@@ -302,4 +302,11 @@ _main JARVIS 两次审计共 25 项发现，评估结果：_
 - AkShare  返回：净利润增长率-24A/25E/26E/27E
 - 福耀玻璃样本：24A=24.16%, 25E=15.06%, 26E=16.35%, 27E=14.05%
 
-_进度 v2.5 | 2026-03-28 19:58 超预期算法重构进行中_
+_进度 v2.5 | 2026-03-28 20:12 超预期算法重构完成 + 验证通过_
+
+### v2.5 交付内容
+- consensus 表: UNIQUE(stock_code, year)，支持 25E/26E/27E 多年预期
+- Pipeline: fetch_and_apply_consensus 改用 AkShare stock_zh_growth_comparison_em
+- Analyzer: scan_beat_expectation 按 end_date 动态匹配年份
+- 福耀玻璃验证: 25E预期15.06% vs 实际24.20% → diff+9.14% → buy signal ✅
+- 3只测试: fetched=9, updated=8, skipped=0
