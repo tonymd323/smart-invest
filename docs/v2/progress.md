@@ -283,4 +283,23 @@ _main JARVIS 两次审计共 25 项发现，评估结果：_
 | 25 | 空表清理 | P1 | news/fund_flows/push_logs |
 
 
-_进度 v2.3.1 | 2026-03-28 17:45 CTO 审计评估完成_
+
+## 超预期算法重构 v2.5（2026-03-28 19:58）
+
+### 问题根因
+- v2 ConsensusProvider 用的东方财富 API 字段不对（RPT_RES_ORGRATINGSTAT）
+- 缺失动态年份选择（25年财报→25E，26Q1预告→26E）
+- expectation_diff_pct 全部为 NULL（4686/4686）
+
+### 重构方案
+| 层 | 改动 |
+|----|------|
+| consensus 表 | UNIQUE(stock_code) → UNIQUE(stock_code, year)，加 year 列 |
+| Pipeline | fetch_and_apply_consensus() 改用 AkShare stock_zh_growth_comparison_em 获取多年预期 |
+| Analyzer | scan_beat_expectation() 按 earnings.end_date 匹配对应年份预期，计算 diff |
+
+### 数据源
+- AkShare  返回：净利润增长率-24A/25E/26E/27E
+- 福耀玻璃样本：24A=24.16%, 25E=15.06%, 26E=16.35%, 27E=14.05%
+
+_进度 v2.5 | 2026-03-28 19:58 超预期算法重构进行中_
