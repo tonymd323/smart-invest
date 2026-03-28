@@ -314,11 +314,11 @@ def test_t7_data_quality():
 #  T8: 1.0 daily_scan.py 回归
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@pytest.mark.skip(reason='daily_scan.py archived, Cron uses v2 inline Python')
+# T8 跳过: daily_scan.py 已恢复，但 BitableManager 导入需要检查
 def test_t8_regression():
     """确保 2.0 开发不影响 1.0 daily_scan.py (已归档)"""
     result = subprocess.run(
-        ["python3", "scripts/archived/daily_scan.py", "--quiet"],
+        ["python3", "daily_scan.py", "--quiet"],
         cwd=str(PROJECT_ROOT),
         capture_output=True, text=True, timeout=120
     )
