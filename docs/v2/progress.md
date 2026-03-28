@@ -107,7 +107,7 @@ P1 开发 ████████████████████ 100% ✅
 
 | # | 问题 | 位置 | 类型 | 修复 |
 |---|------|------|------|------|
-| 1 | **QuoteProvider 字段索引偏移** — change_pct/high/low/amount/turnover_rate/pe 全部读错索引，导致 change_pct=最高价、high=复合字段、low=成交量、amount=换手次数、turnover_rate=PE、pe=未知值。T17 测试只验 price>0 没验字段正确性 | data_provider.py L821-830 | 实现 bug | ❌ 待修 |
+| 1 | **QuoteProvider 字段索引偏移** — change_pct/high/low/amount/turnover_rate/pe 全部读错索引。已修复：change_pct[32]✅ high[33]✅ low[34]✅ amount(复合字段解析)✅ turnover_rate[38]✅ pe[39]✅ | data_provider.py L817-827 | 实现 bug | ✅ 已修 |
 | 2 | Bitable sync() 只写文件不调 API | bitable_sync.py L260 | 设计问题 | ❌ |
 
 ### 🟡 中风险（4 项）

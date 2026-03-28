@@ -817,13 +817,17 @@ class QuoteProvider(BaseProvider):
         change_pct = float(parts[32]) if parts[32] else 0  # [32] 涨跌幅%
         # 成交量转万手（腾讯返回单位：手）
         volume = float(parts[6]) / 10000 if parts[6] else 0
-        # 成交额转亿元（腾讯返回单位：元）
-        amount = float(parts[37]) / 1e4 if parts[37] and len(parts) > 37 else 0  # [37] 成交额(万→亿)
+        # 成交额从复合字段提取（parts[35] = "价格/成交量/成交额元"）
+        amount = 0
+        if parts[35] and '/' in parts[35]:
+            composite = parts[35].split('/')
+            if len(composite) >= 3:
+                amount = float(composite[2]) / 1e8  # 元→亿
         high = float(parts[33]) if parts[33] else 0  # [33] 最高价
         low = float(parts[34]) if parts[34] else 0  # [34] 最低价
         open_price = float(parts[5]) if parts[5] else 0
-        turnover_rate = float(parts[38]) if parts[38] else 0
-        pe = float(parts[39]) if parts[39] else 0
+        turnover_rate = float(parts[38]) if parts[38] else 0  # [38] 换手率%
+        pe = float(parts[39]) if parts[39] else 0  # [39] PE
         # 总市值转亿元（腾讯返回单位：万元）
         total_mv = float(parts[44]) if len(parts) > 44 and parts[44] else 0  # [44] 总市值(亿)
 
