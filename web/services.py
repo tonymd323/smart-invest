@@ -84,7 +84,7 @@ def get_events(days: int = 7, event_type: Optional[str] = None, sentiment: Optio
     """
     params = [f'-{days} days']
     if event_type:
-        sql += " AND et.event_type = ?"
+        sql += " AND et.tracking_status = ?"
         params.append(event_type)
     if sentiment:
         sql += " AND et.sentiment = ?"
@@ -99,14 +99,17 @@ def get_tn_tracking(status: Optional[str] = None):
     """获取 T+N 跟踪"""
     conn = get_conn()
     sql = """
-        SELECT et.*, COALESCE(s.name, et.stock_code) as stock_name
+        SELECT et.id, et.stock_code, COALESCE(et.stock_name, s.name, et.stock_code) as stock_name,
+               et.event_type, et.event_date, et.entry_price,
+               et.return_1d, et.return_5d, et.return_10d, et.return_20d,
+               et.tracking_status, et.last_updated
         FROM event_tracking et
         LEFT JOIN stocks s ON et.stock_code = s.code
         WHERE et.entry_price IS NOT NULL
     """
     params = []
     if status:
-        sql += " AND et.event_type = ?"
+        sql += " AND et.tracking_status = ?"
         params.append(status)
     sql += " ORDER BY et.event_date DESC"
     rows = conn.execute(sql, params).fetchall()
@@ -118,7 +121,10 @@ def get_backtest_results(signal_type: Optional[str] = None):
     """获取回测结果"""
     conn = get_conn()
     sql = """
-        SELECT b.*, COALESCE(s.name, b.stock_code) as stock_name
+        SELECT b.stock_code, COALESCE(s.name, b.stock_code) as stock_name,
+               b.event_type, b.event_date, b.entry_price,
+               b.return_5d, b.return_10d, b.return_20d, b.return_60d,
+               b.alpha_5d, b.alpha_20d, b.is_win
         FROM backtest b
         LEFT JOIN stocks s ON b.stock_code = s.code
         WHERE 1=1
@@ -189,7 +195,7 @@ def get_strategy_performance():
     """策略胜率统计"""
     conn = get_conn()
     sql = """
-        SELECT event_type as signal_type,
+        SELECT COALESCE(event_type, 'unknown') as signal_type,
                COUNT(*) as total,
                AVG(return_20d) as avg_return,
                SUM(CASE WHEN return_20d > 0 THEN 1 ELSE 0 END) * 1.0 / COUNT(*) as win_rate,
