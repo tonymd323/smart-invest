@@ -88,18 +88,25 @@ class EarningsAnalyzer:
 
             # 实际利润增速
             actual_yoy = rec.get("net_profit_yoy", 0) or 0
+            report_date = rec.get("report_date", "")
 
-            # 检查 consensus 表是否有该股票的一致预期数据
-            has_consensus = self._has_consensus_data(conn, stock_code)
+            # 动态选年份: 2025-12-31 → 25E, 2026-03-31 → 26E
+            year = self._pick_consensus_year(report_date)
 
-            if not has_consensus:
-                # 无一致预期数据，标记为 N/A，不参与评分
+            # 查 consensus 表获取对应年份预期
+            cr = conn.execute(
+                "SELECT net_profit_yoy FROM consensus WHERE stock_code = ? AND year = ?",
+                (stock_code, year)
+            ).fetchone()
+
+            if cr is None or cr["net_profit_yoy"] is None or cr["net_profit_yoy"] == 0:
                 result = {
                     "stock_code": stock_code,
                     "stock_name": stock_name,
                     "analysis_type": "earnings_beat",
-                    "report_period": rec.get("report_date"),
+                    "report_period": report_date,
                     "actual_profit_yoy": actual_yoy,
+                    "consensus_year": year,
                     "beat_diff_pct": None,
                     "is_beat": False,
                     "is_miss": False,
@@ -109,14 +116,12 @@ class EarningsAnalyzer:
                 }
                 results.append(result)
                 self._write_result(conn, result)
-                logger.info(f"[EarningsAnalyzer] {stock_code} 无一致预期数据，跳过")
+                logger.info(f"[EarningsAnalyzer] {stock_code} {year} 无一致预期，跳过")
                 continue
 
-            # 预期差
-            beat_diff = rec.get("expectation_diff_pct")
-            if beat_diff is None:
-                # 有 consensus 但 earnings 无 expectation_diff_pct，用 0
-                beat_diff = 0
+            # 计算超预期差值
+            expected_yoy = cr["net_profit_yoy"]
+            beat_diff = actual_yoy - expected_yoy
 
             is_beat = beat_diff >= threshold_pct
             is_miss = beat_diff <= -threshold_pct
@@ -168,28 +173,30 @@ class EarningsAnalyzer:
         return results
 
     @staticmethod
-    def _has_consensus_data(conn: sqlite3.Connection, stock_code: str) -> bool:
-        """
-        检查 consensus 表中该股票是否有有效的一致预期数据。
-        有效 = 存在记录且至少 eps 或 net_profit_yoy 不为 0/NULL。
-        """
-        row = conn.execute("""
-            SELECT eps, net_profit_yoy, rev_yoy
-            FROM consensus
-            WHERE stock_code = ?
-        """, (stock_code,)).fetchone()
+    def _has_consensus_data(conn: sqlite3.Connection, stock_code: str, year: str = None) -> bool:
+        """检查 consensus 表中该股票是否有有效的一致预期数据"""
+        if year:
+            row = conn.execute(
+                "SELECT net_profit_yoy FROM consensus WHERE stock_code = ? AND year = ?",
+                (stock_code, year)
+            ).fetchone()
+        else:
+            row = conn.execute(
+                "SELECT net_profit_yoy FROM consensus WHERE stock_code = ? AND net_profit_yoy != 0",
+                (stock_code,)
+            ).fetchone()
+        return row is not None and row[0] is not None
 
-        if row is None:
-            return False
-
-        eps, profit_yoy, rev_yoy = row
-        # 全零或全 NULL 视为无有效预期
-        has_value = (
-            (eps is not None and eps != 0) or
-            (profit_yoy is not None and profit_yoy != 0) or
-            (rev_yoy is not None and rev_yoy != 0)
-        )
-        return has_value
+    @staticmethod
+    def _pick_consensus_year(end_date: str) -> str:
+        """根据报告期选择一致预期年份: 2025-12-31 → 25E, 2026-03-31 → 26E"""
+        if not end_date:
+            return '25E'
+        try:
+            year = int(end_date[:4])
+            return f"{year % 100}E"
+        except (ValueError, IndexError):
+            return '25E'
 
     def scan_new_high(self, stock_codes: List[str] = None) -> List[Dict]:
         """

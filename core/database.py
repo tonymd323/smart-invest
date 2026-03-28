@@ -167,14 +167,15 @@ CREATE TABLE IF NOT EXISTS backtest (
 CREATE TABLE IF NOT EXISTS consensus (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     stock_code      TEXT    NOT NULL,
+    year            TEXT    NOT NULL,                   -- 预期年份，如 25E/26E/27E
     eps             REAL,                              -- 预期每股收益
     net_profit_yoy  REAL,                              -- 预期净利润同比（%）
     rev_yoy         REAL,                              -- 预期营收同比（%）
     num_analysts    INTEGER DEFAULT 0,                  -- 分析师数量
-    source          TEXT    DEFAULT 'eastmoney',        -- 数据来源
+    source          TEXT    DEFAULT 'akshare',          -- 数据来源
     fetched_at      TEXT    DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (stock_code) REFERENCES stocks(code),
-    UNIQUE(stock_code)
+    UNIQUE(stock_code, year)
 );
 
 -- 8. 发现池（系统自动发现的候选股票）
