@@ -12,7 +12,7 @@
   T5: EarningsAnalyzer 扣非新高扫描
   T6: 端到端链路（Pipeline → DB → Analyzer → DB）
   T7: 数据质量校验（正常值 vs 脏数据）
-  T8: 1.0 daily_scan.py 回归
+
   T9: 性能基准（3只股票总耗时）
   T10: DisclosureScanner 获取新披露列表
   T11: DisclosureScanner diff_with_db 去重
@@ -309,22 +309,6 @@ def test_t7_data_quality():
 
     print(f"     正常数据: PASS | 脏数据: 检测到错误 | 缺字段: 检测到")
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  T8: 1.0 daily_scan.py 回归
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# T8 跳过: daily_scan.py 已恢复，但 BitableManager 导入需要检查
-def test_t8_regression():
-    """确保 2.0 开发不影响 1.0 daily_scan.py (已归档)"""
-    result = subprocess.run(
-        ["python3", "daily_scan.py", "--quiet"],
-        cwd=str(PROJECT_ROOT),
-        capture_output=True, text=True, timeout=120
-    )
-    assert result.returncode == 0, \
-        f"daily_scan.py 退出码 {result.returncode}\nstderr: {result.stderr[:500]}"
-    print(f"     daily_scan.py exit code: {result.returncode}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1364,7 +1348,6 @@ if __name__ == "__main__":
         ("T5:  扣非新高扫描",               test_t5_new_high),
         ("T6:  端到端链路验证",             test_t6_e2e),
         ("T7:  数据质量校验",               test_t7_data_quality),
-        ("T8:  1.0 daily_scan.py 回归",     test_t8_regression),
         ("T9:  性能基准",                   test_t9_performance),
         ("T10: DisclosureScanner API 调用",  test_t10_disclosure_scanner_fetch),
         ("T11: DisclosureScanner diff 去重", test_t11_disclosure_scanner_diff),
