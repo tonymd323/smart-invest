@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}今日行动 — 投资系统 2.2{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">📌 今日行动</h2>
+    <p class="text-gray-500 text-sm mt-1">系统直接告诉你该做什么</p>
+</div>
+
+{% if actions %}
+<div class="space-y-3">
+    {% for act in actions %}
+    <div class="signal-card">
+        <div class="flex items-start justify-between">
+            <div class="flex items-start gap-3">
+                <span class="text-xl">
+                    {% if act.priority == 'high' %}🔥{% elif act.priority == 'medium' %}⚡{% else %}👀{% endif %}
+                </span>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-gray-900">{{ act.stock_name }}</span>
+                        <span class="text-gray-400 text-sm">{{ act.stock_code }}</span>
+                        {% if act.signal == 'buy' %}
+                        <span class="tag-buy">BUY</span>
+                        {% else %}
+                        <span class="tag-watch">WATCH</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">{{ act.reason }}</div>
+                    <div class="flex gap-4 mt-2 text-xs text-gray-500">
+                        {% if act.target_price %}<span>目标 ¥{{ act.target_price }}</span>{% endif %}
+                        {% if act.stop_loss %}<span>止损 ¥{{ act.stop_loss }}</span>{% endif %}
+                        {% if act.score %}<span>评分 {{ act.score }}</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- 决策记录按钮 -->
+            <div class="flex gap-2" id="decision-{{ act.stock_code }}">
+                <button class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
+                        hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"bought"}'
+                        hx-target="#decision-{{ act.stock_code }}" hx-swap="innerHTML">
+                    ✅ 已买入
+                </button>
+                <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
+                        hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"skip"}'
+                        hx-target="#decision-{{ act.stock_code }}" hx-swap="innerHTML">
+                    ❌ 跳过
+                </button>
+                <button class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200"
+                        hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"watch"}'
+                        hx-target="#decision-{{ act.stock_code }}" hx-swap="innerHTML">
+                    👀 观望
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
+    <div class="text-4xl mb-3">☕</div>
+    <p class="text-gray-500">今日暂无行动建议</p>
+    <p class="text-gray-400 text-sm mt-1">晚间 21:00 扫描后自动生成</p>
+</div>
+{% endif %}
+{% endblock %}

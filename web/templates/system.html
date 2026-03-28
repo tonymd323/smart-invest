@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}系统控制 — 投资系统 2.2{% endblock %}
+{% block content %}
+<div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">⚙️ 系统控制</h2></div>
+
+<!-- Pipeline 触发 -->
+<div class="bg-white rounded-lg p-6 border border-gray-200 mb-6">
+    <h3 class="font-semibold mb-4">🚀 手动触发 Pipeline</h3>
+    <div class="flex gap-4 mb-4">
+        <select id="window" class="border rounded px-3 py-2">
+            <option value="4h">盘后 (4h)</option>
+            <option value="12h" selected>晚间 (12h)</option>
+            <option value="18h">早盘 (18h)</option>
+            <option value="720h">全量 (720h)</option>
+        </select>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                hx-post="/api/pipeline/run" hx-vals='{"window":"12h"}'
+                hx-target="#log-output" onclick="startLogStream()">
+            ▶ 执行
+        </button>
+    </div>
+    <div id="log-output" class="text-xs">点击执行开始日志流...</div>
+</div>
+
+<!-- 数据库信息 -->
+<div class="bg-white rounded-lg p-6 border border-gray-200">
+    <h3 class="font-semibold mb-4">📊 数据库统计</h3>
+    <div class="grid grid-cols-4 gap-4 text-sm">
+        <div><span class="text-gray-500">数据库大小</span><div class="font-">{{ db_stats.db_size_mb }} MB</div></div>
+        <div><span class="text-gray-500">Earnings</span><div class="font-">{{ db_stats.earnings }}</div></div>
+        <div><span class="text-gray-500">分析结果</span><div class="font-">{{ db_stats.analysis_results }}</div></div>
+        <div><span class="text-gray-500">发现池</span><div class="font-">{{ db_stats.discovery_pool }}</div></div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+let eventSource = null;
+function startLogStream() {
+    const window = document.getElementById('window').value;
+    const logEl = document.getElementById('log-output');
+    logEl.innerHTML = '🔄 连接中...\n';
+    
+    if (eventSource) eventSource.close();
+    eventSource = new EventSource('/api/pipeline/stream/xxx?window=' + window);
+    
+    eventSource.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const cls = data.type === 'error' ? 'log-error' : data.type === 'success' ? 'log-success' : data.type === 'warn' ? 'log-warn' : 'log-info';
+        logEl.innerHTML += `<span class="${cls}">${data.msg}</span>\n`;
+        logEl.scrollTop = logEl.scrollHeight;
+        if (data.type === 'done') eventSource.close();
+    };
+    eventSource.onerror = function() {
+        logEl.innerHTML += '❌ 连接断开\n';
+    };
+}
+</script>
+{% endblock %}

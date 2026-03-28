@@ -455,14 +455,9 @@ def run_backtest(db_path: str) -> Dict[str, int]:
 
 def fetch_and_apply_consensus(db_path: str, stock_codes: list = None) -> dict:
     """
-    从 AkShare 获取多年一致预期 → 写入 consensus 表 → 计算 expectation_diff_pct 更新 earnings。
+    通过 ConsensusProvider 获取多年一致预期 → 写入 consensus 表 → 计算 expectation_diff_pct。
 
-    数据源: AkShare stock_zh_growth_comparison_em（东方财富增长对比表）
-    返回字段: 净利润增长率-24A/25E/26E/27E
-
-    年份匹配逻辑:
-      earnings.end_date=2025-12-31 → year=25E → 对比 净利润增长率-25E
-      earnings.end_date=2026-03-31 → year=26E → 对比 净利润增长率-26E
+    架构：调用 ConsensusProvider（不直接调 AkShare），保持三层分离。
 
     Args:
         db_path: 数据库路径
@@ -470,65 +465,43 @@ def fetch_and_apply_consensus(db_path: str, stock_codes: list = None) -> dict:
     Returns:
         {"fetched": N, "updated": M, "skipped": K}
     """
-    import math
+    from core.data_provider import ConsensusProvider
 
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
 
-    # 获取需要处理的股票列表
     if stock_codes is None:
         rows = conn.execute(
             "SELECT DISTINCT stock_code FROM earnings WHERE expectation_diff_pct IS NULL"
         ).fetchall()
         stock_codes = [r["stock_code"] for r in rows]
 
+    provider = ConsensusProvider()
     fetched = 0
     updated = 0
     skipped = 0
 
     try:
-        import akshare as ak
-
         for code in stock_codes:
-            short = code.split('.')[0]
-            exchange = 'SH' if code.endswith('.SH') else 'SZ'
-
-            # 1. 获取 AkShare 一致预期
-            try:
-                df = ak.stock_zh_growth_comparison_em(symbol=f'{exchange}{short}')
-                if df is None or df.empty:
-                    skipped += 1
-                    continue
-                row = df[df['代码'] == short]
-                if row.empty:
-                    skipped += 1
-                    continue
-                r = row.iloc[0]
-            except Exception as e:
-                logger.warning(f"[fetch_consensus] AkShare 获取失败 {code}: {e}")
+            # 1. 通过 Provider 获取多年预期
+            multi = provider.fetch_multi_year(code)
+            if not multi:
                 skipped += 1
                 continue
 
-            # 2. 写入多年预期到 consensus 表
-            for year in ['25E', '26E', '27E']:
-                profit_col = f'净利润增长率-{year}'
-                rev_col = f'营业收入增长率-{year}'
-                profit_val = r.get(profit_col)
-                rev_val = r.get(rev_col)
-
-                # 跳过 NaN 和空值
-                if profit_val is None or (isinstance(profit_val, float) and math.isnan(profit_val)):
-                    continue
-
+            # 2. 写入 consensus 表
+            for year, consensus_data in multi.items():
                 conn.execute("""
                     INSERT OR REPLACE INTO consensus
-                    (stock_code, year, net_profit_yoy, rev_yoy, source)
-                    VALUES (?, ?, ?, ?, 'akshare')
+                    (stock_code, year, net_profit_yoy, rev_yoy, num_analysts, source)
+                    VALUES (?, ?, ?, ?, ?, ?)
                 """, (
                     code,
                     year,
-                    float(profit_val),
-                    float(rev_val) if rev_val is not None and not (isinstance(rev_val, float) and math.isnan(rev_val)) else None,
+                    consensus_data.net_profit_yoy,
+                    consensus_data.rev_yoy,
+                    consensus_data.num_analysts,
+                    consensus_data.source,
                 ))
                 fetched += 1
 
@@ -540,31 +513,19 @@ def fetch_and_apply_consensus(db_path: str, stock_codes: list = None) -> dict:
             """, (code,)).fetchall()
 
             for erow in earnings_rows:
-                end_date = erow["report_date"]
-                actual_yoy = erow["net_profit_yoy"]
-
-                # 动态选年份: 2025-12-31 → 25E, 2026-03-31 → 26E
-                year = _pick_consensus_year(end_date)
-
-                # 查 consensus 表
-                cr = conn.execute(
-                    "SELECT net_profit_yoy FROM consensus WHERE stock_code = ? AND year = ?",
-                    (code, year)
-                ).fetchone()
-
-                if cr and cr["net_profit_yoy"] is not None:
-                    expected = cr["net_profit_yoy"]
-                    diff = actual_yoy - expected
-                    conn.execute(
-                        "UPDATE earnings SET expectation_diff_pct = ? WHERE id = ?",
-                        (diff, erow["id"])
-                    )
-                    updated += 1
+                year = _pick_consensus_year(erow["report_date"])
+                if year in multi:
+                    expected = multi[year].net_profit_yoy
+                    if expected and expected != 0:
+                        diff = erow["net_profit_yoy"] - expected
+                        conn.execute(
+                            "UPDATE earnings SET expectation_diff_pct = ? WHERE id = ?",
+                            (diff, erow["id"])
+                        )
+                        updated += 1
 
             conn.commit()
 
-    except ImportError:
-        logger.error("[fetch_consensus] akshare 库未安装")
     except Exception as e:
         logger.error(f"[fetch_consensus] 失败: {e}")
         conn.rollback()
@@ -572,9 +533,8 @@ def fetch_and_apply_consensus(db_path: str, stock_codes: list = None) -> dict:
     finally:
         conn.close()
 
-    logger.info(f"[fetch_consensus] 完成: fetched={fetched}条预期, updated={updated}条diff, skipped={skipped}只")
+    logger.info(f"[fetch_consensus] 完成: fetched={fetched}条预期, updated={updated}条diff, skipped={skipped}只, source={provider.last_source}")
     return {"fetched": fetched, "updated": updated, "skipped": skipped}
-
 
 def _pick_consensus_year(end_date: str) -> str:
     """根据报告期选择一致预期年份: 2025-12-31 → 25E, 2026-03-31 → 26E"""

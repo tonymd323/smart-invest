@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}总览 — 投资系统 2.2{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">总览</h2>
+    <p class="text-gray-500 text-sm mt-1">一页看全局</p>
+</div>
+
+<!-- 信号摘要 + 持仓 + 系统健康 -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <!-- 今日信号 -->
+    <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3">📋 今日信号</h3>
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span>超预期</span>
+                <span class="font-bold {% if signal_summary.超预期 > 0 %}text-red-500{% endif %}">{{ signal_summary.超预期 }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>扣非新高</span>
+                <span class="font-bold {% if signal_summary.扣非新高 > 0 %}text-blue-500{% endif %}">{{ signal_summary.扣非新高 }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>回调买入</span>
+                <span class="font-bold {% if signal_summary.回调买入 > 0 %}text-green-500{% endif %}">{{ signal_summary.回调买入 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 持仓状态 -->
+    <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3">💼 持仓</h3>
+        <div class="space-y-2">
+            {% for pos in positions %}
+            <div class="flex justify-between text-sm">
+                <span>{{ pos.name }}</span>
+                <span class="{% if pos.change_pct > 0 %}up{% elif pos.change_pct < 0 %}down{% endif %}">
+                    ¥{{ "%.2f"|format(pos.price) }} {% if pos.change_pct > 0 %}+{% endif %}{{ "%.2f"|format(pos.change_pct) }}%
+                </span>
+            </div>
+            {% endfor %}
+            {% if not positions %}
+            <div class="text-gray-400 text-sm">暂无持仓配置</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 系统健康 -->
+    <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3">🖥️ 系统</h3>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span>数据库</span>
+                <span>{{ db_stats.db_size_mb }}MB</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Earnings</span>
+                <span>{{ db_stats.earnings }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Analysis</span>
+                <span>{{ db_stats.analysis_results }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>发现池</span>
+                <span>{{ db_stats.discovery_pool }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 最近事件 -->
+<div class="bg-white rounded-lg p-4 border border-gray-200">
+    <h3 class="text-sm font-semibold text-gray-600 mb-3">📰 最近事件</h3>
+    {% if recent_events %}
+    <div class="space-y-2">
+        {% for evt in recent_events %}
+        <div class="flex items-start gap-3 text-sm py-2 border-b border-gray-100 last:border-0">
+            <span class="text-xs text-gray-400 whitespace-nowrap">{{ evt.created_at[:16] if evt.created_at else '' }}</span>
+            <span class="font-medium">{{ evt.stock_name or evt.stock_code }}</span>
+            <span class="text-gray-500">{{ evt.title or evt.event_type }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-400 text-sm">暂无事件</p>
+    {% endif %}
+</div>
+{% endblock %}

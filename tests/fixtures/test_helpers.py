@@ -193,11 +193,12 @@ MOCK_EARNINGS_RAW_EM = [
 
 MOCK_CONSENSUS = {
     "000858.SZ": {
-        "eps": 7.50,
-        "profit_yoy_expected": 15.0,
-        "rev_yoy_expected": 12.0,
-        "analyst_count": 28,
-        "source": "eastmoney_f10",
+        "profit_25e": 15.0,
+        "rev_25e": 12.0,
+        "profit_26e": 16.0,
+        "rev_26e": 13.0,
+        "profit_27e": 17.0,
+        "rev_27e": 14.0,
     },
     "600519.SH": {
         "eps": 68.50,

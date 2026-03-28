@@ -372,62 +372,123 @@ class FinancialProvider(BaseProvider):
 class ConsensusProvider(BaseProvider):
     """
     一致预期 Provider
-    主源：东方财富 F10 (ProfitForecast / PageAjax)
-    降级：AkShare 机构预期
+    主源：AkShare 东方财富增长对比表（stock_zh_growth_comparison_em）
+    返回多年预期：净利润增长率-25E/26E/27E
+    降级：东方财富 F10 API
 
     用法：
-        provider = ConsensusProvider(data=em_consensus_dict)
-        result = provider.fetch("000858.SZ")  # ConsensusData 或 None
+        provider = ConsensusProvider()
+        # 单年预期
+        result = provider.fetch("600660.SH")  # ConsensusData (当年) 或 None
+        # 多年预期
+        results = provider.fetch_multi_year("600660.SH")  # {"25E": ConsensusData, ...}
     """
 
-    BASE_URL = "https://datacenter-web.eastmoney.com/api/data/v1/get"
-
-    def __init__(self, data: dict = None, source: str = "eastmoney"):
+    def __init__(self, data: dict = None):
         self.data = data or {}
-        self.source = source
-        self.last_source: str = source
+        self.last_source: str = "none"
 
     def fetch(self, stock_code: str) -> Optional[ConsensusData]:
-        """
-        获取一致预期数据
+        """获取当年一致预期（取最近一年可用数据）"""
+        multi = self.fetch_multi_year(stock_code)
+        if not multi:
+            return None
+        # 取最新一年
+        for year in ['25E', '26E', '27E']:
+            if year in multi:
+                return multi[year]
+        return None
 
-        降级逻辑：
-        1. 尝试东方财富 F10（或预注入数据）
-        2. 失败 → 尝试 AkShare
-        3. 都失败 → 返回 None
+    def fetch_multi_year(self, stock_code: str) -> dict:
         """
-        # 尝试主数据源
-        result = self._fetch_from_em(stock_code)
+        获取多年一致预期
+
+        Returns:
+            {"25E": ConsensusData, "26E": ConsensusData, "27E": ConsensusData}
+        """
+        # 尝试预注入数据
+        if stock_code in self.data:
+            raw = self.data[stock_code]
+            result = {}
+            for year in ['25E', '26E', '27E']:
+                profit = raw.get(f'profit_{year.lower()}')
+                if profit is not None:
+                    result[year] = ConsensusData(
+                        stock_code=stock_code,
+                        eps=0,
+                        net_profit_yoy=float(profit),
+                        rev_yoy=float(raw.get(f'rev_{year.lower()}') or 0),
+                        num_analysts=0,
+                        source="preloaded",
+                    )
+            if result:
+                self.last_source = "preloaded"
+                return result
+
+        # 主源：AkShare 东方财富增长对比表
+        result = self._fetch_from_akshare_growth(stock_code)
         if result:
-            self.last_source = "eastmoney"
+            self.last_source = "akshare_growth"
             return result
 
-        # 降级到 AkShare
-        logger.info(f"[ConsensusProvider] {stock_code} 东财无预期，降级到 AkShare")
-        result = self._fetch_from_akshare(stock_code)
+        # 降级：东方财富 F10
+        result = self._fetch_from_em_f10(stock_code)
         if result:
-            self.last_source = "akshare"
+            self.last_source = "eastmoney_f10"
             return result
 
         logger.warning(f"[ConsensusProvider] {stock_code} 所有数据源均无预期数据")
         self.last_source = "none"
-        return None
+        return {}
 
-    def _fetch_from_em(self, stock_code: str) -> Optional[ConsensusData]:
-        """从东方财富获取一致预期"""
-        # 优先使用预注入数据
-        if stock_code in self.data:
-            raw = self.data[stock_code]
-            return ConsensusData(
-                stock_code=stock_code,
-                eps=float(raw.get("eps") or 0),
-                net_profit_yoy=float(raw.get("profit_yoy_expected") or 0),
-                rev_yoy=float(raw.get("rev_yoy_expected") or 0),
-                num_analysts=int(raw.get("analyst_count") or 0),
-                source="eastmoney_f10",
-            )
+    def _fetch_from_akshare_growth(self, stock_code: str) -> dict:
+        """从 AkShare 东方财富增长对比表获取多年预期"""
+        try:
+            import akshare as ak
+            import math
+            # AkShare 需要大写交易所前缀: SH600660
+            short = stock_code.split('.')[0]
+            prefix = 'SH' if stock_code.endswith('.SH') else 'SZ'
+            ak_symbol = f'{prefix}{short}'
 
-        # 实时调用东方财富 ProfitForecast API
+            df = ak.stock_zh_growth_comparison_em(symbol=ak_symbol)
+            if df is None or df.empty:
+                return {}
+
+            short_code = stock_code.split('.')[0]  # 600660.SH → 600660
+            row = df[df['代码'] == short_code]
+            if row.empty:
+                return {}
+            r = row.iloc[0]
+
+            result = {}
+            for year in ['25E', '26E', '27E']:
+                profit_col = f'净利润增长率-{year}'
+                rev_col = f'营业收入增长率-{year}'
+                profit_val = r.get(profit_col)
+                rev_val = r.get(rev_col)
+
+                if profit_val is None or (isinstance(profit_val, float) and math.isnan(profit_val)):
+                    continue
+
+                result[year] = ConsensusData(
+                    stock_code=stock_code,
+                    eps=0,
+                    net_profit_yoy=float(profit_val),
+                    rev_yoy=float(rev_val) if rev_val is not None and not (isinstance(rev_val, float) and math.isnan(rev_val)) else 0,
+                    num_analysts=0,
+                    source="akshare_growth",
+                )
+
+            return result
+        except ImportError:
+            logger.error("[ConsensusProvider] akshare 库未安装")
+        except Exception as e:
+            logger.error(f"[ConsensusProvider] AkShare 增长对比获取失败 {stock_code}: {e}")
+        return {}
+
+    def _fetch_from_em_f10(self, stock_code: str) -> dict:
+        """从东方财富 F10 获取一致预期（降级）"""
         try:
             import requests
             code = _ts_code_to_em(stock_code)
@@ -435,7 +496,7 @@ class ConsensusProvider(BaseProvider):
                 "https://datacenter-web.eastmoney.com/api/data/v1/get",
                 params={
                     'reportName': 'RPT_RES_ORGRATINGSTAT',
-                    'columns': 'SECURITY_CODE,NETPROFITTHISYEAR,NETPROFITNEXTYEAR,NETPROFITLASTYEAR,REVENUE_THISYEAR,TOTAL_MARKET',
+                    'columns': 'SECURITY_CODE,NETPROFITTHISYEAR,REVENUE_THISYEAR,ANALYST_NUM',
                     'filter': f'(SECURITY_CODE="{code}")',
                     'pageSize': 1,
                     'sortColumns': 'REPORT_DATE',
@@ -448,47 +509,21 @@ class ConsensusProvider(BaseProvider):
 
             if data.get('success') and data.get('result', {}).get('data'):
                 item = data['result']['data'][0]
-                return ConsensusData(
-                    stock_code=stock_code,
-                    eps=float(item.get("EPS_BASIC") or 0),
-                    net_profit_yoy=float(item.get("NETPROFITTHISYEAR") or 0),
-                    rev_yoy=float(item.get("REVENUE_THISYEAR") or 0),
-                    num_analysts=int(item.get("ANALYST_NUM") or 0),
-                    source="eastmoney_f10",
-                )
+                profit = float(item.get("NETPROFITTHISYEAR") or 0)
+                if profit != 0:
+                    # F10 只有当年，放到 25E
+                    return {"25E": ConsensusData(
+                        stock_code=stock_code,
+                        eps=0,
+                        net_profit_yoy=profit,
+                        rev_yoy=float(item.get("REVENUE_THISYEAR") or 0),
+                        num_analysts=int(item.get("ANALYST_NUM") or 0),
+                        source="eastmoney_f10",
+                    )}
         except Exception as e:
-            logger.error(f"[ConsensusProvider] 东方财富预期 API 失败 {stock_code}: {e}")
-        return None
+            logger.error(f"[ConsensusProvider] 东方财富 F10 获取失败 {stock_code}: {e}")
+        return {}
 
-    def _fetch_from_akshare(self, stock_code: str) -> Optional[ConsensusData]:
-        """从 AkShare 获取一致预期（降级路径）"""
-        try:
-            import akshare as ak
-            code = _ts_code_to_em(stock_code)
-
-            # akshare stock_profit_forecast_ths 返回同花顺一致预期
-            df = ak.stock_profit_forecast_ths(
-                symbol=code,
-                indicator="预测年报每股收益",
-            )
-            if df is not None and not df.empty:
-                latest = df.iloc[0]
-                return ConsensusData(
-                    stock_code=stock_code,
-                    eps=float(latest.get("预测年报每股收益") or 0),
-                    net_profit_yoy=float(latest.get("预测年报净利润") or 0),
-                    rev_yoy=0.0,  # akshare 不一定有营收预期
-                    num_analysts=int(latest.get("机构数") or 0),
-                    source="akshare",
-                )
-        except ImportError:
-            logger.error("[ConsensusProvider] akshare 库未安装")
-        except Exception as e:
-            logger.error(f"[ConsensusProvider] AkShare 获取失败 {stock_code}: {e}")
-        return None
-
-
-# ── KlineProvider ─────────────────────────────────────────────────────────────
 
 class KlineProvider(BaseProvider):
     """

@@ -1,0 +1,100 @@
+/* 投资系统 2.2 前端样式 */
+
+/* 导航项 */
+.nav-item {
+    display: block;
+    padding: 0.5rem 1.5rem;
+    color: #9ca3af;
+    text-decoration: none;
+    transition: all 0.15s;
+    font-size: 0.875rem;
+}
+.nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: #f3f4f6;
+}
+.nav-item.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-right: 3px solid #3b82f6;
+}
+
+/* 信号卡片 */
+.signal-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    transition: box-shadow 0.15s;
+}
+.signal-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 优先级标签 */
+.priority-high { color: #ef4444; }
+.priority-medium { color: #f59e0b; }
+.priority-low { color: #6b7280; }
+
+/* 信号标签 */
+.tag-buy { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; }
+.tag-watch { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; }
+.tag-hold { background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; }
+
+/* 涨跌色 */
+.up { color: #ef4444; }
+.down { color: #16a34a; }
+
+/* SSE 日志 */
+#log-output {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    max-height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+#log-output .log-info { color: #60a5fa; }
+#log-output .log-success { color: #34d399; }
+#log-output .log-warn { color: #fbbf24; }
+#log-output .log-error { color: #f87171; }
+
+/* 表格 */
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table.data-table th {
+    background: #f9fafb;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6b7280;
+    border-bottom: 2px solid #e5e7eb;
+}
+table.data-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+}
+table.data-table tr:hover td {
+    background: #f9fafb;
+}
+
+/* 进度条 */
+.progress-bar {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: #3b82f6;
+    transition: width 0.3s;
+}
