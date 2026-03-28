@@ -37,7 +37,7 @@ def get_discovery_pool(signal_filter: Optional[list] = None, source_filter: Opti
     conn = get_conn()
     sql = """
         SELECT stock_code, stock_name, industry, source, score, signal,
-               status, discovered_at, expires_at, entry_price, target_price, stop_loss
+               status, discovered_at, expires_at
         FROM discovery_pool
         WHERE status = 'active'
     """
@@ -58,7 +58,7 @@ def get_scan_results(days: int = 7, analysis_type: Optional[str] = None):
     sql = """
         SELECT ar.id, ar.stock_code, COALESCE(s.name, ar.stock_code) as stock_name,
                s.industry, ar.analysis_type, ar.score, ar.signal, ar.summary,
-               ar.created_at, ar.metadata
+               ar.created_at
         FROM analysis_results ar
         LEFT JOIN stocks s ON ar.stock_code = s.code
         WHERE ar.created_at >= datetime('now', ?)
@@ -99,16 +99,16 @@ def get_tn_tracking(status: Optional[str] = None):
     """获取 T+N 跟踪"""
     conn = get_conn()
     sql = """
-        SELECT tt.*, COALESCE(s.name, tt.stock_code) as stock_name
-        FROM tn_tracking tt
-        LEFT JOIN stocks s ON tt.stock_code = s.code
-        WHERE 1=1
+        SELECT et.*, COALESCE(s.name, et.stock_code) as stock_name
+        FROM event_tracking et
+        LEFT JOIN stocks s ON et.stock_code = s.code
+        WHERE et.entry_price IS NOT NULL
     """
     params = []
     if status:
-        sql += " AND tt.tracking_status = ?"
+        sql += " AND et.event_type = ?"
         params.append(status)
-    sql += " ORDER BY tt.discovered_at DESC"
+    sql += " ORDER BY et.event_date DESC"
     rows = conn.execute(sql, params).fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -118,16 +118,16 @@ def get_backtest_results(signal_type: Optional[str] = None):
     """获取回测结果"""
     conn = get_conn()
     sql = """
-        SELECT br.*, COALESCE(s.name, br.stock_code) as stock_name
-        FROM backtest_results br
-        LEFT JOIN stocks s ON br.stock_code = s.code
+        SELECT b.*, COALESCE(s.name, b.stock_code) as stock_name
+        FROM backtest b
+        LEFT JOIN stocks s ON b.stock_code = s.code
         WHERE 1=1
     """
     params = []
     if signal_type:
-        sql += " AND br.signal_type = ?"
+        sql += " AND b.event_type = ?"
         params.append(signal_type)
-    sql += " ORDER BY br.signal_date DESC"
+    sql += " ORDER BY b.event_date DESC"
     rows = conn.execute(sql, params).fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -189,14 +189,14 @@ def get_strategy_performance():
     """策略胜率统计"""
     conn = get_conn()
     sql = """
-        SELECT signal_type,
+        SELECT event_type as signal_type,
                COUNT(*) as total,
-               AVG(actual_return) as avg_return,
-               SUM(CASE WHEN actual_return > 0 THEN 1 ELSE 0 END) * 1.0 / COUNT(*) as win_rate,
-               AVG(hold_days) as avg_hold_days
-        FROM backtest_results
-        WHERE actual_return IS NOT NULL
-        GROUP BY signal_type
+               AVG(return_20d) as avg_return,
+               SUM(CASE WHEN return_20d > 0 THEN 1 ELSE 0 END) * 1.0 / COUNT(*) as win_rate,
+               20 as avg_hold_days
+        FROM backtest
+        WHERE return_20d IS NOT NULL
+        GROUP BY event_type
     """
     rows = conn.execute(sql).fetchall()
     conn.close()

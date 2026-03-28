@@ -13,7 +13,7 @@ from web.services import get_db_stats
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 @router.get("/system", response_class=HTMLResponse)
