@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from datetime import datetime
+from typing import Optional
 
 from web.services import get_db_stats, get_tn_tracking
 
@@ -12,14 +12,11 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templa
 
 
 @router.get("/tracking", response_class=HTMLResponse)
-async def tracking_page(request: Request, status: str = Query(None)):
-    db_stats = get_db_stats()
+async def tracking_page(request: Request, status: Optional[str] = None):
     tracking = get_tn_tracking(status=status)
-    
+    db_stats = get_db_stats()
     return templates.TemplateResponse("tracking.html", {
-        "request": request,
-        "active": "tracking",
+        "request": request, "active": "tracking",
         "db_stats": db_stats,
-        "tracking": tracking,
-        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "tracking": tracking, "current_status": status,
     })

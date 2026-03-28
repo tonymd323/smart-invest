@@ -1,3 +1,47 @@
-{% extends "base.html" %} {% block title %}发现池 — 投资系统 2.2{% endblock %} {% block content %}
-<div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">🔍 发现池</h2><p class="text-gray-500 text-sm mt-1">自动发现的候选股</p></div>
-{% if pool %}<table class="data-table"><thead><tr><th>代码</th><th>名称</th><th>行业</th><th>来源</th><th>评分</th><th>信号</th><th>状态</th><th>入池日</th></tr></thead>{% for r in pool %}<tr><td>{{ r.stock_code }}</td><td>{{ r.stock_name }}</td><td>{{ r.industry }}</td><td>{{ r.source }}</td><td>{{ r.score }}</td><td><span class="tag-{{ r.signal }}">{{ r.signal }}</span></td><td>{{ r.status }}</td><td>{{ r.discovered_at[:10] }}</td></tr>{% endfor %}</table>{% else %}<p class="text-gray-400">暂无活跃发现</p>{% endif %}{% endblock %}
+{% extends "base.html" %}
+{% block title %}发现池 — 投资系统 2.2{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">🎯 发现池</h2>
+</div>
+
+<!-- 筛选 -->
+<div class="flex gap-4 mb-4">
+    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/discovery?signal='+this.value">
+        <option value="">全部信号</option>
+        <option value="buy" {{ 'selected' if current_signal=='buy' }}>BUY</option>
+        <option value="watch" {{ 'selected' if current_signal=='watch' }}>WATCH</option>
+    </select>
+    <span class="text-gray-500 text-sm self-center">{{ pool|length }} 条记录</span>
+</div>
+
+{% if pool %}
+<div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+<table class="data-table text-sm w-full">
+    <thead>
+        <tr><th>股票</th><th>行业</th><th>来源</th><th>评分</th><th>信号</th><th>入池时间</th></tr>
+    </thead>
+    <tbody>
+    {% for p in pool %}
+    <tr>
+        <td>
+            <span class="font-medium">{{ p.stock_name or p.stock_code }}</span>
+            <span class="text-gray-400 ml-1">{{ p.stock_code }}</span>
+        </td>
+        <td class="text-gray-500">{{ p.industry or '-' }}</td>
+        <td><span class="tag-watch">{{ p.source or '-' }}</span></td>
+        <td class="font-bold">{{ "%.0f"|format(p.score or 0) }}</td>
+        <td>
+            {% if p.signal == 'buy' %}<span class="tag-buy">BUY</span>
+            {% else %}<span class="tag-watch">WATCH</span>{% endif %}
+        </td>
+        <td class="text-gray-400 text-xs">{{ p.discovered_at[:16] if p.discovered_at else '-' }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="text-gray-400">发现池为空</p>
+{% endif %}
+{% endblock %}

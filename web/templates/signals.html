@@ -2,24 +2,49 @@
 {% block title %}信号看板 — 投资系统 2.2{% endblock %}
 {% block content %}
 <div class="mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">📋 信号看板</h2>
-    <p class="text-gray-500 text-sm mt-1">超预期 / 扣非新高 / 回调买入</p>
+    <h2 class="text-2xl font-bold text-gray-800">📡 信号看板</h2>
 </div>
 
-<div class="mb-4 flex gap-2">
-    <a href="/signals?days=2" class="px-3 py-1 bg-gray-100 rounded text-sm {% if days==2 %}bg-blue-100 text-blue-700{% endif %}">近2天</a>
-    <a href="/signals?days=7" class="px-3 py-1 bg-gray-100 rounded text-sm {% if days==7 %}bg-blue-100 text-blue-700{% endif %}">近7天</a>
-    <a href="/signals?days=30" class="px-3 py-1 bg-gray-100 rounded text-sm {% if days==30 %}bg-blue-100 text-blue-700{% endif %}">近30天</a>
+<!-- 筛选 -->
+<div class="flex gap-4 mb-4">
+    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/signals?type='+this.value+'&days={{ current_days }}'">
+        <option value="earnings_beat" {{ 'selected' if current_type=='earnings_beat' }}>超预期</option>
+        <option value="profit_new_high" {{ 'selected' if current_type=='profit_new_high' }}>扣非新高</option>
+        <option value="pullback_buy" {{ 'selected' if current_type=='pullback_buy' }}>回调买入</option>
+    </select>
+    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/signals?type={{ current_type }}&days='+this.value">
+        <option value="1" {{ 'selected' if current_days==1 }}>今日</option>
+        <option value="3" {{ 'selected' if current_days==3 }}>3天</option>
+        <option value="7" {{ 'selected' if current_days==7 }}>7天</option>
+        <option value="30" {{ 'selected' if current_days==30 }}>30天</option>
+    </select>
+    <span class="text-gray-500 text-sm self-center">{{ signals|length }} 条</span>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
-    <div class="bg-white rounded-lg p-4 border border-gray-200">
-        <h3 class="font-semibold mb-3">🔥 超预期 ({{ beats|length }})</h3>
-        {% if beats %}<table class="data-table text-sm">{% for r in beats %}{% if loop.first %}<thead><tr>{% for k in ['股票','名称','类型','评分','信号','时间'] %}<th>{{ k }}</th>{% endfor %}</tr></thead>{% endif %}<tr>{% if loop.index0<20 %}<td>{{ r.stock_code }}</td><td>{{ r.stock_name }}</td><td>{{ r.analysis_type }}</td><td>{{ r.score }}</td><td><span class="tag-{{ r.signal }}">{{ r.signal }}</span></td><td>{{ r.created_at[:10] }}</td>{% endif %}</tr>{% endfor %}</table>{% else %}<p class="text-gray-400 text-sm">暂无</p>{% endif %}
+{% if signals %}
+<div class="space-y-2">
+{% for s in signals[:50] %}
+<div class="signal-card">
+    <div class="flex justify-between items-start">
+        <div>
+            <span class="font-medium">{{ s.stock_name or s.stock_code }}</span>
+            <span class="text-gray-400 ml-1">{{ s.stock_code }}</span>
+            {% if s.industry %}<span class="text-gray-300 ml-2 text-xs">{{ s.industry }}</span>{% endif %}
+        </div>
+        <div class="flex items-center gap-2">
+            {% if s.score %}<span class="text-sm font-bold">{{ "%.0f"|format(s.score) }}</span>{% endif %}
+            {% if s.signal == 'buy' %}<span class="tag-buy">BUY</span>
+            {% elif s.signal == 'watch' %}<span class="tag-watch">WATCH</span>
+            {% elif s.signal == 'avoid' %}<span class="tag-avoid">AVOID</span>
+            {% else %}<span class="text-gray-400 text-xs">{{ s.signal }}</span>{% endif %}
+        </div>
     </div>
-    <div class="bg-white rounded-lg p-4 border border-gray-200">
-        <h3 class="font-semibold mb-3">📈 扣非新高 ({{ highs|length }})</h3>
-        {% if highs %}<table class="data-table text-sm">{% for r in highs %}{% if loop.first %}<thead><tr>{% for k in ['股票','名称','评分','信号','时间'] %}<th>{{ k }}</th>{% endfor %}</tr></thead>{% endif %}<tr>{% if loop.index0<20 %}<td>{{ r.stock_code }}</td><td>{{ r.stock_name }}</td><td>{{ r.score }}</td><td><span class="tag-{{ r.signal }}">{{ r.signal }}</span></td><td>{{ r.created_at[:10] }}</td>{% endif %}</tr>{% endfor %}</table>{% else %}<p class="text-gray-400 text-sm">暂无</p>{% endif %}
-    </div>
+    {% if s.summary %}<div class="text-sm text-gray-500 mt-1">{{ s.summary }}</div>{% endif %}
+    <div class="text-xs text-gray-400 mt-1">{{ s.created_at[:16] if s.created_at else '' }}</div>
 </div>
+{% endfor %}
+</div>
+{% else %}
+<p class="text-gray-400">暂无信号</p>
+{% endif %}
 {% endblock %}

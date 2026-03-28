@@ -22,22 +22,23 @@
                         <span class="text-gray-400 text-sm">{{ act.stock_code }}</span>
                         {% if act.signal == 'buy' %}
                         <span class="tag-buy">BUY</span>
-                        {% else %}
+                        {% elif act.signal == 'watch' %}
                         <span class="tag-watch">WATCH</span>
+                        {% else %}
+                        <span class="tag-avoid">{{ act.signal }}</span>
                         {% endif %}
                     </div>
                     <div class="text-sm text-gray-600 mt-1">{{ act.reason }}</div>
                     <div class="flex gap-4 mt-2 text-xs text-gray-500">
-                        {% if act.target_price %}<span>目标 ¥{{ act.target_price }}</span>{% endif %}
-                        {% if act.stop_loss %}<span>止损 ¥{{ act.stop_loss }}</span>{% endif %}
-                        {% if act.score %}<span>评分 {{ act.score }}</span>{% endif %}
+                        {% if act.source %}<span>来源: {{ act.source }}</span>{% endif %}
+                        {% if act.score %}<span>评分: {{ "%.0f"|format(act.score) }}</span>{% endif %}
+                        {% if act.industry %}<span>行业: {{ act.industry }}</span>{% endif %}
                     </div>
                 </div>
             </div>
-            <!-- 决策记录按钮 -->
             <div class="flex gap-2" id="decision-{{ act.stock_code }}">
                 <button class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
-                        hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"bought"}'
+                        hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"bought","reason":"{{ act.reason }}"}'
                         hx-target="#decision-{{ act.stock_code }}" hx-swap="innerHTML">
                     ✅ 已买入
                 </button>
@@ -60,7 +61,7 @@
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
     <div class="text-4xl mb-3">☕</div>
     <p class="text-gray-500">今日暂无行动建议</p>
-    <p class="text-gray-400 text-sm mt-1">晚间 21:00 扫描后自动生成</p>
+    <p class="text-gray-400 text-sm mt-1">去 <a href="/system" class="text-blue-600">系统控制</a> 跑一次 Pipeline</p>
 </div>
 {% endif %}
 {% endblock %}

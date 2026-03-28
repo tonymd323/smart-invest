@@ -1,1 +1,49 @@
-{% extends "base.html" %} {% block title %}T+N 跟踪 — 投资系统 2.2{% endblock %} {% block content %}<div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">📈 T+N 跟踪</h2></div>{% if tracking %}{% for t in tracking %}<div class="signal-card mb-2"><div class="flex justify-between"><div><span class="font-">{{ t.stock_name }} {{ t.stock_code }}</span></div><span class="tag-{{ t.tracking_status }}">{{ t.tracking_status }}</span></div>{% if t.current_price and t.entry_price %}<div class="text-sm mt-2">当前: ¥{{ "%.2f"|format(t.current_price) }} vs 入池: ¥{{ "%.2f"|format(t.entry_price) }}</div>{% endif %}</div>{% endfor %}{% else %}<p class="text-gray-400">暂无跟踪</p>{% endif %}{% endblock %}
+{% extends "base.html" %}
+{% block title %}T+N 跟踪 — 投资系统 2.2{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">📈 T+N 跟踪</h2>
+</div>
+
+<!-- 筛选 -->
+<div class="flex gap-4 mb-4">
+    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/tracking?status='+this.value">
+        <option value="">全部状态</option>
+        <option value="pending" {{ 'selected' if current_status=='pending' }}>待观察</option>
+        <option value="active" {{ 'selected' if current_status=='active' }}>跟踪中</option>
+        <option value="closed" {{ 'selected' if current_status=='closed' }}>已结束</option>
+    </select>
+    <span class="text-gray-500 text-sm self-center">{{ tracking|length }} 条</span>
+</div>
+
+{% if tracking %}
+<div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+<table class="data-table text-sm w-full">
+    <thead>
+        <tr><th>股票</th><th>类型</th><th>信号日</th><th>入场价</th><th>1日</th><th>5日</th><th>10日</th><th>20日</th><th>状态</th></tr>
+    </thead>
+    <tbody>
+    {% for t in tracking %}
+    <tr>
+        <td class="font-medium">{{ t.stock_name or t.stock_code }}</td>
+        <td class="text-gray-500">{{ t.event_type or '-' }}</td>
+        <td class="text-gray-400 text-xs">{{ t.event_date[:10] if t.event_date else '-' }}</td>
+        <td>{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
+        <td class="{% if t.return_1d and t.return_1d>0 %}up{% elif t.return_1d and t.return_1d<0 %}down{% endif %}">
+            {% if t.return_1d != None %}{{ "%.1f"|format(t.return_1d) }}%{% else %}-{% endif %}</td>
+        <td class="{% if t.return_5d and t.return_5d>0 %}up{% elif t.return_5d and t.return_5d<0 %}down{% endif %}">
+            {% if t.return_5d != None %}{{ "%.1f"|format(t.return_5d) }}%{% else %}-{% endif %}</td>
+        <td class="{% if t.return_10d and t.return_10d>0 %}up{% elif t.return_10d and t.return_10d<0 %}down{% endif %}">
+            {% if t.return_10d != None %}{{ "%.1f"|format(t.return_10d) }}%{% else %}-{% endif %}</td>
+        <td class="{% if t.return_20d and t.return_20d>0 %}up{% elif t.return_20d and t.return_20d<0 %}down{% endif %}">
+            {% if t.return_20d != None %}{{ "%.1f"|format(t.return_20d) }}%{% else %}-{% endif %}</td>
+        <td><span class="tag-{{ t.tracking_status or 'pending' }}">{{ t.tracking_status or '-' }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="text-gray-400">暂无跟踪数据</p>
+{% endif %}
+{% endblock %}
