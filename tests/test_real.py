@@ -24,6 +24,7 @@
 """
 
 import os
+import pytest
 import sys
 import json
 import sqlite3
@@ -313,10 +314,11 @@ def test_t7_data_quality():
 #  T8: 1.0 daily_scan.py 回归
 # ═══════════════════════════════════════════════════════════════════════════════
 
+@pytest.mark.skip(reason='daily_scan.py archived, Cron uses v2 inline Python')
 def test_t8_regression():
-    """确保 2.0 开发不影响 1.0 daily_scan.py"""
+    """确保 2.0 开发不影响 1.0 daily_scan.py (已归档)"""
     result = subprocess.run(
-        ["python3", "daily_scan.py", "--quiet"],
+        ["python3", "scripts/archived/daily_scan.py", "--quiet"],
         cwd=str(PROJECT_ROOT),
         capture_output=True, text=True, timeout=120
     )
