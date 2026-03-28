@@ -39,11 +39,11 @@ def load_scan_results():
     """加载最新扫描结果（超预期 + 扣非新高）"""
     conn = sqlite3.connect(str(DB_PATH))
     df = pd.read_sql_query("""
-        SELECT ar.stock_code, s.name as stock_name, s.industry,
+        SELECT ar.stock_code, COALESCE(s.name, ar.stock_code, dp.stock_code) as stock_name, s.industry,
                ar.analysis_type, ar.score, ar.signal, ar.summary, ar.created_at
         FROM analysis_results ar
         LEFT JOIN stocks s ON ar.stock_code = s.code
-        WHERE ar.created_at >= datetime('now', '-2 days')
+        WHERE ar.created_at >= datetime('now', '-7 days')
         ORDER BY ar.created_at DESC, ar.score DESC
     """, conn)
     conn.close()
@@ -54,11 +54,11 @@ def load_events():
     """加载事件"""
     conn = sqlite3.connect(str(DB_PATH))
     df = pd.read_sql_query("""
-        SELECT e.stock_code, s.name as stock_name, e.event_type,
+        SELECT e.stock_code, COALESCE(s.name, ar.stock_code, dp.stock_code) as stock_name, e.event_type,
                e.title, e.content, e.severity, e.sentiment, e.published_at
         FROM events e
         LEFT JOIN stocks s ON e.stock_code = s.code
-        WHERE e.published_at >= datetime('now', '-7 days')
+        WHERE e.published_at >= datetime('now', '-30 days') OR e.created_at >= datetime('now', '-30 days')
         ORDER BY e.published_at DESC
         LIMIT 100
     """, conn)
@@ -70,7 +70,7 @@ def load_consensus():
     """加载一致预期数据"""
     conn = sqlite3.connect(str(DB_PATH))
     df = pd.read_sql_query("""
-        SELECT c.stock_code, s.name as stock_name, s.industry,
+        SELECT c.stock_code, COALESCE(s.name, ar.stock_code, dp.stock_code) as stock_name, s.industry,
                c.year, c.net_profit_yoy, c.rev_yoy, c.num_analysts
         FROM consensus c
         LEFT JOIN stocks s ON c.stock_code = s.code
@@ -167,8 +167,8 @@ elif page == "📋 扫描结果":
         st.info("暂无扫描结果。")
     else:
         # 分类统计
-        beat = df[df["analysis_type"] == "earnings_beat"]
-        new_high = df[df["analysis_type"] == "profit_new_high"]
+        beat = df[df["analysis_type"].str.contains("beat", na=False)]
+        new_high = df[df["analysis_type"].str.contains("new_high|profit", na=False, case=False)]
 
         col1, col2, col3 = st.columns(3)
         col1.metric("超预期", len(beat))
@@ -236,7 +236,7 @@ elif page == "🎯 一致预期":
         st.info("暂无一致预期数据。")
     else:
         # 按股票展示
-        stock_list = df["stock_code"].unique()
+        stock_list = sorted(df["stock_code"].unique())
         selected = st.selectbox("选择股票", stock_list, format_func=lambda x: f"{x} {df[df['stock_code']==x]['stock_name'].iloc[0] if len(df[df['stock_code']==x]) > 0 else ''}")
 
         stock_df = df[df["stock_code"] == selected]
