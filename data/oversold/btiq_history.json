@@ -1,0 +1,5292 @@
+[
+  {
+    "time": "2026-03-23 15:00:00",
+    "up": 305,
+    "down": 5172,
+    "flat": 6,
+    "total": 5483,
+    "btiq": 5.57,
+    "top_gainers": [],
+    "top_losers": []
+  },
+  {
+    "time": "2026-03-24 11:00:49",
+    "up": 4390,
+    "down": 753,
+    "flat": 48,
+    "total": 5191,
+    "btiq": 85.36,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.37,
+        "change_pct": 15.78
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 39.3,
+        "change_pct": 14.64
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 115.55,
+        "change_pct": 14.5
+      },
+      {
+        "code": "300868",
+        "name": "杰美特",
+        "price": 52.76,
+        "change_pct": 13.88
+      },
+      {
+        "code": "688802",
+        "name": "沐曦股份-U",
+        "price": 602.95,
+        "change_pct": 13.86
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 245.15,
+        "change_pct": -10.24
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.9,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "002800",
+        "name": "天顺股份",
+        "price": 19.65,
+        "change_pct": -8.77
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.59,
+        "change_pct": -8.73
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 37.5,
+        "change_pct": -8.04
+      },
+      {
+        "code": "301373",
+        "name": "凌玮科技",
+        "price": 59.97,
+        "change_pct": -7.47
+      },
+      {
+        "code": "300641",
+        "name": "正丹股份",
+        "price": 20.26,
+        "change_pct": -7.06
+      },
+      {
+        "code": "600191",
+        "name": "华资实业",
+        "price": 10.43,
+        "change_pct": -6.96
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 11:31:19",
+    "up": 4306,
+    "down": 818,
+    "flat": 67,
+    "total": 5191,
+    "btiq": 84.04,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "688802",
+        "name": "沐曦股份-U",
+        "price": 619.0,
+        "change_pct": 16.89
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 39.77,
+        "change_pct": 16.02
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.21,
+        "change_pct": 14.82
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 115.79,
+        "change_pct": 14.73
+      },
+      {
+        "code": "300868",
+        "name": "杰美特",
+        "price": 52.16,
+        "change_pct": 12.58
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.9,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 247.2,
+        "change_pct": -9.49
+      },
+      {
+        "code": "002800",
+        "name": "天顺股份",
+        "price": 19.56,
+        "change_pct": -9.19
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.65,
+        "change_pct": -8.33
+      },
+      {
+        "code": "301373",
+        "name": "凌玮科技",
+        "price": 59.58,
+        "change_pct": -8.07
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 37.54,
+        "change_pct": -7.95
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 34.01,
+        "change_pct": -7.3
+      },
+      {
+        "code": "300641",
+        "name": "正丹股份",
+        "price": 20.33,
+        "change_pct": -6.74
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 12:01:30",
+    "up": 4306,
+    "down": 818,
+    "flat": 67,
+    "total": 5191,
+    "btiq": 84.04,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "688802",
+        "name": "沐曦股份-U",
+        "price": 619.0,
+        "change_pct": 16.89
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 39.77,
+        "change_pct": 16.02
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.21,
+        "change_pct": 14.82
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 115.79,
+        "change_pct": 14.73
+      },
+      {
+        "code": "300868",
+        "name": "杰美特",
+        "price": 52.16,
+        "change_pct": 12.58
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.9,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 247.2,
+        "change_pct": -9.49
+      },
+      {
+        "code": "002800",
+        "name": "天顺股份",
+        "price": 19.56,
+        "change_pct": -9.19
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.65,
+        "change_pct": -8.33
+      },
+      {
+        "code": "301373",
+        "name": "凌玮科技",
+        "price": 59.58,
+        "change_pct": -8.07
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 37.54,
+        "change_pct": -7.95
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 34.01,
+        "change_pct": -7.3
+      },
+      {
+        "code": "300641",
+        "name": "正丹股份",
+        "price": 20.33,
+        "change_pct": -6.74
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 12:30:31",
+    "up": 4306,
+    "down": 818,
+    "flat": 67,
+    "total": 5191,
+    "btiq": 84.04,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "688802",
+        "name": "沐曦股份-U",
+        "price": 619.0,
+        "change_pct": 16.89
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 39.77,
+        "change_pct": 16.02
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.21,
+        "change_pct": 14.82
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 115.79,
+        "change_pct": 14.73
+      },
+      {
+        "code": "300868",
+        "name": "杰美特",
+        "price": 52.16,
+        "change_pct": 12.58
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.9,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 247.2,
+        "change_pct": -9.49
+      },
+      {
+        "code": "002800",
+        "name": "天顺股份",
+        "price": 19.56,
+        "change_pct": -9.19
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.65,
+        "change_pct": -8.33
+      },
+      {
+        "code": "301373",
+        "name": "凌玮科技",
+        "price": 59.58,
+        "change_pct": -8.07
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 37.54,
+        "change_pct": -7.95
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 34.01,
+        "change_pct": -7.3
+      },
+      {
+        "code": "300641",
+        "name": "正丹股份",
+        "price": 20.33,
+        "change_pct": -6.74
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 13:06:06",
+    "up": 3847,
+    "down": 1249,
+    "flat": 95,
+    "total": 5191,
+    "btiq": 75.49,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "688802",
+        "name": "沐曦股份-U",
+        "price": 606.01,
+        "change_pct": 14.43
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 114.65,
+        "change_pct": 13.6
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 38.91,
+        "change_pct": 13.51
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 18.91,
+        "change_pct": 13.03
+      },
+      {
+        "code": "301609",
+        "name": "山大电力",
+        "price": 57.0,
+        "change_pct": 11.96
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 243.5,
+        "change_pct": -10.84
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.9,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "002800",
+        "name": "天顺股份",
+        "price": 19.47,
+        "change_pct": -9.61
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.5,
+        "change_pct": -9.34
+      },
+      {
+        "code": "301373",
+        "name": "凌玮科技",
+        "price": 58.8,
+        "change_pct": -9.27
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 33.34,
+        "change_pct": -9.13
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 37.39,
+        "change_pct": -8.31
+      },
+      {
+        "code": "300641",
+        "name": "正丹股份",
+        "price": 20.05,
+        "change_pct": -8.03
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 13:06:50",
+    "up": 3845,
+    "down": 1269,
+    "flat": 77,
+    "total": 5191,
+    "btiq": 75.19,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 38.97,
+        "change_pct": 13.68
+      },
+      {
+        "code": "688802",
+        "name": "沐曦股份-U",
+        "price": 602.04,
+        "change_pct": 13.68
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 114.42,
+        "change_pct": 13.38
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 18.88,
+        "change_pct": 12.85
+      },
+      {
+        "code": "301609",
+        "name": "山大电力",
+        "price": 57.1,
+        "change_pct": 12.16
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 243.4,
+        "change_pct": -10.88
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.9,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "002800",
+        "name": "天顺股份",
+        "price": 19.5,
+        "change_pct": -9.47
+      },
+      {
+        "code": "301373",
+        "name": "凌玮科技",
+        "price": 58.79,
+        "change_pct": -9.29
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.51,
+        "change_pct": -9.27
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 33.41,
+        "change_pct": -8.94
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 37.37,
+        "change_pct": -8.36
+      },
+      {
+        "code": "300641",
+        "name": "正丹股份",
+        "price": 20.01,
+        "change_pct": -8.21
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 14:00:34",
+    "up": 4144,
+    "down": 987,
+    "flat": 60,
+    "total": 5191,
+    "btiq": 80.76,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.1,
+        "change_pct": 14.17
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 114.82,
+        "change_pct": 13.77
+      },
+      {
+        "code": "688802",
+        "name": "沐曦股份-U",
+        "price": 601.75,
+        "change_pct": 13.63
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 38.91,
+        "change_pct": 13.51
+      },
+      {
+        "code": "301609",
+        "name": "山大电力",
+        "price": 57.78,
+        "change_pct": 13.49
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.4,
+        "change_pct": -10.01
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.91,
+        "change_pct": -9.95
+      },
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 247.0,
+        "change_pct": -9.56
+      },
+      {
+        "code": "300900",
+        "name": "广联航空",
+        "price": 33.94,
+        "change_pct": -8.79
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 33.57,
+        "change_pct": -8.5
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 37.32,
+        "change_pct": -8.48
+      },
+      {
+        "code": "301373",
+        "name": "凌玮科技",
+        "price": 59.99,
+        "change_pct": -7.44
+      },
+      {
+        "code": "002430",
+        "name": "杭氧股份",
+        "price": 27.14,
+        "change_pct": -7.31
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 14:30:31",
+    "up": 4812,
+    "down": 352,
+    "flat": 27,
+    "total": 5191,
+    "btiq": 93.18,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "301183",
+        "name": "东田微",
+        "price": 157.57,
+        "change_pct": 16.14
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.23,
+        "change_pct": 14.94
+      },
+      {
+        "code": "300938",
+        "name": "信测标准",
+        "price": 40.99,
+        "change_pct": 14.43
+      },
+      {
+        "code": "301105",
+        "name": "鸿铭股份",
+        "price": 60.41,
+        "change_pct": 14.41
+      },
+      {
+        "code": "300391",
+        "name": "长药退",
+        "price": 0.4,
+        "change_pct": 14.29
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.9,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.08,
+        "change_pct": -9.99
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.83,
+        "change_pct": -7.12
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 38.16,
+        "change_pct": -6.42
+      },
+      {
+        "code": "600759",
+        "name": "洲际油气",
+        "price": 6.39,
+        "change_pct": -6.3
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 34.45,
+        "change_pct": -6.11
+      },
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 256.55,
+        "change_pct": -6.06
+      },
+      {
+        "code": "603616",
+        "name": "韩建河山",
+        "price": 6.84,
+        "change_pct": -5.66
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 18.98,
+        "change_pct": -5.53
+      }
+    ]
+  },
+  {
+    "time": "2026-03-24 15:00:41",
+    "up": 4866,
+    "down": 299,
+    "flat": 26,
+    "total": 5191,
+    "btiq": 94.21,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 157.0,
+        "change_pct": 18.03
+      },
+      {
+        "code": "300391",
+        "name": "长药退",
+        "price": 0.41,
+        "change_pct": 17.14
+      },
+      {
+        "code": "301183",
+        "name": "东田微",
+        "price": 158.0,
+        "change_pct": 16.46
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 117.51,
+        "change_pct": 16.44
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.33,
+        "change_pct": 15.54
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.1,
+        "change_pct": -9.83
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.95,
+        "change_pct": -9.76
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.85,
+        "change_pct": -6.98
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 34.51,
+        "change_pct": -5.94
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 18.91,
+        "change_pct": -5.87
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 38.4,
+        "change_pct": -5.84
+      },
+      {
+        "code": "300900",
+        "name": "广联航空",
+        "price": 35.08,
+        "change_pct": -5.72
+      },
+      {
+        "code": "600759",
+        "name": "洲际油气",
+        "price": 6.44,
+        "change_pct": -5.57
+      },
+      {
+        "code": "002430",
+        "name": "杭氧股份",
+        "price": 27.76,
+        "change_pct": -5.19
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 09:00:51",
+    "up": 4866,
+    "down": 299,
+    "flat": 28,
+    "total": 5193,
+    "btiq": 94.21,
+    "top_gainers": [
+      {
+        "code": "300335",
+        "name": "迪森股份",
+        "price": 8.4,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301226",
+        "name": "祥明智能",
+        "price": 42.96,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688551",
+        "name": "科威尔",
+        "price": 47.34,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.73,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300497",
+        "name": "富祥药业",
+        "price": 17.0,
+        "change_pct": 19.97
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 157.0,
+        "change_pct": 18.03
+      },
+      {
+        "code": "300391",
+        "name": "长药退",
+        "price": 0.41,
+        "change_pct": 17.14
+      },
+      {
+        "code": "301183",
+        "name": "东田微",
+        "price": 158.0,
+        "change_pct": 16.46
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 117.51,
+        "change_pct": 16.44
+      },
+      {
+        "code": "300531",
+        "name": "优博讯",
+        "price": 19.33,
+        "change_pct": 15.54
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 36.27,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 11.1,
+        "change_pct": -9.83
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 18.95,
+        "change_pct": -9.76
+      },
+      {
+        "code": "600703",
+        "name": "三安光电",
+        "price": 13.85,
+        "change_pct": -6.98
+      },
+      {
+        "code": "600096",
+        "name": "云天化",
+        "price": 34.51,
+        "change_pct": -5.94
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 18.91,
+        "change_pct": -5.87
+      },
+      {
+        "code": "600580",
+        "name": "卧龙电驱",
+        "price": 38.4,
+        "change_pct": -5.84
+      },
+      {
+        "code": "300900",
+        "name": "广联航空",
+        "price": 35.08,
+        "change_pct": -5.72
+      },
+      {
+        "code": "600759",
+        "name": "洲际油气",
+        "price": 6.44,
+        "change_pct": -5.57
+      },
+      {
+        "code": "002430",
+        "name": "杭氧股份",
+        "price": 27.76,
+        "change_pct": -5.19
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 09:30:43",
+    "up": 3752,
+    "down": 1131,
+    "flat": 310,
+    "total": 5193,
+    "btiq": 76.84,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 49.99,
+        "change_pct": 120.41
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 140.24,
+        "change_pct": 101.32
+      },
+      {
+        "code": "000859",
+        "name": "国风新材",
+        "price": 10.34,
+        "change_pct": 10.0
+      },
+      {
+        "code": "002902",
+        "name": "铭普光磁",
+        "price": 25.95,
+        "change_pct": 10.0
+      },
+      {
+        "code": "600666",
+        "name": "奥瑞德",
+        "price": 5.28,
+        "change_pct": 10.0
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.72,
+        "change_pct": 10.0
+      },
+      {
+        "code": "000722",
+        "name": "湖南发展",
+        "price": 16.62,
+        "change_pct": 9.99
+      },
+      {
+        "code": "000889",
+        "name": "中嘉博创",
+        "price": 3.54,
+        "change_pct": 9.94
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 4.55,
+        "change_pct": 9.9
+      },
+      {
+        "code": "603937",
+        "name": "丽岛新材",
+        "price": 13.52,
+        "change_pct": 9.83
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.27,
+        "change_pct": -8.67
+      },
+      {
+        "code": "601015",
+        "name": "陕西黑猫",
+        "price": 5.11,
+        "change_pct": -7.09
+      },
+      {
+        "code": "600617",
+        "name": "国新能源",
+        "price": 3.95,
+        "change_pct": -6.84
+      },
+      {
+        "code": "600759",
+        "name": "洲际油气",
+        "price": 6.02,
+        "change_pct": -6.52
+      },
+      {
+        "code": "000968",
+        "name": "蓝焰控股",
+        "price": 9.81,
+        "change_pct": -6.39
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.78,
+        "change_pct": -6.17
+      },
+      {
+        "code": "000856",
+        "name": "冀东装备",
+        "price": 10.45,
+        "change_pct": -5.86
+      },
+      {
+        "code": "688106",
+        "name": "金宏气体",
+        "price": 27.9,
+        "change_pct": -5.46
+      },
+      {
+        "code": "300317",
+        "name": "珈伟新能",
+        "price": 6.1,
+        "change_pct": -5.43
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 10:30:27",
+    "up": 4618,
+    "down": 500,
+    "flat": 75,
+    "total": 5193,
+    "btiq": 90.23,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 49.04,
+        "change_pct": 116.23
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 136.01,
+        "change_pct": 95.25
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.11,
+        "change_pct": 16.99
+      },
+      {
+        "code": "688167",
+        "name": "炬光科技",
+        "price": 349.0,
+        "change_pct": 15.46
+      },
+      {
+        "code": "688048",
+        "name": "长光华芯",
+        "price": 225.8,
+        "change_pct": 15.21
+      },
+      {
+        "code": "688229",
+        "name": "博睿数据",
+        "price": 97.16,
+        "change_pct": 14.6
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 55.15,
+        "change_pct": 13.81
+      },
+      {
+        "code": "688530",
+        "name": "欧莱新材",
+        "price": 32.12,
+        "change_pct": 13.14
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.25,
+        "change_pct": -8.78
+      },
+      {
+        "code": "600759",
+        "name": "洲际油气",
+        "price": 5.99,
+        "change_pct": -6.99
+      },
+      {
+        "code": "601898",
+        "name": "中煤能源",
+        "price": 17.15,
+        "change_pct": -6.39
+      },
+      {
+        "code": "688106",
+        "name": "金宏气体",
+        "price": 27.72,
+        "change_pct": -6.07
+      },
+      {
+        "code": "600803",
+        "name": "新奥股份",
+        "price": 21.5,
+        "change_pct": -5.99
+      },
+      {
+        "code": "600256",
+        "name": "广汇能源",
+        "price": 6.69,
+        "change_pct": -5.91
+      },
+      {
+        "code": "000968",
+        "name": "蓝焰控股",
+        "price": 9.87,
+        "change_pct": -5.82
+      },
+      {
+        "code": "600188",
+        "name": "兖矿能源",
+        "price": 19.34,
+        "change_pct": -5.8
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.86,
+        "change_pct": -5.75
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 11:00:33",
+    "up": 4621,
+    "down": 506,
+    "flat": 66,
+    "total": 5193,
+    "btiq": 90.13,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 52.01,
+        "change_pct": 129.32
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 136.23,
+        "change_pct": 95.56
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.05,
+        "change_pct": 16.6
+      },
+      {
+        "code": "688048",
+        "name": "长光华芯",
+        "price": 227.19,
+        "change_pct": 15.92
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 55.59,
+        "change_pct": 14.71
+      },
+      {
+        "code": "688141",
+        "name": "杰华特",
+        "price": 50.38,
+        "change_pct": 13.6
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 20.62,
+        "change_pct": 13.36
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 12.55,
+        "change_pct": 12.66
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.81,
+        "change_pct": -6.02
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.71,
+        "change_pct": -5.83
+      },
+      {
+        "code": "600803",
+        "name": "新奥股份",
+        "price": 21.56,
+        "change_pct": -5.73
+      },
+      {
+        "code": "605117",
+        "name": "德业股份",
+        "price": 127.36,
+        "change_pct": -5.72
+      },
+      {
+        "code": "688106",
+        "name": "金宏气体",
+        "price": 27.86,
+        "change_pct": -5.59
+      },
+      {
+        "code": "002843",
+        "name": "泰嘉股份",
+        "price": 21.28,
+        "change_pct": -5.21
+      },
+      {
+        "code": "601898",
+        "name": "中煤能源",
+        "price": 17.37,
+        "change_pct": -5.19
+      },
+      {
+        "code": "600759",
+        "name": "洲际油气",
+        "price": 6.11,
+        "change_pct": -5.12
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.96,
+        "change_pct": -5.02
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 11:30:41",
+    "up": 4320,
+    "down": 797,
+    "flat": 76,
+    "total": 5193,
+    "btiq": 84.42,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 49.15,
+        "change_pct": 116.71
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 134.05,
+        "change_pct": 92.43
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 13.37,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 21.83,
+        "change_pct": 20.01
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.33,
+        "change_pct": 18.41
+      },
+      {
+        "code": "688048",
+        "name": "长光华芯",
+        "price": 221.12,
+        "change_pct": 12.82
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 54.08,
+        "change_pct": 11.6
+      },
+      {
+        "code": "688141",
+        "name": "杰华特",
+        "price": 49.37,
+        "change_pct": 11.32
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.63,
+        "change_pct": -6.34
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.75,
+        "change_pct": -6.25
+      },
+      {
+        "code": "300900",
+        "name": "广联航空",
+        "price": 32.9,
+        "change_pct": -6.21
+      },
+      {
+        "code": "002843",
+        "name": "泰嘉股份",
+        "price": 21.06,
+        "change_pct": -6.19
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.84,
+        "change_pct": -5.86
+      },
+      {
+        "code": "688106",
+        "name": "金宏气体",
+        "price": 27.83,
+        "change_pct": -5.69
+      },
+      {
+        "code": "300068",
+        "name": "南都电源",
+        "price": 13.85,
+        "change_pct": -5.65
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.89,
+        "change_pct": -5.39
+      },
+      {
+        "code": "600803",
+        "name": "新奥股份",
+        "price": 21.64,
+        "change_pct": -5.38
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 12:00:40",
+    "up": 4320,
+    "down": 797,
+    "flat": 76,
+    "total": 5193,
+    "btiq": 84.42,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 49.15,
+        "change_pct": 116.71
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 134.05,
+        "change_pct": 92.43
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 13.37,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 21.83,
+        "change_pct": 20.01
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.33,
+        "change_pct": 18.41
+      },
+      {
+        "code": "688048",
+        "name": "长光华芯",
+        "price": 221.12,
+        "change_pct": 12.82
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 54.08,
+        "change_pct": 11.6
+      },
+      {
+        "code": "688141",
+        "name": "杰华特",
+        "price": 49.37,
+        "change_pct": 11.32
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.63,
+        "change_pct": -6.34
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.75,
+        "change_pct": -6.25
+      },
+      {
+        "code": "300900",
+        "name": "广联航空",
+        "price": 32.9,
+        "change_pct": -6.21
+      },
+      {
+        "code": "002843",
+        "name": "泰嘉股份",
+        "price": 21.06,
+        "change_pct": -6.19
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.84,
+        "change_pct": -5.86
+      },
+      {
+        "code": "688106",
+        "name": "金宏气体",
+        "price": 27.83,
+        "change_pct": -5.69
+      },
+      {
+        "code": "300068",
+        "name": "南都电源",
+        "price": 13.85,
+        "change_pct": -5.65
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.89,
+        "change_pct": -5.39
+      },
+      {
+        "code": "600803",
+        "name": "新奥股份",
+        "price": 21.64,
+        "change_pct": -5.38
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 12:30:29",
+    "up": 4320,
+    "down": 797,
+    "flat": 76,
+    "total": 5193,
+    "btiq": 84.42,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 49.15,
+        "change_pct": 116.71
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 134.05,
+        "change_pct": 92.43
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 13.37,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 21.83,
+        "change_pct": 20.01
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.33,
+        "change_pct": 18.41
+      },
+      {
+        "code": "688048",
+        "name": "长光华芯",
+        "price": 221.12,
+        "change_pct": 12.82
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 54.08,
+        "change_pct": 11.6
+      },
+      {
+        "code": "688141",
+        "name": "杰华特",
+        "price": 49.37,
+        "change_pct": 11.32
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.63,
+        "change_pct": -6.34
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.75,
+        "change_pct": -6.25
+      },
+      {
+        "code": "300900",
+        "name": "广联航空",
+        "price": 32.9,
+        "change_pct": -6.21
+      },
+      {
+        "code": "002843",
+        "name": "泰嘉股份",
+        "price": 21.06,
+        "change_pct": -6.19
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.84,
+        "change_pct": -5.86
+      },
+      {
+        "code": "688106",
+        "name": "金宏气体",
+        "price": 27.83,
+        "change_pct": -5.69
+      },
+      {
+        "code": "300068",
+        "name": "南都电源",
+        "price": 13.85,
+        "change_pct": -5.65
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.89,
+        "change_pct": -5.39
+      },
+      {
+        "code": "600803",
+        "name": "新奥股份",
+        "price": 21.64,
+        "change_pct": -5.38
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 13:00:28",
+    "up": 4393,
+    "down": 711,
+    "flat": 89,
+    "total": 5193,
+    "btiq": 86.07,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 48.57,
+        "change_pct": 114.15
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 133.96,
+        "change_pct": 92.31
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 13.37,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 21.83,
+        "change_pct": 20.01
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.2,
+        "change_pct": 17.57
+      },
+      {
+        "code": "688048",
+        "name": "长光华芯",
+        "price": 222.98,
+        "change_pct": 13.77
+      },
+      {
+        "code": "688150",
+        "name": "莱特光电",
+        "price": 40.41,
+        "change_pct": 13.45
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 54.28,
+        "change_pct": 12.01
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "002843",
+        "name": "泰嘉股份",
+        "price": 21.01,
+        "change_pct": -6.41
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.62,
+        "change_pct": -6.4
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.8,
+        "change_pct": -6.07
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.8,
+        "change_pct": -6.06
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.78,
+        "change_pct": -5.98
+      },
+      {
+        "code": "600803",
+        "name": "新奥股份",
+        "price": 21.53,
+        "change_pct": -5.86
+      },
+      {
+        "code": "300900",
+        "name": "广联航空",
+        "price": 33.07,
+        "change_pct": -5.73
+      },
+      {
+        "code": "300483",
+        "name": "首华燃气",
+        "price": 21.92,
+        "change_pct": -5.56
+      },
+      {
+        "code": "300068",
+        "name": "南都电源",
+        "price": 13.89,
+        "change_pct": -5.38
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 15:00:45",
+    "up": 4615,
+    "down": 521,
+    "flat": 57,
+    "total": 5193,
+    "btiq": 89.86,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 46.0,
+        "change_pct": 102.82
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 128.65,
+        "change_pct": 84.68
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 13.37,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 21.83,
+        "change_pct": 20.01
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301196",
+        "name": "唯科科技",
+        "price": 110.16,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.23,
+        "change_pct": 17.76
+      },
+      {
+        "code": "300720",
+        "name": "海川智能",
+        "price": 71.89,
+        "change_pct": 16.12
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 55.5,
+        "change_pct": 14.53
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300131",
+        "name": "英唐智控",
+        "price": 11.01,
+        "change_pct": -16.72
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 34.3,
+        "change_pct": -15.1
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "603949",
+        "name": "雪龙集团",
+        "price": 18.17,
+        "change_pct": -8.79
+      },
+      {
+        "code": "600590",
+        "name": "泰豪科技",
+        "price": 13.8,
+        "change_pct": -8.73
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.51,
+        "change_pct": -7.16
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 50.36,
+        "change_pct": -7.08
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.59,
+        "change_pct": -6.98
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.68,
+        "change_pct": -6.7
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.6,
+        "change_pct": -6.53
+      }
+    ]
+  },
+  {
+    "time": "2026-03-25 15:30:41",
+    "up": 4615,
+    "down": 521,
+    "flat": 57,
+    "total": 5193,
+    "btiq": 89.86,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 46.0,
+        "change_pct": 102.82
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 128.65,
+        "change_pct": 84.68
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 13.37,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 21.83,
+        "change_pct": 20.01
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301196",
+        "name": "唯科科技",
+        "price": 110.16,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.23,
+        "change_pct": 17.76
+      },
+      {
+        "code": "300720",
+        "name": "海川智能",
+        "price": 71.89,
+        "change_pct": 16.12
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 55.5,
+        "change_pct": 14.53
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300131",
+        "name": "英唐智控",
+        "price": 11.01,
+        "change_pct": -16.72
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 34.3,
+        "change_pct": -15.1
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "603949",
+        "name": "雪龙集团",
+        "price": 18.17,
+        "change_pct": -8.79
+      },
+      {
+        "code": "600590",
+        "name": "泰豪科技",
+        "price": 13.8,
+        "change_pct": -8.73
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.51,
+        "change_pct": -7.16
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 50.36,
+        "change_pct": -7.08
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.59,
+        "change_pct": -6.98
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.68,
+        "change_pct": -6.7
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.6,
+        "change_pct": -6.53
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 09:00:39",
+    "up": 4615,
+    "down": 521,
+    "flat": 57,
+    "total": 5193,
+    "btiq": 89.86,
+    "top_gainers": [
+      {
+        "code": "688781",
+        "name": "N视涯-UW",
+        "price": 46.0,
+        "change_pct": 102.82
+      },
+      {
+        "code": "301682",
+        "name": "N宏明电子",
+        "price": 128.65,
+        "change_pct": 84.68
+      },
+      {
+        "code": "300245",
+        "name": "天玑科技",
+        "price": 13.37,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 21.83,
+        "change_pct": 20.01
+      },
+      {
+        "code": "301419",
+        "name": "阿莱德",
+        "price": 43.79,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 27.78,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301196",
+        "name": "唯科科技",
+        "price": 110.16,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300383",
+        "name": "光环新网",
+        "price": 18.23,
+        "change_pct": 17.76
+      },
+      {
+        "code": "300720",
+        "name": "海川智能",
+        "price": 71.89,
+        "change_pct": 16.12
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 55.5,
+        "change_pct": 14.53
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300131",
+        "name": "英唐智控",
+        "price": 11.01,
+        "change_pct": -16.72
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 34.3,
+        "change_pct": -15.1
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 32.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "603949",
+        "name": "雪龙集团",
+        "price": 18.17,
+        "change_pct": -8.79
+      },
+      {
+        "code": "600590",
+        "name": "泰豪科技",
+        "price": 13.8,
+        "change_pct": -8.73
+      },
+      {
+        "code": "688757",
+        "name": "胜科纳米",
+        "price": 24.51,
+        "change_pct": -7.16
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 50.36,
+        "change_pct": -7.08
+      },
+      {
+        "code": "300164",
+        "name": "通源石油",
+        "price": 17.59,
+        "change_pct": -6.98
+      },
+      {
+        "code": "000020",
+        "name": "深华发Ａ",
+        "price": 17.68,
+        "change_pct": -6.7
+      },
+      {
+        "code": "300551",
+        "name": "古鳌科技",
+        "price": 14.6,
+        "change_pct": -6.53
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 09:30:33",
+    "up": 1368,
+    "down": 3478,
+    "flat": 347,
+    "total": 5193,
+    "btiq": 28.23,
+    "top_gainers": [
+      {
+        "code": "300168",
+        "name": "万达信息",
+        "price": 6.08,
+        "change_pct": 10.55
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "002471",
+        "name": "中超控股",
+        "price": 8.76,
+        "change_pct": 10.05
+      },
+      {
+        "code": "600666",
+        "name": "奥瑞德",
+        "price": 5.81,
+        "change_pct": 10.04
+      },
+      {
+        "code": "002902",
+        "name": "铭普光磁",
+        "price": 28.55,
+        "change_pct": 10.02
+      },
+      {
+        "code": "000965",
+        "name": "天保基建",
+        "price": 4.18,
+        "change_pct": 10.0
+      },
+      {
+        "code": "000722",
+        "name": "湖南发展",
+        "price": 18.28,
+        "change_pct": 9.99
+      },
+      {
+        "code": "001367",
+        "name": "海森药业",
+        "price": 24.12,
+        "change_pct": 9.99
+      },
+      {
+        "code": "002705",
+        "name": "新宝股份",
+        "price": 14.77,
+        "change_pct": 9.98
+      },
+      {
+        "code": "603601",
+        "name": "再升科技",
+        "price": 13.44,
+        "change_pct": 9.98
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301658",
+        "name": "首航新能",
+        "price": 56.8,
+        "change_pct": -7.04
+      },
+      {
+        "code": "301629",
+        "name": "矽电股份",
+        "price": 232.0,
+        "change_pct": -6.85
+      },
+      {
+        "code": "000988",
+        "name": "华工科技",
+        "price": 108.11,
+        "change_pct": -6.59
+      },
+      {
+        "code": "000862",
+        "name": "银星能源",
+        "price": 8.28,
+        "change_pct": -6.33
+      },
+      {
+        "code": "301357",
+        "name": "北方长龙",
+        "price": 120.31,
+        "change_pct": -6.0
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 32.3,
+        "change_pct": -5.83
+      },
+      {
+        "code": "688766",
+        "name": "普冉股份",
+        "price": 241.3,
+        "change_pct": -5.75
+      },
+      {
+        "code": "002309",
+        "name": "中利集团",
+        "price": 4.78,
+        "change_pct": -5.72
+      },
+      {
+        "code": "002150",
+        "name": "正泰电源",
+        "price": 36.88,
+        "change_pct": -5.56
+      },
+      {
+        "code": "002039",
+        "name": "黔源电力",
+        "price": 20.3,
+        "change_pct": -5.54
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 10:00:45",
+    "up": 2587,
+    "down": 2378,
+    "flat": 228,
+    "total": 5193,
+    "btiq": 52.1,
+    "top_gainers": [
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 82.81,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 28.02,
+        "change_pct": 14.37
+      },
+      {
+        "code": "688353",
+        "name": "华盛锂电",
+        "price": 126.8,
+        "change_pct": 13.95
+      },
+      {
+        "code": "301150",
+        "name": "中一科技",
+        "price": 54.93,
+        "change_pct": 12.12
+      },
+      {
+        "code": "301246",
+        "name": "宏源药业",
+        "price": 22.61,
+        "change_pct": 11.43
+      },
+      {
+        "code": "300749",
+        "name": "顶固集创",
+        "price": 34.31,
+        "change_pct": 11.11
+      },
+      {
+        "code": "300168",
+        "name": "万达信息",
+        "price": 6.11,
+        "change_pct": 11.09
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.14,
+        "change_pct": -9.66
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 41.93,
+        "change_pct": -8.85
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 31.39,
+        "change_pct": -8.48
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 46.15,
+        "change_pct": -8.36
+      },
+      {
+        "code": "300137",
+        "name": "先河环保",
+        "price": 13.07,
+        "change_pct": -7.96
+      },
+      {
+        "code": "001258",
+        "name": "立新能源",
+        "price": 10.92,
+        "change_pct": -7.38
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 30.24,
+        "change_pct": -7.35
+      },
+      {
+        "code": "000988",
+        "name": "华工科技",
+        "price": 107.3,
+        "change_pct": -7.29
+      },
+      {
+        "code": "002796",
+        "name": "世嘉科技",
+        "price": 47.07,
+        "change_pct": -7.12
+      },
+      {
+        "code": "300069",
+        "name": "金利华电",
+        "price": 20.3,
+        "change_pct": -7.01
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 10:30:37",
+    "up": 1562,
+    "down": 3479,
+    "flat": 152,
+    "total": 5193,
+    "btiq": 30.99,
+    "top_gainers": [
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 80.99,
+        "change_pct": 17.36
+      },
+      {
+        "code": "301150",
+        "name": "中一科技",
+        "price": 54.93,
+        "change_pct": 12.12
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 27.43,
+        "change_pct": 11.96
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.36,
+        "change_pct": 11.8
+      },
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 39.8,
+        "change_pct": 10.56
+      },
+      {
+        "code": "300168",
+        "name": "万达信息",
+        "price": 6.08,
+        "change_pct": 10.55
+      },
+      {
+        "code": "301312",
+        "name": "智立方",
+        "price": 96.7,
+        "change_pct": 10.45
+      },
+      {
+        "code": "300749",
+        "name": "顶固集创",
+        "price": 34.06,
+        "change_pct": 10.3
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 43.22,
+        "change_pct": -14.18
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.64,
+        "change_pct": -10.67
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 41.33,
+        "change_pct": -10.15
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.81,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.11,
+        "change_pct": -9.99
+      },
+      {
+        "code": "002796",
+        "name": "世嘉科技",
+        "price": 46.15,
+        "change_pct": -8.94
+      },
+      {
+        "code": "000533",
+        "name": "顺钠股份",
+        "price": 15.74,
+        "change_pct": -8.75
+      },
+      {
+        "code": "300137",
+        "name": "先河环保",
+        "price": 13.02,
+        "change_pct": -8.31
+      },
+      {
+        "code": "001258",
+        "name": "立新能源",
+        "price": 10.85,
+        "change_pct": -7.97
+      },
+      {
+        "code": "600032",
+        "name": "浙江新能",
+        "price": 12.0,
+        "change_pct": -7.83
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 12:00:31",
+    "up": 1121,
+    "down": 3952,
+    "flat": 120,
+    "total": 5193,
+    "btiq": 22.1,
+    "top_gainers": [
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 79.09,
+        "change_pct": 14.61
+      },
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 40.92,
+        "change_pct": 13.67
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.65,
+        "change_pct": 13.25
+      },
+      {
+        "code": "301312",
+        "name": "智立方",
+        "price": 98.14,
+        "change_pct": 12.1
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 27.28,
+        "change_pct": 11.35
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      },
+      {
+        "code": "601908",
+        "name": "京运通",
+        "price": 5.03,
+        "change_pct": 10.07
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.39,
+        "change_pct": -12.01
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 44.47,
+        "change_pct": -11.7
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 40.69,
+        "change_pct": -11.54
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.68,
+        "change_pct": -10.55
+      },
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.11,
+        "change_pct": -9.99
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 25.09,
+        "change_pct": -9.68
+      },
+      {
+        "code": "603778",
+        "name": "国晟科技",
+        "price": 22.26,
+        "change_pct": -9.29
+      },
+      {
+        "code": "603922",
+        "name": "金鸿顺",
+        "price": 20.16,
+        "change_pct": -9.03
+      },
+      {
+        "code": "002859",
+        "name": "洁美科技",
+        "price": 40.26,
+        "change_pct": -8.87
+      },
+      {
+        "code": "300651",
+        "name": "金陵体育",
+        "price": 28.07,
+        "change_pct": -8.72
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 12:30:36",
+    "up": 1121,
+    "down": 3952,
+    "flat": 120,
+    "total": 5193,
+    "btiq": 22.1,
+    "top_gainers": [
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 79.09,
+        "change_pct": 14.61
+      },
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 40.92,
+        "change_pct": 13.67
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.65,
+        "change_pct": 13.25
+      },
+      {
+        "code": "301312",
+        "name": "智立方",
+        "price": 98.14,
+        "change_pct": 12.1
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 27.28,
+        "change_pct": 11.35
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      },
+      {
+        "code": "601908",
+        "name": "京运通",
+        "price": 5.03,
+        "change_pct": 10.07
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.39,
+        "change_pct": -12.01
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 44.47,
+        "change_pct": -11.7
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 40.69,
+        "change_pct": -11.54
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.68,
+        "change_pct": -10.55
+      },
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.11,
+        "change_pct": -9.99
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 25.09,
+        "change_pct": -9.68
+      },
+      {
+        "code": "603778",
+        "name": "国晟科技",
+        "price": 22.26,
+        "change_pct": -9.29
+      },
+      {
+        "code": "603922",
+        "name": "金鸿顺",
+        "price": 20.16,
+        "change_pct": -9.03
+      },
+      {
+        "code": "002859",
+        "name": "洁美科技",
+        "price": 40.26,
+        "change_pct": -8.87
+      },
+      {
+        "code": "300651",
+        "name": "金陵体育",
+        "price": 28.07,
+        "change_pct": -8.72
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 13:00:32",
+    "up": 1183,
+    "down": 3913,
+    "flat": 97,
+    "total": 5193,
+    "btiq": 23.21,
+    "top_gainers": [
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 79.58,
+        "change_pct": 15.32
+      },
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 41.49,
+        "change_pct": 15.25
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.53,
+        "change_pct": 12.65
+      },
+      {
+        "code": "301312",
+        "name": "智立方",
+        "price": 97.51,
+        "change_pct": 11.38
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 27.27,
+        "change_pct": 11.31
+      },
+      {
+        "code": "300749",
+        "name": "顶固集创",
+        "price": 34.37,
+        "change_pct": 11.3
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 18.3,
+        "change_pct": -12.44
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 40.69,
+        "change_pct": -11.54
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 44.78,
+        "change_pct": -11.08
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.75,
+        "change_pct": -10.35
+      },
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.12,
+        "change_pct": -9.88
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 25.07,
+        "change_pct": -9.76
+      },
+      {
+        "code": "603778",
+        "name": "国晟科技",
+        "price": 22.19,
+        "change_pct": -9.58
+      },
+      {
+        "code": "300651",
+        "name": "金陵体育",
+        "price": 27.93,
+        "change_pct": -9.17
+      },
+      {
+        "code": "002859",
+        "name": "洁美科技",
+        "price": 40.27,
+        "change_pct": -8.85
+      },
+      {
+        "code": "300137",
+        "name": "先河环保",
+        "price": 12.96,
+        "change_pct": -8.73
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 13:30:31",
+    "up": 818,
+    "down": 4306,
+    "flat": 69,
+    "total": 5193,
+    "btiq": 15.96,
+    "top_gainers": [
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 43.2,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 80.36,
+        "change_pct": 16.45
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.42,
+        "change_pct": 12.1
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      },
+      {
+        "code": "601908",
+        "name": "京运通",
+        "price": 5.03,
+        "change_pct": 10.07
+      },
+      {
+        "code": "002471",
+        "name": "中超控股",
+        "price": 8.76,
+        "change_pct": 10.05
+      },
+      {
+        "code": "603520",
+        "name": "司太立",
+        "price": 10.3,
+        "change_pct": 10.04
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 17.6,
+        "change_pct": -15.79
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 24.46,
+        "change_pct": -11.95
+      },
+      {
+        "code": "301266",
+        "name": "宇邦新材",
+        "price": 44.8,
+        "change_pct": -11.04
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 41.0,
+        "change_pct": -10.87
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.6,
+        "change_pct": -10.79
+      },
+      {
+        "code": "300137",
+        "name": "先河环保",
+        "price": 12.76,
+        "change_pct": -10.14
+      },
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.11,
+        "change_pct": -9.99
+      },
+      {
+        "code": "002796",
+        "name": "世嘉科技",
+        "price": 45.62,
+        "change_pct": -9.98
+      },
+      {
+        "code": "603778",
+        "name": "国晟科技",
+        "price": 22.09,
+        "change_pct": -9.98
+      },
+      {
+        "code": "000533",
+        "name": "顺钠股份",
+        "price": 15.6,
+        "change_pct": -9.57
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 14:00:31",
+    "up": 909,
+    "down": 4195,
+    "flat": 89,
+    "total": 5193,
+    "btiq": 17.81,
+    "top_gainers": [
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 42.15,
+        "change_pct": 17.08
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 79.51,
+        "change_pct": 15.22
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.6,
+        "change_pct": 13.0
+      },
+      {
+        "code": "300501",
+        "name": "海顺新材",
+        "price": 18.24,
+        "change_pct": 10.81
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      },
+      {
+        "code": "601908",
+        "name": "京运通",
+        "price": 5.03,
+        "change_pct": 10.07
+      },
+      {
+        "code": "002471",
+        "name": "中超控股",
+        "price": 8.76,
+        "change_pct": 10.05
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 17.2,
+        "change_pct": -17.7
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.08,
+        "change_pct": -12.3
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 24.43,
+        "change_pct": -12.06
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 40.89,
+        "change_pct": -11.11
+      },
+      {
+        "code": "300651",
+        "name": "金陵体育",
+        "price": 27.47,
+        "change_pct": -10.67
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 41.77,
+        "change_pct": -10.0
+      },
+      {
+        "code": "000890",
+        "name": "法尔胜",
+        "price": 12.25,
+        "change_pct": -9.99
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 29.38,
+        "change_pct": -9.99
+      },
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.11,
+        "change_pct": -9.99
+      },
+      {
+        "code": "000533",
+        "name": "顺钠股份",
+        "price": 15.53,
+        "change_pct": -9.97
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 14:30:42",
+    "up": 806,
+    "down": 4315,
+    "flat": 72,
+    "total": 5193,
+    "btiq": 15.74,
+    "top_gainers": [
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 42.29,
+        "change_pct": 17.47
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 79.66,
+        "change_pct": 15.43
+      },
+      {
+        "code": "301306",
+        "name": "西测测试",
+        "price": 152.61,
+        "change_pct": 15.0
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.65,
+        "change_pct": 13.25
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 27.25,
+        "change_pct": 11.22
+      },
+      {
+        "code": "300749",
+        "name": "顶固集创",
+        "price": 34.11,
+        "change_pct": 10.46
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 17.28,
+        "change_pct": -17.32
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.12,
+        "change_pct": -12.19
+      },
+      {
+        "code": "300651",
+        "name": "金陵体育",
+        "price": 27.26,
+        "change_pct": -11.35
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 24.74,
+        "change_pct": -10.94
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 41.42,
+        "change_pct": -10.75
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 41.06,
+        "change_pct": -10.74
+      },
+      {
+        "code": "002961",
+        "name": "瑞达期货",
+        "price": 23.02,
+        "change_pct": -10.01
+      },
+      {
+        "code": "000890",
+        "name": "法尔胜",
+        "price": 12.25,
+        "change_pct": -9.99
+      },
+      {
+        "code": "603358",
+        "name": "华达科技",
+        "price": 29.38,
+        "change_pct": -9.99
+      },
+      {
+        "code": "603817",
+        "name": "海峡环保",
+        "price": 8.11,
+        "change_pct": -9.99
+      }
+    ]
+  },
+  {
+    "time": "2026-03-26 15:00:58",
+    "up": 877,
+    "down": 4235,
+    "flat": 81,
+    "total": 5193,
+    "btiq": 17.16,
+    "top_gainers": [
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 42.65,
+        "change_pct": 18.47
+      },
+      {
+        "code": "301306",
+        "name": "西测测试",
+        "price": 154.32,
+        "change_pct": 16.28
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 80.24,
+        "change_pct": 16.27
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.61,
+        "change_pct": 13.05
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 27.03,
+        "change_pct": 10.33
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      },
+      {
+        "code": "600726",
+        "name": "华电能源",
+        "price": 6.77,
+        "change_pct": 10.08
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 17.9,
+        "change_pct": -14.35
+      },
+      {
+        "code": "300651",
+        "name": "金陵体育",
+        "price": 26.87,
+        "change_pct": -12.62
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 40.79,
+        "change_pct": -11.33
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.42,
+        "change_pct": -11.31
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 24.65,
+        "change_pct": -11.27
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 41.7,
+        "change_pct": -10.15
+      },
+      {
+        "code": "002730",
+        "name": "电光科技",
+        "price": 23.27,
+        "change_pct": -10.02
+      },
+      {
+        "code": "601330",
+        "name": "绿色动力",
+        "price": 9.61,
+        "change_pct": -10.02
+      },
+      {
+        "code": "002961",
+        "name": "瑞达期货",
+        "price": 23.02,
+        "change_pct": -10.01
+      },
+      {
+        "code": "002796",
+        "name": "世嘉科技",
+        "price": 45.61,
+        "change_pct": -10.0
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 09:01:23",
+    "up": 877,
+    "down": 4235,
+    "flat": 80,
+    "total": 5192,
+    "btiq": 17.16,
+    "top_gainers": [
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 42.65,
+        "change_pct": 18.47
+      },
+      {
+        "code": "301306",
+        "name": "西测测试",
+        "price": 154.32,
+        "change_pct": 16.28
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 80.24,
+        "change_pct": 16.27
+      },
+      {
+        "code": "300736",
+        "name": "百邦科技",
+        "price": 22.61,
+        "change_pct": 13.05
+      },
+      {
+        "code": "301587",
+        "name": "中瑞股份",
+        "price": 27.03,
+        "change_pct": 10.33
+      },
+      {
+        "code": "002263",
+        "name": "大东南",
+        "price": 3.7,
+        "change_pct": 10.12
+      },
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 4.9,
+        "change_pct": 10.11
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.01,
+        "change_pct": 10.11
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.0,
+        "change_pct": 10.09
+      },
+      {
+        "code": "600726",
+        "name": "华电能源",
+        "price": 6.77,
+        "change_pct": 10.08
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 17.9,
+        "change_pct": -14.35
+      },
+      {
+        "code": "300651",
+        "name": "金陵体育",
+        "price": 26.87,
+        "change_pct": -12.62
+      },
+      {
+        "code": "688781",
+        "name": "C视涯-UW",
+        "price": 40.79,
+        "change_pct": -11.33
+      },
+      {
+        "code": "301040",
+        "name": "中环海陆",
+        "price": 30.42,
+        "change_pct": -11.31
+      },
+      {
+        "code": "300658",
+        "name": "延江股份",
+        "price": 24.65,
+        "change_pct": -11.27
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 41.7,
+        "change_pct": -10.15
+      },
+      {
+        "code": "002730",
+        "name": "电光科技",
+        "price": 23.27,
+        "change_pct": -10.02
+      },
+      {
+        "code": "601330",
+        "name": "绿色动力",
+        "price": 9.61,
+        "change_pct": -10.02
+      },
+      {
+        "code": "002961",
+        "name": "瑞达期货",
+        "price": 23.02,
+        "change_pct": -10.01
+      },
+      {
+        "code": "002796",
+        "name": "世嘉科技",
+        "price": 45.61,
+        "change_pct": -10.0
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 09:30:35",
+    "up": 376,
+    "down": 4707,
+    "flat": 109,
+    "total": 5192,
+    "btiq": 7.4,
+    "top_gainers": [
+      {
+        "code": "000692",
+        "name": "惠天热电",
+        "price": 5.39,
+        "change_pct": 10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 6.6,
+        "change_pct": 10.0
+      },
+      {
+        "code": "600996",
+        "name": "贵广网络",
+        "price": 10.02,
+        "change_pct": 9.99
+      },
+      {
+        "code": "000720",
+        "name": "新能泰山",
+        "price": 5.51,
+        "change_pct": 9.98
+      },
+      {
+        "code": "000767",
+        "name": "晋控电力",
+        "price": 5.09,
+        "change_pct": 9.94
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 49.41,
+        "change_pct": 9.24
+      },
+      {
+        "code": "603585",
+        "name": "苏利股份",
+        "price": 20.27,
+        "change_pct": 7.53
+      },
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 49.5,
+        "change_pct": 6.77
+      },
+      {
+        "code": "300501",
+        "name": "海顺新材",
+        "price": 19.1,
+        "change_pct": 6.7
+      },
+      {
+        "code": "600771",
+        "name": "广誉远",
+        "price": 16.97,
+        "change_pct": 6.6
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.18,
+        "change_pct": -10.92
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 15.98,
+        "change_pct": -10.73
+      },
+      {
+        "code": "000338",
+        "name": "潍柴动力",
+        "price": 21.4,
+        "change_pct": -10.01
+      },
+      {
+        "code": "300939",
+        "name": "秋田微",
+        "price": 39.07,
+        "change_pct": -9.14
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.79,
+        "change_pct": -8.98
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.69,
+        "change_pct": -7.33
+      },
+      {
+        "code": "688525",
+        "name": "佰维存储",
+        "price": 222.88,
+        "change_pct": -6.74
+      },
+      {
+        "code": "688550",
+        "name": "瑞联新材",
+        "price": 41.9,
+        "change_pct": -6.68
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 39.15,
+        "change_pct": -6.12
+      },
+      {
+        "code": "301656",
+        "name": "联合动力",
+        "price": 21.91,
+        "change_pct": -6.05
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 10:30:49",
+    "up": 3688,
+    "down": 1335,
+    "flat": 169,
+    "total": 5192,
+    "btiq": 73.42,
+    "top_gainers": [
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 53.51,
+        "change_pct": 18.31
+      },
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 53.89,
+        "change_pct": 16.24
+      },
+      {
+        "code": "688710",
+        "name": "益诺思",
+        "price": 65.59,
+        "change_pct": 13.87
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 125.16,
+        "change_pct": 13.67
+      },
+      {
+        "code": "688141",
+        "name": "杰华特",
+        "price": 54.15,
+        "change_pct": 12.04
+      },
+      {
+        "code": "300204",
+        "name": "舒泰神",
+        "price": 25.85,
+        "change_pct": 11.76
+      },
+      {
+        "code": "300518",
+        "name": "新迅达",
+        "price": 20.64,
+        "change_pct": 10.97
+      },
+      {
+        "code": "688799",
+        "name": "华纳药厂",
+        "price": 54.32,
+        "change_pct": 10.72
+      },
+      {
+        "code": "000822",
+        "name": "山东海化",
+        "price": 6.45,
+        "change_pct": 10.07
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 15.37,
+        "change_pct": -14.13
+      },
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 65.92,
+        "change_pct": -12.75
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.56,
+        "change_pct": -9.94
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.79,
+        "change_pct": -8.98
+      },
+      {
+        "code": "688550",
+        "name": "瑞联新材",
+        "price": 40.91,
+        "change_pct": -8.89
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.62,
+        "change_pct": -8.47
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.27,
+        "change_pct": -8.4
+      },
+      {
+        "code": "002150",
+        "name": "正泰电源",
+        "price": 34.1,
+        "change_pct": -7.56
+      },
+      {
+        "code": "600135",
+        "name": "乐凯胶片",
+        "price": 9.64,
+        "change_pct": -7.13
+      },
+      {
+        "code": "301656",
+        "name": "联合动力",
+        "price": 21.71,
+        "change_pct": -6.9
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 11:00:36",
+    "up": 3252,
+    "down": 1747,
+    "flat": 193,
+    "total": 5192,
+    "btiq": 65.05,
+    "top_gainers": [
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 55.58,
+        "change_pct": 19.89
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 52.05,
+        "change_pct": 15.08
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 125.91,
+        "change_pct": 14.35
+      },
+      {
+        "code": "688710",
+        "name": "益诺思",
+        "price": 65.19,
+        "change_pct": 13.18
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 90.37,
+        "change_pct": 12.62
+      },
+      {
+        "code": "300518",
+        "name": "新迅达",
+        "price": 20.81,
+        "change_pct": 11.88
+      },
+      {
+        "code": "688799",
+        "name": "华纳药厂",
+        "price": 54.89,
+        "change_pct": 11.88
+      },
+      {
+        "code": "300584",
+        "name": "海辰药业",
+        "price": 45.2,
+        "change_pct": 11.22
+      },
+      {
+        "code": "300204",
+        "name": "舒泰神",
+        "price": 25.6,
+        "change_pct": 10.68
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 15.11,
+        "change_pct": -15.59
+      },
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 66.6,
+        "change_pct": -11.85
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.54,
+        "change_pct": -10.02
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.53,
+        "change_pct": -9.93
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.77,
+        "change_pct": -9.25
+      },
+      {
+        "code": "688550",
+        "name": "瑞联新材",
+        "price": 40.82,
+        "change_pct": -9.09
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.26,
+        "change_pct": -8.68
+      },
+      {
+        "code": "002309",
+        "name": "中利集团",
+        "price": 4.35,
+        "change_pct": -8.23
+      },
+      {
+        "code": "600135",
+        "name": "乐凯胶片",
+        "price": 9.55,
+        "change_pct": -8.0
+      },
+      {
+        "code": "301656",
+        "name": "联合动力",
+        "price": 21.51,
+        "change_pct": -7.76
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 12:00:46",
+    "up": 3619,
+    "down": 1422,
+    "flat": 151,
+    "total": 5192,
+    "btiq": 71.79,
+    "top_gainers": [
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 55.63,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 52.21,
+        "change_pct": 15.43
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 126.3,
+        "change_pct": 14.7
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 90.66,
+        "change_pct": 12.99
+      },
+      {
+        "code": "688710",
+        "name": "益诺思",
+        "price": 64.69,
+        "change_pct": 12.31
+      },
+      {
+        "code": "300518",
+        "name": "新迅达",
+        "price": 20.86,
+        "change_pct": 12.15
+      },
+      {
+        "code": "300082",
+        "name": "奥克股份",
+        "price": 10.9,
+        "change_pct": 12.02
+      },
+      {
+        "code": "300204",
+        "name": "舒泰神",
+        "price": 25.79,
+        "change_pct": 11.5
+      },
+      {
+        "code": "688799",
+        "name": "华纳药厂",
+        "price": 54.49,
+        "change_pct": 11.07
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 15.26,
+        "change_pct": -14.75
+      },
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 67.81,
+        "change_pct": -10.24
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.54,
+        "change_pct": -10.02
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.53,
+        "change_pct": -9.93
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.23,
+        "change_pct": -9.52
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.78,
+        "change_pct": -9.12
+      },
+      {
+        "code": "603687",
+        "name": "大胜达",
+        "price": 15.09,
+        "change_pct": -8.55
+      },
+      {
+        "code": "600135",
+        "name": "乐凯胶片",
+        "price": 9.5,
+        "change_pct": -8.48
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 38.43,
+        "change_pct": -7.84
+      },
+      {
+        "code": "601016",
+        "name": "节能风电",
+        "price": 4.9,
+        "change_pct": -7.72
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 12:30:31",
+    "up": 3619,
+    "down": 1422,
+    "flat": 151,
+    "total": 5192,
+    "btiq": 71.79,
+    "top_gainers": [
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 55.63,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 52.21,
+        "change_pct": 15.43
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 126.3,
+        "change_pct": 14.7
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 90.66,
+        "change_pct": 12.99
+      },
+      {
+        "code": "688710",
+        "name": "益诺思",
+        "price": 64.69,
+        "change_pct": 12.31
+      },
+      {
+        "code": "300518",
+        "name": "新迅达",
+        "price": 20.86,
+        "change_pct": 12.15
+      },
+      {
+        "code": "300082",
+        "name": "奥克股份",
+        "price": 10.9,
+        "change_pct": 12.02
+      },
+      {
+        "code": "300204",
+        "name": "舒泰神",
+        "price": 25.79,
+        "change_pct": 11.5
+      },
+      {
+        "code": "688799",
+        "name": "华纳药厂",
+        "price": 54.49,
+        "change_pct": 11.07
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 15.26,
+        "change_pct": -14.75
+      },
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 67.81,
+        "change_pct": -10.24
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.54,
+        "change_pct": -10.02
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.53,
+        "change_pct": -9.93
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.23,
+        "change_pct": -9.52
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.78,
+        "change_pct": -9.12
+      },
+      {
+        "code": "603687",
+        "name": "大胜达",
+        "price": 15.09,
+        "change_pct": -8.55
+      },
+      {
+        "code": "600135",
+        "name": "乐凯胶片",
+        "price": 9.5,
+        "change_pct": -8.48
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 38.43,
+        "change_pct": -7.84
+      },
+      {
+        "code": "601016",
+        "name": "节能风电",
+        "price": 4.9,
+        "change_pct": -7.72
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 13:00:35",
+    "up": 3926,
+    "down": 1130,
+    "flat": 136,
+    "total": 5192,
+    "btiq": 77.65,
+    "top_gainers": [
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 55.63,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 52.62,
+        "change_pct": 16.34
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 126.01,
+        "change_pct": 14.44
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 91.8,
+        "change_pct": 14.41
+      },
+      {
+        "code": "688455",
+        "name": "科捷智能",
+        "price": 24.32,
+        "change_pct": 12.91
+      },
+      {
+        "code": "688710",
+        "name": "益诺思",
+        "price": 64.7,
+        "change_pct": 12.33
+      },
+      {
+        "code": "300518",
+        "name": "新迅达",
+        "price": 20.8,
+        "change_pct": 11.83
+      },
+      {
+        "code": "300868",
+        "name": "杰美特",
+        "price": 54.84,
+        "change_pct": 11.69
+      },
+      {
+        "code": "300082",
+        "name": "奥克股份",
+        "price": 10.82,
+        "change_pct": 11.2
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 15.71,
+        "change_pct": -12.23
+      },
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 67.01,
+        "change_pct": -11.3
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.54,
+        "change_pct": -10.02
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.53,
+        "change_pct": -9.93
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.23,
+        "change_pct": -9.52
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.81,
+        "change_pct": -8.71
+      },
+      {
+        "code": "600135",
+        "name": "乐凯胶片",
+        "price": 9.51,
+        "change_pct": -8.38
+      },
+      {
+        "code": "688550",
+        "name": "瑞联新材",
+        "price": 41.4,
+        "change_pct": -7.8
+      },
+      {
+        "code": "002150",
+        "name": "正泰电源",
+        "price": 34.1,
+        "change_pct": -7.56
+      },
+      {
+        "code": "603687",
+        "name": "大胜达",
+        "price": 15.3,
+        "change_pct": -7.27
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 13:30:32",
+    "up": 4257,
+    "down": 843,
+    "flat": 92,
+    "total": 5192,
+    "btiq": 83.47,
+    "top_gainers": [
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 54.28,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 55.63,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 96.29,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 132.0,
+        "change_pct": 19.88
+      },
+      {
+        "code": "300765",
+        "name": "新诺威",
+        "price": 32.66,
+        "change_pct": 15.98
+      },
+      {
+        "code": "300204",
+        "name": "舒泰神",
+        "price": 26.82,
+        "change_pct": 15.95
+      },
+      {
+        "code": "300390",
+        "name": "天华新能",
+        "price": 64.87,
+        "change_pct": 14.51
+      },
+      {
+        "code": "688455",
+        "name": "科捷智能",
+        "price": 24.27,
+        "change_pct": 12.67
+      },
+      {
+        "code": "300082",
+        "name": "奥克股份",
+        "price": 10.96,
+        "change_pct": 12.64
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 66.96,
+        "change_pct": -11.37
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.55,
+        "change_pct": -9.98
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.53,
+        "change_pct": -9.93
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.26,
+        "change_pct": -8.68
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.86,
+        "change_pct": -8.04
+      },
+      {
+        "code": "600032",
+        "name": "浙江新能",
+        "price": 11.61,
+        "change_pct": -7.93
+      },
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 39.32,
+        "change_pct": -7.81
+      },
+      {
+        "code": "600135",
+        "name": "乐凯胶片",
+        "price": 9.58,
+        "change_pct": -7.71
+      },
+      {
+        "code": "301281",
+        "name": "科源制药",
+        "price": 38.52,
+        "change_pct": -7.63
+      },
+      {
+        "code": "601016",
+        "name": "节能风电",
+        "price": 4.91,
+        "change_pct": -7.53
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 14:00:33",
+    "up": 4028,
+    "down": 1053,
+    "flat": 111,
+    "total": 5192,
+    "btiq": 79.28,
+    "top_gainers": [
+      {
+        "code": "300204",
+        "name": "舒泰神",
+        "price": 27.76,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 55.63,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 96.29,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 132.13,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 53.32,
+        "change_pct": 17.89
+      },
+      {
+        "code": "300765",
+        "name": "新诺威",
+        "price": 32.28,
+        "change_pct": 14.63
+      },
+      {
+        "code": "301201",
+        "name": "诚达药业",
+        "price": 46.38,
+        "change_pct": 12.96
+      },
+      {
+        "code": "688710",
+        "name": "益诺思",
+        "price": 65.0,
+        "change_pct": 12.85
+      },
+      {
+        "code": "300390",
+        "name": "天华新能",
+        "price": 63.79,
+        "change_pct": 12.6
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 67.59,
+        "change_pct": -10.54
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.54,
+        "change_pct": -10.02
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.53,
+        "change_pct": -9.93
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.24,
+        "change_pct": -9.24
+      },
+      {
+        "code": "600032",
+        "name": "浙江新能",
+        "price": 11.52,
+        "change_pct": -8.64
+      },
+      {
+        "code": "002309",
+        "name": "中利集团",
+        "price": 4.34,
+        "change_pct": -8.44
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.86,
+        "change_pct": -8.04
+      },
+      {
+        "code": "688550",
+        "name": "瑞联新材",
+        "price": 41.36,
+        "change_pct": -7.88
+      },
+      {
+        "code": "600780",
+        "name": "通宝能源",
+        "price": 7.77,
+        "change_pct": -7.83
+      },
+      {
+        "code": "000539",
+        "name": "粤电力Ａ",
+        "price": 6.91,
+        "change_pct": -7.74
+      }
+    ]
+  },
+  {
+    "time": "2026-03-27 14:30:31",
+    "up": 4042,
+    "down": 1050,
+    "flat": 100,
+    "total": 5192,
+    "btiq": 79.38,
+    "top_gainers": [
+      {
+        "code": "300204",
+        "name": "舒泰神",
+        "price": 27.76,
+        "change_pct": 20.02
+      },
+      {
+        "code": "300461",
+        "name": "田中精机",
+        "price": 55.63,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301292",
+        "name": "海科新源",
+        "price": 96.29,
+        "change_pct": 20.0
+      },
+      {
+        "code": "688068",
+        "name": "热景生物",
+        "price": 132.13,
+        "change_pct": 20.0
+      },
+      {
+        "code": "300858",
+        "name": "科拓生物",
+        "price": 18.19,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300054",
+        "name": "鼎龙股份",
+        "price": 53.22,
+        "change_pct": 17.67
+      },
+      {
+        "code": "300877",
+        "name": "金春股份",
+        "price": 28.22,
+        "change_pct": 14.86
+      },
+      {
+        "code": "300765",
+        "name": "新诺威",
+        "price": 32.1,
+        "change_pct": 13.99
+      },
+      {
+        "code": "688710",
+        "name": "益诺思",
+        "price": 65.37,
+        "change_pct": 13.49
+      },
+      {
+        "code": "300390",
+        "name": "天华新能",
+        "price": 63.81,
+        "change_pct": 12.64
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301075",
+        "name": "多瑞医药",
+        "price": 66.16,
+        "change_pct": -12.43
+      },
+      {
+        "code": "002782",
+        "name": "可立克",
+        "price": 23.54,
+        "change_pct": -10.02
+      },
+      {
+        "code": "600758",
+        "name": "辽宁能源",
+        "price": 5.53,
+        "change_pct": -9.93
+      },
+      {
+        "code": "688287",
+        "name": "*ST观典",
+        "price": 3.23,
+        "change_pct": -9.52
+      },
+      {
+        "code": "688550",
+        "name": "瑞联新材",
+        "price": 41.03,
+        "change_pct": -8.62
+      },
+      {
+        "code": "300668",
+        "name": "杰恩设计",
+        "price": 39.22,
+        "change_pct": -8.04
+      },
+      {
+        "code": "002309",
+        "name": "中利集团",
+        "price": 4.36,
+        "change_pct": -8.02
+      },
+      {
+        "code": "002367",
+        "name": "康力电梯",
+        "price": 6.87,
+        "change_pct": -7.91
+      },
+      {
+        "code": "300391",
+        "name": "长药退",
+        "price": 0.36,
+        "change_pct": -7.69
+      },
+      {
+        "code": "000965",
+        "name": "天保基建",
+        "price": 3.87,
+        "change_pct": -7.42
+      }
+    ]
+  }
+]

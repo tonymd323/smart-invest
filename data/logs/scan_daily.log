@@ -1,0 +1,379 @@
+2026-03-25 20:00:01,799 [daily_scan_v2] INFO ============================================================
+2026-03-25 20:00:01,800 [daily_scan_v2] INFO 🚀 智能投资系统 v1.5 — 每日扫描
+2026-03-25 20:00:01,800 [daily_scan_v2] INFO ============================================================
+2026-03-25 20:00:01,800 [daily_scan_v2] INFO 
+========================================
+/usr/local/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.5) doesn't match a supported version!
+  warnings.warn(
+2026-03-25 20:00:02,309 [earnings_scanner] INFO ==================================================
+2026-03-25 20:00:02,309 [earnings_scanner] INFO 📊 任务A：业绩超预期扫描 | 日期=20260325
+2026-03-25 20:00:02,309 [earnings_scanner] INFO ==================================================
+2026-03-25 20:00:02,309 [earnings_scanner] INFO   Step 1: 获取披露名单...
+2026-03-25 20:00:03,762 [earnings_scanner] INFO   补充 8 只股票名称...
+2026-03-25 20:00:04,249 [earnings_scanner] INFO     跳过 300497.SZ 的 express 记录（同日已存在于 forecast，Tushare 数据质量问题）
+2026-03-25 20:00:04,426 [earnings_scanner] INFO     跳过 300531.SZ 的 express 记录（同日已存在于 forecast，Tushare 数据质量问题）
+2026-03-25 20:00:04,958 [earnings_scanner] INFO     跳过 300190.SZ 的 express 记录（同日已存在于 forecast，Tushare 数据质量问题）
+2026-03-25 20:00:05,343 [earnings_scanner] INFO     修正 000532.SZ express ann_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 20:00:05,343 [earnings_scanner] INFO     修正 002697.SZ express ann_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 20:00:05,344 [earnings_scanner] INFO     修正 603757.SH express ann_date: 20260326 -> 20260325（Tushare 延迟入库）
+  0%|          | 0/1 [00:00<?, ?it/s]                                       0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:01,  8.02it/s] 12%|█▎        | 2/16 [00:00<00:03,  4.49it/s] 19%|█▉        | 3/16 [00:00<00:02,  5.67it/s] 25%|██▌       | 4/16 [00:00<00:01,  6.33it/s] 31%|███▏      | 5/16 [00:00<00:01,  6.40it/s] 38%|███▊      | 6/16 [00:01<00:01,  5.27it/s] 44%|████▍     | 7/16 [00:01<00:01,  5.68it/s] 50%|█████     | 8/16 [00:01<00:01,  5.46it/s] 56%|█████▋    | 9/16 [00:01<00:01,  6.08it/s] 62%|██████▎   | 10/16 [00:01<00:00,  6.28it/s] 69%|██████▉   | 11/16 [00:01<00:00,  6.65it/s] 75%|███████▌  | 12/16 [00:01<00:00,  7.11it/s] 81%|████████▏ | 13/16 [00:02<00:00,  6.75it/s] 88%|████████▊ | 14/16 [00:02<00:00,  6.98it/s] 94%|█████████▍| 15/16 [00:02<00:00,  7.10it/s]                                               2026-03-25 20:00:12,313 [earnings_scanner] INFO   Step 1 完成：208 家已披露
+2026-03-25 20:00:12,313 [earnings_scanner] INFO   Step 2: 获取实际财务数据...
+2026-03-25 20:00:12,621 [earnings_scanner] INFO     实际数据进度: 20/208
+2026-03-25 20:00:12,973 [earnings_scanner] INFO     实际数据进度: 40/208
+2026-03-25 20:00:13,431 [earnings_scanner] INFO     实际数据进度: 60/208
+2026-03-25 20:00:13,761 [earnings_scanner] INFO     实际数据进度: 80/208
+2026-03-25 20:00:14,185 [earnings_scanner] INFO     实际数据进度: 100/208
+2026-03-25 20:00:14,595 [earnings_scanner] INFO     实际数据进度: 120/208
+2026-03-25 20:00:14,955 [earnings_scanner] INFO     实际数据进度: 140/208
+2026-03-25 20:00:15,358 [earnings_scanner] INFO     实际数据进度: 160/208
+2026-03-25 20:00:15,721 [earnings_scanner] INFO     实际数据进度: 180/208
+2026-03-25 20:00:16,098 [earnings_scanner] INFO     实际数据进度: 200/208
+2026-03-25 20:00:16,268 [earnings_scanner] INFO     实际数据完成: 197/208
+2026-03-25 20:00:16,268 [earnings_scanner] INFO   Step 2 完成：197 家有数据
+2026-03-25 20:00:16,268 [earnings_scanner] INFO   Step 3: 获取一致预期...
+2026-03-25 20:00:17,728 [earnings_scanner] INFO     预期进度: 50/197
+2026-03-25 20:00:19,426 [earnings_scanner] INFO     预期进度: 100/197
+2026-03-25 20:00:20,801 [earnings_scanner] INFO     预期进度: 150/197
+2026-03-25 20:00:21,981 [earnings_scanner] INFO     预期数据完成: 188/197
+2026-03-25 20:00:21,982 [earnings_scanner] INFO   Step 3 完成：188 家有预期
+2026-03-25 20:00:21,982 [earnings_scanner] INFO   Step 4: 对比判定...
+2026-03-25 20:00:21,983 [earnings_scanner] INFO   ✅ 业绩超预期: 109 只
+2026-03-25 20:00:21,983 [daily_scan_v2] INFO 
+========================================
+2026-03-25 20:00:21,984 [new_high_scanner] INFO ==================================================
+2026-03-25 20:00:21,984 [new_high_scanner] INFO 💎 任务B：扣非净利润新高扫描 | 日期=20260325
+2026-03-25 20:00:21,984 [new_high_scanner] INFO ==================================================
+2026-03-25 20:00:21,984 [new_high_scanner] INFO   Step 1: 获取财报披露名单...
+2026-03-25 20:00:22,157 [new_high_scanner] INFO   Step 1 完成：39 家已披露
+2026-03-25 20:00:22,157 [new_high_scanner] INFO   Step 2: 检查扣非净利润新高...
+2026-03-25 20:00:22,813 [new_high_scanner] INFO     ✅ 603860.SH 中公高科 扣非新高！
+2026-03-25 20:00:25,698 [new_high_scanner] INFO   ✅ 扣非净利润新高: 1 只
+2026-03-25 20:00:25,713 [daily_scan_v2] INFO   💾 入库: 110 条
+2026-03-25 20:00:29,088 [daily_scan_v2] INFO   📊 事件跟踪: 新增 45 个事件
+2026-03-25 20:00:29,091 [bitable_sync] INFO   Bitable 生成 110 条待写入记录
+2026-03-25 20:00:29,094 [daily_scan_v2] INFO   📝 已导出 110 条待写入记录到 /root/.openclaw/workspace/smart-invest/data/bitable_pending.json
+2026-03-25 20:00:29,094 [daily_scan_v2] INFO   💡 agent 写入时需先读取 Bitable 现有记录，基于（股票代码+报告期）去重后追加
+2026-03-25 20:00:29,094 [daily_scan_v2] INFO 
+✅ 扫描完成 | 耗时 27.3s | 超预期=109 | 扣非新高=1
+
+===FEISHU_CARD_JSON_START===
+{"config": {"wide_screen_mode": true}, "header": {"title": {"tag": "plain_text", "content": "🏆 备选股池日报 2026-03-25"}, "template": "blue"}, "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": "📊 共发现 **110** 只 | 超预期 **44** 只 | ⚠️ 非经常性 **1** 只 | 首次覆盖 **65** 只 | 扣非新高 **1** 只"}}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏆 **业绩超预期**（实际 vs 券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "profit_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rev_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "富祥药业(300497)", "profit_growth": "**+2736%**", "profit_expected": "-259%", "rev_growth": "-", "rev_expected": "+58%", "rtype": "业绩预告", "ann_date": "2026-03-24"}, {"stock": "中华企业(600675)", "profit_growth": "**+117%**", "profit_expected": "+112%", "rev_growth": "**+52%**", "rev_expected": "-17%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "妙可蓝多(600882)", "profit_growth": "**+236%**", "profit_expected": "+189%", "rev_growth": "**+16%**", "rev_expected": "+11%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "源杰科技(688498)", "profit_growth": "**+1564%**", "profit_expected": "+94%", "rev_growth": "**+138%**", "rev_expected": "+69%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "重庆银行(601963)", "profit_growth": "**+12%**", "profit_expected": "+6%", "rev_growth": "**+10%**", "rev_expected": "+9%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "华能国际(600011)", "profit_growth": "**+28%**", "profit_expected": "+7%", "rev_growth": "**-7%**", "rev_expected": "+4%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "迈威生物-U(688062)", "profit_growth": "**+7%**", "profit_expected": "-41%", "rev_growth": "**+232%**", "rev_expected": "+79%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "星环科技-U(688031)", "profit_growth": "**+31%**", "profit_expected": "-56%", "rev_growth": "**+20%**", "rev_expected": "+15%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "TCL中环(002129)", "profit_growth": "**+10%**", "profit_expected": "-113%", "rev_growth": "**+2%**", "rev_expected": "+38%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "双林股份(300100)", "profit_growth": "**+37%**", "profit_expected": "+27%", "rev_growth": "**+12%**", "rev_expected": "+19%", "rtype": "财报", "ann_date": "2026-03-25"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "📋 **首次覆盖**（有实际数据，暂无券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "明德生物(002932)", "profit_growth": "**-127%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-23"}, {"stock": "有研复材(688811)", "profit_growth": "**+76%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-20"}, {"stock": "光正眼科(002524)", "profit_growth": "**+90%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-21"}, {"stock": "三瑞智能(301696)", "profit_growth": "**+32%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-19"}, {"stock": "红板科技(603459)", "profit_growth": "**+13%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-19"}, {"stock": "优博讯(300531)", "profit_growth": "**+103%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-23"}, {"stock": "天津港(600717)", "profit_growth": "**+4%**", "rev_growth": "**+6%**", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "大豪科技(603025)", "profit_growth": "**+24%**", "rev_growth": "**+19%**", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "新联电子(002546)", "profit_growth": "**+0%**", "rev_growth": "**-10%**", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "华塑控股(000509)", "profit_growth": "**+14%**", "rev_growth": "**-27%**", "rtype": "财报", "ann_date": "2026-03-25"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "💎 **单季度扣非净利润历史新高**"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit", "display_name": "单季扣非", "data_type": "lark_md"}, {"name": "growth", "display_name": "超前高", "data_type": "lark_md"}, {"name": "pe", "display_name": "PE", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "中公高科(603860)", "profit": "**0.40亿**", "growth": "**3%**", "pe": "45.2", "rtype": "财报", "ann_date": ""}]}, {"tag": "hr"}, {"tag": "note", "elements": [{"tag": "plain_text", "content": "⏰ 扫描时间 20:00 | 数据源：Tushare + AkShare"}]}]}
+===FEISHU_CARD_JSON_END===
+2026-03-25 21:00:01,910 [daily_scan_v2] INFO ============================================================
+2026-03-25 21:00:01,911 [daily_scan_v2] INFO 🚀 智能投资系统 v1.5 — 每日扫描
+2026-03-25 21:00:01,911 [daily_scan_v2] INFO ============================================================
+2026-03-25 21:00:01,911 [daily_scan_v2] INFO 
+========================================
+/usr/local/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.5) doesn't match a supported version!
+  warnings.warn(
+2026-03-25 21:00:02,546 [earnings_scanner] INFO ==================================================
+2026-03-25 21:00:02,546 [earnings_scanner] INFO 📊 任务A：业绩超预期扫描 | 日期=20260325
+2026-03-25 21:00:02,546 [earnings_scanner] INFO ==================================================
+2026-03-25 21:00:02,546 [earnings_scanner] INFO   Step 1: 获取披露名单...
+2026-03-25 21:00:03,924 [earnings_scanner] INFO   补充 8 只股票名称...
+2026-03-25 21:00:04,353 [earnings_scanner] INFO     跳过 300497.SZ 的 express 记录（同日已存在于 forecast，Tushare 数据质量问题）
+2026-03-25 21:00:04,536 [earnings_scanner] INFO     跳过 300531.SZ 的 express 记录（同日已存在于 forecast，Tushare 数据质量问题）
+2026-03-25 21:00:05,071 [earnings_scanner] INFO     跳过 300190.SZ 的 express 记录（同日已存在于 forecast，Tushare 数据质量问题）
+2026-03-25 21:00:05,407 [earnings_scanner] INFO     修正 000532.SZ express ann_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:05,407 [earnings_scanner] INFO     修正 002697.SZ express ann_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:05,407 [earnings_scanner] INFO     修正 603757.SH express ann_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,442 [earnings_scanner] INFO     修正 600315.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,442 [earnings_scanner] INFO     修正 603611.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,442 [earnings_scanner] INFO     修正 603166.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,442 [earnings_scanner] INFO     修正 603199.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,443 [earnings_scanner] INFO     修正 688519.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,443 [earnings_scanner] INFO     修正 603985.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,443 [earnings_scanner] INFO     修正 600874.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,443 [earnings_scanner] INFO     修正 601628.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,443 [earnings_scanner] INFO     修正 600318.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,443 [earnings_scanner] INFO     修正 601702.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,444 [earnings_scanner] INFO     修正 601168.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,444 [earnings_scanner] INFO     修正 688636.SH disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,444 [earnings_scanner] INFO     修正 300238.SZ disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,444 [earnings_scanner] INFO     修正 002151.SZ disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,444 [earnings_scanner] INFO     修正 300748.SZ disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+2026-03-25 21:00:07,444 [earnings_scanner] INFO     修正 300501.SZ disclosure_date: 20260326 -> 20260325（Tushare 延迟入库）
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  9.32it/s]                                               0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:05,  2.76it/s] 12%|█▎        | 2/16 [00:00<00:03,  4.29it/s] 19%|█▉        | 3/16 [00:00<00:02,  5.35it/s] 25%|██▌       | 4/16 [00:00<00:02,  5.81it/s] 31%|███▏      | 5/16 [00:00<00:02,  5.42it/s] 38%|███▊      | 6/16 [00:01<00:01,  5.84it/s] 44%|████▍     | 7/16 [00:01<00:01,  6.38it/s] 50%|█████     | 8/16 [00:01<00:01,  6.86it/s] 56%|█████▋    | 9/16 [00:01<00:01,  6.90it/s] 62%|██████▎   | 10/16 [00:01<00:00,  6.89it/s] 69%|██████▉   | 11/16 [00:01<00:00,  7.23it/s] 75%|███████▌  | 12/16 [00:01<00:00,  7.39it/s] 81%|████████▏ | 13/16 [00:02<00:00,  6.37it/s] 88%|████████▊ | 14/16 [00:02<00:00,  6.84it/s] 94%|█████████▍| 15/16 [00:02<00:00,  5.62it/s]100%|██████████| 16/16 [00:02<00:00,  6.45it/s]                                               2026-03-25 21:00:13,313 [earnings_scanner] INFO   Step 1 完成：224 家已披露
+2026-03-25 21:00:13,313 [earnings_scanner] INFO   Step 2: 获取实际财务数据...
+2026-03-25 21:00:13,620 [earnings_scanner] INFO     实际数据进度: 20/224
+2026-03-25 21:00:13,957 [earnings_scanner] INFO     实际数据进度: 40/224
+2026-03-25 21:00:14,826 [earnings_scanner] INFO     实际数据进度: 60/224
+2026-03-25 21:00:15,485 [earnings_scanner] INFO     实际数据进度: 80/224
+2026-03-25 21:00:16,531 [earnings_scanner] INFO     实际数据进度: 100/224
+2026-03-25 21:00:17,109 [earnings_scanner] INFO     实际数据进度: 120/224
+2026-03-25 21:00:17,584 [earnings_scanner] INFO     实际数据进度: 140/224
+2026-03-25 21:00:17,893 [earnings_scanner] INFO     实际数据进度: 160/224
+2026-03-25 21:00:18,304 [earnings_scanner] INFO     实际数据进度: 180/224
+2026-03-25 21:00:18,698 [earnings_scanner] INFO     实际数据进度: 200/224
+2026-03-25 21:00:18,819 [earnings_scanner] INFO     实际数据进度: 220/224
+2026-03-25 21:00:18,863 [earnings_scanner] INFO     实际数据完成: 199/224
+2026-03-25 21:00:18,864 [earnings_scanner] INFO   Step 2 完成：199 家有数据
+2026-03-25 21:00:18,864 [earnings_scanner] INFO   Step 3: 获取一致预期...
+2026-03-25 21:00:20,560 [earnings_scanner] INFO     预期进度: 50/199
+2026-03-25 21:00:21,876 [earnings_scanner] INFO     预期进度: 100/199
+2026-03-25 21:00:23,269 [earnings_scanner] INFO     预期进度: 150/199
+2026-03-25 21:00:24,513 [earnings_scanner] INFO     预期数据完成: 190/199
+2026-03-25 21:00:24,514 [earnings_scanner] INFO   Step 3 完成：190 家有预期
+2026-03-25 21:00:24,514 [earnings_scanner] INFO   Step 4: 对比判定...
+2026-03-25 21:00:24,514 [earnings_scanner] INFO   ✅ 业绩超预期: 110 只
+2026-03-25 21:00:24,515 [daily_scan_v2] INFO 
+========================================
+2026-03-25 21:00:24,516 [new_high_scanner] INFO ==================================================
+2026-03-25 21:00:24,516 [new_high_scanner] INFO 💎 任务B：扣非净利润新高扫描 | 日期=20260325
+2026-03-25 21:00:24,516 [new_high_scanner] INFO ==================================================
+2026-03-25 21:00:24,516 [new_high_scanner] INFO   Step 1: 获取财报披露名单...
+2026-03-25 21:00:24,665 [new_high_scanner] INFO   Step 1 完成：39 家已披露
+2026-03-25 21:00:24,665 [new_high_scanner] INFO   Step 2: 检查扣非净利润新高...
+2026-03-25 21:00:27,374 [new_high_scanner] INFO   ✅ 扣非净利润新高: 0 只
+2026-03-25 21:00:27,387 [daily_scan_v2] INFO   💾 入库: 110 条
+2026-03-25 21:00:30,823 [daily_scan_v2] INFO   📊 事件跟踪: 新增 45 个事件
+2026-03-25 21:00:30,827 [bitable_sync] INFO   Bitable 生成 110 条待写入记录
+2026-03-25 21:00:30,832 [daily_scan_v2] INFO   📝 已导出 110 条待写入记录到 /root/.openclaw/workspace/smart-invest/data/bitable_pending.json
+2026-03-25 21:00:30,832 [daily_scan_v2] INFO   💡 agent 写入时需先读取 Bitable 现有记录，基于（股票代码+报告期）去重后追加
+2026-03-25 21:00:30,832 [daily_scan_v2] INFO 
+✅ 扫描完成 | 耗时 28.9s | 超预期=110 | 扣非新高=0
+
+===FEISHU_CARD_JSON_START===
+{"config": {"wide_screen_mode": true}, "header": {"title": {"tag": "plain_text", "content": "🏆 备选股池日报 2026-03-25"}, "template": "blue"}, "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": "📊 共发现 **110** 只 | 超预期 **45** 只 | ⚠️ 非经常性 **1** 只 | 首次覆盖 **65** 只"}}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏆 **业绩超预期**（实际 vs 券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "profit_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rev_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "富祥药业(300497)", "profit_growth": "**+2736%**", "profit_expected": "-259%", "rev_growth": "-", "rev_expected": "+58%", "rtype": "业绩预告", "ann_date": "2026-03-24"}, {"stock": "妙可蓝多(600882)", "profit_growth": "**+236%**", "profit_expected": "+189%", "rev_growth": "**+16%**", "rev_expected": "+11%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "中华企业(600675)", "profit_growth": "**+117%**", "profit_expected": "+112%", "rev_growth": "**+52%**", "rev_expected": "-17%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "重庆银行(601963)", "profit_growth": "**+12%**", "profit_expected": "+6%", "rev_growth": "**+10%**", "rev_expected": "+9%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "源杰科技(688498)", "profit_growth": "**+1564%**", "profit_expected": "+94%", "rev_growth": "**+138%**", "rev_expected": "+69%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "迈威生物-U(688062)", "profit_growth": "**+7%**", "profit_expected": "-41%", "rev_growth": "**+232%**", "rev_expected": "+79%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "华能国际(600011)", "profit_growth": "**+28%**", "profit_expected": "+7%", "rev_growth": "**-7%**", "rev_expected": "+4%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "星环科技-U(688031)", "profit_growth": "**+31%**", "profit_expected": "-56%", "rev_growth": "**+20%**", "rev_expected": "+15%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "TCL中环(002129)", "profit_growth": "**+10%**", "profit_expected": "-113%", "rev_growth": "**+2%**", "rev_expected": "+38%", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "佛燃能源(002911)", "profit_growth": "**+21%**", "profit_expected": "+3%", "rev_growth": "**+6%**", "rev_expected": "+9%", "rtype": "财报", "ann_date": "2026-03-25"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "📋 **首次覆盖**（有实际数据，暂无券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "优博讯(300531)", "profit_growth": "**+103%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-23"}, {"stock": "光正眼科(002524)", "profit_growth": "**+90%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-21"}, {"stock": "明德生物(002932)", "profit_growth": "**-127%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-23"}, {"stock": "三瑞智能(301696)", "profit_growth": "**+32%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-19"}, {"stock": "红板科技(603459)", "profit_growth": "**+13%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-19"}, {"stock": "有研复材(688811)", "profit_growth": "**+76%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-20"}, {"stock": "天津港(600717)", "profit_growth": "**+4%**", "rev_growth": "**+6%**", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "大豪科技(603025)", "profit_growth": "**+24%**", "rev_growth": "**+19%**", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "华塑控股(000509)", "profit_growth": "**+14%**", "rev_growth": "**-27%**", "rtype": "财报", "ann_date": "2026-03-25"}, {"stock": "新联电子(002546)", "profit_growth": "**+0%**", "rev_growth": "**-10%**", "rtype": "财报", "ann_date": "2026-03-25"}]}, {"tag": "hr"}, {"tag": "note", "elements": [{"tag": "plain_text", "content": "⏰ 扫描时间 21:00 | 数据源：Tushare + AkShare"}]}]}
+===FEISHU_CARD_JSON_END===
+2026-03-26 20:00:01,668 [daily_scan_v2] INFO ============================================================
+2026-03-26 20:00:01,668 [daily_scan_v2] INFO 🚀 智能投资系统 v1.5 — 每日扫描
+2026-03-26 20:00:01,668 [daily_scan_v2] INFO ============================================================
+2026-03-26 20:00:01,668 [daily_scan_v2] INFO 
+========================================
+/usr/local/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.5) doesn't match a supported version!
+  warnings.warn(
+2026-03-26 20:00:02,185 [earnings_scanner] INFO ==================================================
+2026-03-26 20:00:02,186 [earnings_scanner] INFO 📊 任务A：业绩超预期扫描 | 日期=20260326
+2026-03-26 20:00:02,186 [earnings_scanner] INFO ==================================================
+2026-03-26 20:00:02,186 [earnings_scanner] INFO   Step 1: 获取披露名单...
+2026-03-26 20:00:02,724 [earnings_scanner] INFO   补充 1 只股票名称...
+  0%|          | 0/1 [00:00<?, ?it/s]                                       0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:02,  6.63it/s] 12%|█▎        | 2/16 [00:00<00:01,  7.24it/s] 19%|█▉        | 3/16 [00:00<00:01,  7.35it/s] 25%|██▌       | 4/16 [00:00<00:01,  7.39it/s] 31%|███▏      | 5/16 [00:00<00:01,  7.71it/s] 38%|███▊      | 6/16 [00:00<00:01,  7.58it/s] 44%|████▍     | 7/16 [00:00<00:01,  6.87it/s] 50%|█████     | 8/16 [00:01<00:01,  6.88it/s] 56%|█████▋    | 9/16 [00:01<00:01,  6.12it/s] 62%|██████▎   | 10/16 [00:01<00:00,  6.38it/s] 69%|██████▉   | 11/16 [00:01<00:00,  6.67it/s] 75%|███████▌  | 12/16 [00:01<00:00,  6.93it/s] 81%|████████▏ | 13/16 [00:01<00:00,  6.73it/s] 88%|████████▊ | 14/16 [00:02<00:00,  6.98it/s] 94%|█████████▍| 15/16 [00:02<00:00,  6.77it/s]                                               2026-03-26 20:00:08,003 [earnings_scanner] INFO   Step 1 完成：103 家已披露
+2026-03-26 20:00:08,003 [earnings_scanner] INFO   Step 2: 获取实际财务数据...
+2026-03-26 20:00:08,468 [earnings_scanner] INFO     实际数据进度: 20/103
+2026-03-26 20:00:08,791 [earnings_scanner] INFO     实际数据进度: 40/103
+2026-03-26 20:00:09,186 [earnings_scanner] INFO     实际数据进度: 60/103
+2026-03-26 20:00:09,620 [earnings_scanner] INFO     实际数据进度: 80/103
+2026-03-26 20:00:09,919 [earnings_scanner] INFO     实际数据进度: 100/103
+2026-03-26 20:00:09,969 [earnings_scanner] INFO     实际数据完成: 100/103
+2026-03-26 20:00:09,969 [earnings_scanner] INFO   Step 2 完成：100 家有数据
+2026-03-26 20:00:09,969 [earnings_scanner] INFO   Step 3: 获取一致预期...
+2026-03-26 20:00:11,481 [earnings_scanner] INFO     预期进度: 50/100
+2026-03-26 20:00:12,743 [earnings_scanner] INFO     预期进度: 100/100
+2026-03-26 20:00:12,744 [earnings_scanner] INFO     预期数据完成: 95/100
+2026-03-26 20:00:12,744 [earnings_scanner] INFO   Step 3 完成：95 家有预期
+2026-03-26 20:00:12,744 [earnings_scanner] INFO   Step 4: 对比判定...
+2026-03-26 20:00:12,745 [earnings_scanner] INFO   ✅ 业绩超预期: 57 只
+2026-03-26 20:00:12,745 [daily_scan_v2] INFO 
+========================================
+2026-03-26 20:00:12,746 [new_high_scanner] INFO ==================================================
+2026-03-26 20:00:12,746 [new_high_scanner] INFO 💎 任务B：扣非净利润新高扫描 | 日期=20260326
+2026-03-26 20:00:12,746 [new_high_scanner] INFO ==================================================
+2026-03-26 20:00:12,746 [new_high_scanner] INFO   Step 1: 获取财报披露名单...
+2026-03-26 20:00:12,901 [new_high_scanner] INFO   Step 1 完成：57 家已披露
+2026-03-26 20:00:12,901 [new_high_scanner] INFO   Step 2: 检查扣非净利润新高...
+2026-03-26 20:00:14,219 [new_high_scanner] INFO     ✅ 600970.SH 中材国际 扣非新高！
+2026-03-26 20:00:16,627 [new_high_scanner] INFO     ✅ 603166.SH 福达股份 扣非新高！
+2026-03-26 20:00:17,912 [new_high_scanner] INFO     ✅ 688519.SH 南亚新材 扣非新高！
+2026-03-26 20:00:19,549 [new_high_scanner] INFO     ✅ 603063.SH 禾望电气 扣非新高！
+2026-03-26 20:00:20,955 [new_high_scanner] INFO     进度: 20/57 | 已发现: 4
+2026-03-26 20:00:28,499 [new_high_scanner] INFO     进度: 40/57 | 已发现: 4
+2026-03-26 20:00:34,817 [new_high_scanner] INFO   ✅ 扣非净利润新高: 4 只
+2026-03-26 20:00:34,833 [daily_scan_v2] INFO   💾 入库: 61 条
+2026-03-26 20:00:40,514 [daily_scan_v2] INFO   📊 事件跟踪: 新增 26 个事件
+2026-03-26 20:00:40,516 [bitable_sync] INFO   Bitable 生成 59 条待写入记录
+2026-03-26 20:00:40,518 [daily_scan_v2] INFO   📝 已导出 59 条待写入记录到 /root/.openclaw/workspace/smart-invest/data/bitable_pending.json
+2026-03-26 20:00:40,518 [daily_scan_v2] INFO   💡 agent 写入时需先读取 Bitable 现有记录，基于（股票代码+报告期）去重后追加
+2026-03-26 20:00:40,518 [daily_scan_v2] INFO 
+✅ 扫描完成 | 耗时 38.8s | 超预期=57 | 扣非新高=4
+
+===FEISHU_CARD_JSON_START===
+{"config": {"wide_screen_mode": true}, "header": {"title": {"tag": "plain_text", "content": "🏆 备选股池日报 2026-03-26"}, "template": "blue"}, "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": "📊 共发现 **61** 只 | 超预期 **22** 只 | ⚠️ 非经常性 **1** 只 | 首次覆盖 **35** 只 | 扣非新高 **4** 只"}}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏆 **业绩超预期**（实际 vs 券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "profit_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rev_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "诺诚健华-U(688428)", "profit_growth": "**+226%**", "profit_expected": "-63%", "rev_growth": "**+135%**", "rev_expected": "-3%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "上海家化(600315)", "profit_growth": "**+105%**", "profit_expected": "+83%", "rev_growth": "**+11%**", "rev_expected": "+13%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "安恒信息(688023)", "profit_growth": "**+61%**", "profit_expected": "-240%", "rev_growth": "**+5%**", "rev_expected": "+7%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "中远海特(600428)", "profit_growth": "**+35%**", "profit_expected": "+10%", "rev_growth": "**+38%**", "rev_expected": "+3%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "福达股份(603166)", "profit_growth": "**+61%**", "profit_expected": "+29%", "rev_growth": "**+21%**", "rev_expected": "+51%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "南亚新材(688519)", "profit_growth": "**+678%**", "profit_expected": "+113%", "rev_growth": "**+56%**", "rev_expected": "+20%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "中国人寿(601628)", "profit_growth": "**+44%**", "profit_expected": "+3%", "rev_growth": "**+16%**", "rev_expected": "+0%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "赛诺医疗(688108) ⚠️", "profit_growth": "**+294%**", "profit_expected": "-27%", "rev_growth": "**+14%**", "rev_expected": "+29%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "智明达(688636)", "profit_growth": "**+704%**", "profit_expected": "+57%", "rev_growth": "**+62%**", "rev_expected": "+39%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "石基信息(002153)", "profit_growth": "**+15%**", "profit_expected": "-277%", "rev_growth": "**-5%**", "rev_expected": "+31%", "rtype": "财报", "ann_date": "2026-03-26"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "📋 **首次覆盖**（有实际数据，暂无券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "大普微(301666)", "profit_growth": "**+154%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-26"}, {"stock": "高铁电气(688285)", "profit_growth": "**+9%**", "rev_growth": "**+17%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "统一股份(600506)", "profit_growth": "**-55%**", "rev_growth": "**+4%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "恒润股份(603985)", "profit_growth": "**+165%**", "rev_growth": "**+129%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "宁夏建材(600449)", "profit_growth": "**-23%**", "rev_growth": "**-40%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "中信金属(601061)", "profit_growth": "**+41%**", "rev_growth": "**+10%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "深高速(600548)", "profit_growth": "**+5%**", "rev_growth": "**+0%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "马钢股份(600808)", "profit_growth": "**+95%**", "rev_growth": "**-5%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "凯恩股份(002012)", "profit_growth": "**-34%**", "rev_growth": "**+6%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "天沃科技(002564)", "profit_growth": "**+356%**", "rev_growth": "**+3%**", "rtype": "财报", "ann_date": "2026-03-26"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "💎 **单季度扣非净利润历史新高**"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit", "display_name": "单季扣非", "data_type": "lark_md"}, {"name": "growth", "display_name": "超前高", "data_type": "lark_md"}, {"name": "pe", "display_name": "PE", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "中材国际(600970)", "profit": "**7.50亿**", "growth": "**0%**", "pe": "9.4", "rtype": "财报", "ann_date": ""}, {"stock": "福达股份(603166)", "profit": "**0.83亿**", "growth": "**15%**", "pe": "26.8", "rtype": "财报", "ann_date": ""}, {"stock": "南亚新材(688519)", "profit": "**0.74亿**", "growth": "**14%**", "pe": "144.9", "rtype": "财报", "ann_date": ""}, {"stock": "禾望电气(603063)", "profit": "**2.17亿**", "growth": "**6%**", "pe": "28.6", "rtype": "财报", "ann_date": ""}]}, {"tag": "hr"}, {"tag": "note", "elements": [{"tag": "plain_text", "content": "⏰ 扫描时间 20:00 | 数据源：Tushare + AkShare"}]}]}
+===FEISHU_CARD_JSON_END===
+2026-03-26 21:00:01,293 [daily_scan_v2] INFO ============================================================
+2026-03-26 21:00:01,294 [daily_scan_v2] INFO 🚀 智能投资系统 v1.5 — 每日扫描
+2026-03-26 21:00:01,294 [daily_scan_v2] INFO ============================================================
+2026-03-26 21:00:01,294 [daily_scan_v2] INFO 
+========================================
+/usr/local/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.5) doesn't match a supported version!
+  warnings.warn(
+2026-03-26 21:00:01,840 [earnings_scanner] INFO ==================================================
+2026-03-26 21:00:01,840 [earnings_scanner] INFO 📊 任务A：业绩超预期扫描 | 日期=20260326
+2026-03-26 21:00:01,840 [earnings_scanner] INFO ==================================================
+2026-03-26 21:00:01,840 [earnings_scanner] INFO   Step 1: 获取披露名单...
+2026-03-26 21:00:02,368 [earnings_scanner] INFO   补充 1 只股票名称...
+  0%|          | 0/1 [00:00<?, ?it/s]                                       0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:04,  3.12it/s] 12%|█▎        | 2/16 [00:00<00:03,  3.68it/s] 19%|█▉        | 3/16 [00:00<00:03,  3.99it/s] 25%|██▌       | 4/16 [00:01<00:03,  3.59it/s] 31%|███▏      | 5/16 [00:01<00:04,  2.48it/s] 38%|███▊      | 6/16 [00:02<00:03,  2.64it/s] 44%|████▍     | 7/16 [00:02<00:03,  2.92it/s] 50%|█████     | 8/16 [00:02<00:02,  2.94it/s] 56%|█████▋    | 9/16 [00:02<00:02,  2.97it/s] 62%|██████▎   | 10/16 [00:03<00:01,  3.15it/s] 69%|██████▉   | 11/16 [00:03<00:01,  2.65it/s] 75%|███████▌  | 12/16 [00:04<00:01,  2.74it/s] 81%|████████▏ | 13/16 [00:04<00:01,  2.35it/s] 88%|████████▊ | 14/16 [00:04<00:00,  2.67it/s] 94%|█████████▍| 15/16 [00:05<00:00,  3.02it/s]100%|██████████| 16/16 [00:05<00:00,  2.85it/s]                                               2026-03-26 21:00:11,012 [earnings_scanner] INFO   Step 1 完成：150 家已披露
+2026-03-26 21:00:11,013 [earnings_scanner] INFO   Step 2: 获取实际财务数据...
+2026-03-26 21:00:11,478 [earnings_scanner] INFO     实际数据进度: 20/150
+2026-03-26 21:00:11,862 [earnings_scanner] INFO     实际数据进度: 40/150
+2026-03-26 21:00:12,305 [earnings_scanner] INFO     实际数据进度: 60/150
+2026-03-26 21:00:12,635 [earnings_scanner] INFO     实际数据进度: 80/150
+2026-03-26 21:00:12,990 [earnings_scanner] INFO     实际数据进度: 100/150
+2026-03-26 21:00:13,399 [earnings_scanner] INFO     实际数据进度: 120/150
+2026-03-26 21:00:13,762 [earnings_scanner] INFO     实际数据进度: 140/150
+2026-03-26 21:00:13,874 [earnings_scanner] INFO     实际数据完成: 145/150
+2026-03-26 21:00:13,874 [earnings_scanner] INFO   Step 2 完成：145 家有数据
+2026-03-26 21:00:13,874 [earnings_scanner] INFO   Step 3: 获取一致预期...
+2026-03-26 21:00:15,417 [earnings_scanner] INFO     预期进度: 50/145
+2026-03-26 21:00:16,882 [earnings_scanner] INFO     预期进度: 100/145
+2026-03-26 21:00:18,075 [earnings_scanner] INFO     预期数据完成: 138/145
+2026-03-26 21:00:18,076 [earnings_scanner] INFO   Step 3 完成：138 家有预期
+2026-03-26 21:00:18,076 [earnings_scanner] INFO   Step 4: 对比判定...
+2026-03-26 21:00:18,076 [earnings_scanner] INFO   ✅ 业绩超预期: 82 只
+2026-03-26 21:00:18,077 [daily_scan_v2] INFO 
+========================================
+2026-03-26 21:00:18,078 [new_high_scanner] INFO ==================================================
+2026-03-26 21:00:18,078 [new_high_scanner] INFO 💎 任务B：扣非净利润新高扫描 | 日期=20260326
+2026-03-26 21:00:18,078 [new_high_scanner] INFO ==================================================
+2026-03-26 21:00:18,078 [new_high_scanner] INFO   Step 1: 获取财报披露名单...
+2026-03-26 21:00:18,236 [new_high_scanner] INFO   Step 1 完成：57 家已披露
+2026-03-26 21:00:18,236 [new_high_scanner] INFO   Step 2: 检查扣非净利润新高...
+2026-03-26 21:00:19,562 [new_high_scanner] INFO     ✅ 600970.SH 中材国际 扣非新高！
+2026-03-26 21:00:21,931 [new_high_scanner] INFO     ✅ 603166.SH 福达股份 扣非新高！
+2026-03-26 21:00:23,203 [new_high_scanner] INFO     ✅ 688519.SH 南亚新材 扣非新高！
+2026-03-26 21:00:24,852 [new_high_scanner] INFO     ✅ 603063.SH 禾望电气 扣非新高！
+2026-03-26 21:00:26,270 [new_high_scanner] INFO     进度: 20/57 | 已发现: 4
+2026-03-26 21:00:33,767 [new_high_scanner] INFO     进度: 40/57 | 已发现: 4
+2026-03-26 21:00:39,181 [new_high_scanner] INFO   ✅ 扣非净利润新高: 4 只
+2026-03-26 21:00:39,198 [daily_scan_v2] INFO   💾 入库: 86 条
+2026-03-26 21:00:44,960 [daily_scan_v2] INFO   📊 事件跟踪: 新增 30 个事件
+2026-03-26 21:00:44,963 [bitable_sync] INFO   Bitable 生成 84 条待写入记录
+2026-03-26 21:00:44,965 [daily_scan_v2] INFO   📝 已导出 84 条待写入记录到 /root/.openclaw/workspace/smart-invest/data/bitable_pending.json
+2026-03-26 21:00:44,965 [daily_scan_v2] INFO   💡 agent 写入时需先读取 Bitable 现有记录，基于（股票代码+报告期）去重后追加
+2026-03-26 21:00:44,965 [daily_scan_v2] INFO 
+✅ 扫描完成 | 耗时 43.7s | 超预期=82 | 扣非新高=4
+
+===FEISHU_CARD_JSON_START===
+{"config": {"wide_screen_mode": true}, "header": {"title": {"tag": "plain_text", "content": "🏆 备选股池日报 2026-03-26"}, "template": "blue"}, "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": "📊 共发现 **86** 只 | 超预期 **26** 只 | ⚠️ 非经常性 **1** 只 | 首次覆盖 **56** 只 | 扣非新高 **4** 只"}}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏆 **业绩超预期**（实际 vs 券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "profit_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rev_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "诺诚健华-U(688428)", "profit_growth": "**+226%**", "profit_expected": "-63%", "rev_growth": "**+135%**", "rev_expected": "-3%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "安恒信息(688023)", "profit_growth": "**+61%**", "profit_expected": "-240%", "rev_growth": "**+5%**", "rev_expected": "+7%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "上海家化(600315)", "profit_growth": "**+105%**", "profit_expected": "+83%", "rev_growth": "**+11%**", "rev_expected": "+13%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "福达股份(603166)", "profit_growth": "**+61%**", "profit_expected": "+29%", "rev_growth": "**+21%**", "rev_expected": "+51%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "中远海特(600428)", "profit_growth": "**+35%**", "profit_expected": "+10%", "rev_growth": "**+38%**", "rev_expected": "+3%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "南亚新材(688519)", "profit_growth": "**+678%**", "profit_expected": "+113%", "rev_growth": "**+56%**", "rev_expected": "+20%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "赛诺医疗(688108) ⚠️", "profit_growth": "**+294%**", "profit_expected": "-27%", "rev_growth": "**+14%**", "rev_expected": "+29%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "中国人寿(601628)", "profit_growth": "**+44%**", "profit_expected": "+3%", "rev_growth": "**+16%**", "rev_expected": "+0%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "智明达(688636)", "profit_growth": "**+704%**", "profit_expected": "+57%", "rev_growth": "**+62%**", "rev_expected": "+39%", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "石基信息(002153)", "profit_growth": "**+15%**", "profit_expected": "-277%", "rev_growth": "**-5%**", "rev_expected": "+31%", "rtype": "财报", "ann_date": "2026-03-26"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "📋 **首次覆盖**（有实际数据，暂无券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "大普微(301666)", "profit_growth": "**+154%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-26"}, {"stock": "高铁电气(688285)", "profit_growth": "**+9%**", "rev_growth": "**+17%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "恒润股份(603985)", "profit_growth": "**+165%**", "rev_growth": "**+129%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "统一股份(600506)", "profit_growth": "**-55%**", "rev_growth": "**+4%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "宁夏建材(600449)", "profit_growth": "**-23%**", "rev_growth": "**-40%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "中信金属(601061)", "profit_growth": "**+41%**", "rev_growth": "**+10%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "深高速(600548)", "profit_growth": "**+5%**", "rev_growth": "**+0%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "马钢股份(600808)", "profit_growth": "**+95%**", "rev_growth": "**-5%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "凯恩股份(002012)", "profit_growth": "**-34%**", "rev_growth": "**+6%**", "rtype": "财报", "ann_date": "2026-03-26"}, {"stock": "中泰化学(002092)", "profit_growth": "**+61%**", "rev_growth": "**-5%**", "rtype": "财报", "ann_date": "2026-03-26"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "💎 **单季度扣非净利润历史新高**"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit", "display_name": "单季扣非", "data_type": "lark_md"}, {"name": "growth", "display_name": "超前高", "data_type": "lark_md"}, {"name": "pe", "display_name": "PE", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "中材国际(600970)", "profit": "**7.50亿**", "growth": "**0%**", "pe": "9.4", "rtype": "财报", "ann_date": ""}, {"stock": "福达股份(603166)", "profit": "**0.83亿**", "growth": "**15%**", "pe": "26.8", "rtype": "财报", "ann_date": ""}, {"stock": "南亚新材(688519)", "profit": "**0.74亿**", "growth": "**14%**", "pe": "144.9", "rtype": "财报", "ann_date": ""}, {"stock": "禾望电气(603063)", "profit": "**2.17亿**", "growth": "**6%**", "pe": "28.6", "rtype": "财报", "ann_date": ""}]}, {"tag": "hr"}, {"tag": "note", "elements": [{"tag": "plain_text", "content": "⏰ 扫描时间 21:00 | 数据源：Tushare + AkShare"}]}]}
+===FEISHU_CARD_JSON_END===
+2026-03-27 20:00:02,305 [daily_scan_v2] INFO ============================================================
+2026-03-27 20:00:02,305 [daily_scan_v2] INFO 🚀 智能投资系统 v1.5 — 每日扫描
+2026-03-27 20:00:02,305 [daily_scan_v2] INFO ============================================================
+2026-03-27 20:00:02,305 [daily_scan_v2] INFO 
+========================================
+/usr/local/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.5) doesn't match a supported version!
+  warnings.warn(
+2026-03-27 20:00:02,574 [earnings_scanner] INFO ==================================================
+2026-03-27 20:00:02,575 [earnings_scanner] INFO 📊 任务A：业绩超预期扫描 | 日期=20260327
+2026-03-27 20:00:02,575 [earnings_scanner] INFO ==================================================
+2026-03-27 20:00:02,575 [earnings_scanner] INFO   Step 1: 获取披露名单...
+2026-03-27 20:00:03,124 [earnings_scanner] INFO   补充 4 只股票名称...
+  0%|          | 0/1 [00:00<?, ?it/s]                                       0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:02,  6.56it/s] 12%|█▎        | 2/16 [00:00<00:02,  6.57it/s] 19%|█▉        | 3/16 [00:00<00:01,  6.70it/s] 25%|██▌       | 4/16 [00:00<00:01,  6.83it/s] 31%|███▏      | 5/16 [00:00<00:01,  6.65it/s] 38%|███▊      | 6/16 [00:00<00:01,  6.86it/s] 44%|████▍     | 7/16 [00:01<00:01,  6.74it/s] 50%|█████     | 8/16 [00:01<00:01,  6.98it/s] 56%|█████▋    | 9/16 [00:01<00:01,  6.77it/s] 62%|██████▎   | 10/16 [00:01<00:00,  6.84it/s] 69%|██████▉   | 11/16 [00:01<00:00,  6.58it/s] 75%|███████▌  | 12/16 [00:01<00:00,  6.76it/s] 81%|████████▏ | 13/16 [00:01<00:00,  6.93it/s] 88%|████████▊ | 14/16 [00:02<00:00,  7.04it/s] 94%|█████████▍| 15/16 [00:02<00:00,  6.19it/s]                                               2026-03-27 20:00:09,410 [earnings_scanner] INFO   Step 1 完成：200 家已披露
+2026-03-27 20:00:09,410 [earnings_scanner] INFO   Step 2: 获取实际财务数据...
+2026-03-27 20:00:09,749 [earnings_scanner] INFO     实际数据进度: 20/200
+2026-03-27 20:00:10,179 [earnings_scanner] INFO     实际数据进度: 40/200
+2026-03-27 20:00:10,606 [earnings_scanner] INFO     实际数据进度: 60/200
+2026-03-27 20:00:10,937 [earnings_scanner] INFO     实际数据进度: 80/200
+2026-03-27 20:00:11,334 [earnings_scanner] INFO     实际数据进度: 100/200
+2026-03-27 20:00:11,731 [earnings_scanner] INFO     实际数据进度: 120/200
+2026-03-27 20:00:12,029 [earnings_scanner] INFO     实际数据进度: 140/200
+2026-03-27 20:00:12,450 [earnings_scanner] INFO     实际数据进度: 160/200
+2026-03-27 20:00:12,816 [earnings_scanner] INFO     实际数据进度: 180/200
+2026-03-27 20:00:13,109 [earnings_scanner] INFO     实际数据进度: 200/200
+2026-03-27 20:00:13,111 [earnings_scanner] INFO     实际数据完成: 193/200
+2026-03-27 20:00:13,111 [earnings_scanner] INFO   Step 2 完成：193 家有数据
+2026-03-27 20:00:13,111 [earnings_scanner] INFO   Step 3: 获取一致预期...
+2026-03-27 20:00:14,739 [earnings_scanner] INFO     预期进度: 50/193
+2026-03-27 20:00:16,168 [earnings_scanner] INFO     预期进度: 100/193
+2026-03-27 20:00:17,632 [earnings_scanner] INFO     预期进度: 150/193
+2026-03-27 20:00:18,837 [earnings_scanner] INFO     预期数据完成: 180/193
+2026-03-27 20:00:18,837 [earnings_scanner] INFO   Step 3 完成：180 家有预期
+2026-03-27 20:00:18,837 [earnings_scanner] INFO   Step 4: 对比判定...
+2026-03-27 20:00:18,838 [earnings_scanner] INFO   ✅ 业绩超预期: 121 只
+2026-03-27 20:00:18,838 [daily_scan_v2] INFO 
+========================================
+2026-03-27 20:00:18,839 [new_high_scanner] INFO ==================================================
+2026-03-27 20:00:18,839 [new_high_scanner] INFO 💎 任务B：扣非净利润新高扫描 | 日期=20260327
+2026-03-27 20:00:18,839 [new_high_scanner] INFO ==================================================
+2026-03-27 20:00:18,839 [new_high_scanner] INFO   Step 1: 获取财报披露名单...
+2026-03-27 20:00:19,008 [new_high_scanner] INFO   Step 1 完成：128 家已披露
+2026-03-27 20:00:19,008 [new_high_scanner] INFO   Step 2: 检查扣非净利润新高...
+2026-03-27 20:00:30,386 [new_high_scanner] INFO   ✅ 扣非净利润新高: 0 只
+2026-03-27 20:00:30,533 [daily_scan_v2] INFO   🏭 行业映射: 已加载 5493 只
+2026-03-27 20:00:30,533 [daily_scan_v2] INFO 
+========================================
+2026-03-27 20:00:30,533 [daily_scan_v2] INFO 📐 任务C：回调买入信号扫描
+2026-03-27 20:00:30,537 [daily_scan_v2] INFO   扫描池: 128 只（超预期=121 + 新高=0 + 持仓）
+2026-03-27 20:00:41,285 [pullback_scanner] INFO   进度: 50/128
+2026-03-27 20:00:52,439 [pullback_scanner] INFO   进度: 100/128
+2026-03-27 20:00:58,471 [pullback_scanner] INFO   ✅ 回调买入扫描完成: 128 只 → 0 只信号
+2026-03-27 20:00:58,471 [daily_scan_v2] INFO   回调信号: 0 只
+2026-03-27 20:00:58,487 [daily_scan_v2] INFO   💾 入库: 121 条
+2026-03-27 20:01:06,967 [daily_scan_v2] INFO   📊 事件跟踪: 新增 33 个事件
+2026-03-27 20:01:06,971 [bitable_sync] INFO   Bitable 生成 121 条待写入记录
+2026-03-27 20:01:06,974 [bitable_sync] INFO   📝 已导出 121 条到 /root/.openclaw/workspace/smart-invest/data/bitable_pending.json
+2026-03-27 20:01:06,975 [daily_scan_v2] INFO   📝 Bitable 同步: 121 条生成 → 121 条新增
+2026-03-27 20:01:06,975 [daily_scan_v2] INFO 
+✅ 扫描完成 | 耗时 64.7s | 超预期=121 | 扣非新高=0 | 回调信号=0
+
+===FEISHU_CARD_JSON_START===
+{"config": {"wide_screen_mode": true}, "header": {"title": {"tag": "plain_text", "content": "🏆 备选股池日报 2026-03-27"}, "template": "blue"}, "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": "📊 共发现 **121** 只 | 超预期 **33** 只 | ⚠️ 非经常性 **3** 只 | 首次覆盖 **88** 只"}}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏭 超预期板块：半导体(5) > 保险(3) > 机械基件(3) > 生物制药(2) > 电气设备(2)"}}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏆 **业绩超预期**（实际 vs 券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "profit_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rev_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "中国平安(601318)", "profit_growth": "**+22%**", "profit_expected": "+17%", "rev_growth": "**+2%**", "rev_expected": "+10%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "中国太保(601601)", "profit_growth": "**+16%**", "profit_expected": "+7%", "rev_growth": "**+8%**", "rev_expected": "+5%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "中信证券(600030)", "profit_growth": "**+40%**", "profit_expected": "+10%", "rev_growth": "**+29%**", "rev_expected": "+14%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "汇顶科技(603160)", "profit_growth": "**+31%**", "profit_expected": "+21%", "rev_growth": "**+8%**", "rev_expected": "+38%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "吉比特(603444)", "profit_growth": "**+97%**", "profit_expected": "+12%", "rev_growth": "**+68%**", "rev_expected": "+11%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "华新建材(600801)", "profit_growth": "**+51%**", "profit_expected": "+28%", "rev_growth": "**+3%**", "rev_expected": "+10%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "中国国航(601111)", "profit_growth": "**+2%**", "profit_expected": "-297%", "rev_growth": "**+3%**", "rev_expected": "+8%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "华虹公司(688347)", "profit_growth": "**-7%**", "profit_expected": "-104%", "rev_growth": "**+20%**", "rev_expected": "+26%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "百奥赛图(688796)", "profit_growth": "**+405%**", "profit_expected": "+86%", "rev_growth": "**+41%**", "rev_expected": "+33%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "国电南自(600268)", "profit_growth": "**+38%**", "profit_expected": "-41%", "rev_growth": "**+7%**", "rev_expected": "+11%", "rtype": "财报", "ann_date": "2026-03-27"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "📋 **首次覆盖**（有实际数据，暂无券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "埃泰克(603293)", "profit_growth": "**+4%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-27"}, {"stock": "尚水智能(301513)", "profit_growth": "**-26%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-27"}, {"stock": "大普微(301666)", "profit_growth": "**+154%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-26"}, {"stock": "日照港(600017)", "profit_growth": "**-32%**", "rev_growth": "**-8%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "华安证券(600909)", "profit_growth": "**+41%**", "rev_growth": "**+31%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "航天机电(600151)", "profit_growth": "**-184%**", "rev_growth": "**-33%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "乐凯胶片(600135)", "profit_growth": "**-24%**", "rev_growth": "**-11%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "两面针(600249)", "profit_growth": "**-52%**", "rev_growth": "**+1%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "金自天正(600560)", "profit_growth": "**-6%**", "rev_growth": "**+7%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "绿城水务(601368)", "profit_growth": "**+34%**", "rev_growth": "**+1%**", "rtype": "财报", "ann_date": "2026-03-27"}]}, {"tag": "hr"}, {"tag": "note", "elements": [{"tag": "plain_text", "content": "⏰ 扫描时间 20:01 | 数据源：Tushare + AkShare"}]}]}
+===FEISHU_CARD_JSON_END===
+2026-03-27 21:00:02,382 [daily_scan_v2] INFO ============================================================
+2026-03-27 21:00:02,383 [daily_scan_v2] INFO 🚀 智能投资系统 v1.5 — 每日扫描
+2026-03-27 21:00:02,383 [daily_scan_v2] INFO ============================================================
+2026-03-27 21:00:02,383 [daily_scan_v2] INFO 
+========================================
+/usr/local/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.5) doesn't match a supported version!
+  warnings.warn(
+2026-03-27 21:00:02,694 [earnings_scanner] INFO ==================================================
+2026-03-27 21:00:02,695 [earnings_scanner] INFO 📊 任务A：业绩超预期扫描 | 日期=20260327
+2026-03-27 21:00:02,695 [earnings_scanner] INFO ==================================================
+2026-03-27 21:00:02,695 [earnings_scanner] INFO   Step 1: 获取披露名单...
+2026-03-27 21:00:03,216 [earnings_scanner] INFO   补充 6 只股票名称...
+2026-03-27 21:00:03,796 [earnings_scanner] INFO     跳过 603826.SH 的 express 记录（同日已存在于 forecast，Tushare 数据质量问题）
+  0%|          | 0/1 [00:00<?, ?it/s]                                       0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:01,  7.57it/s] 12%|█▎        | 2/16 [00:00<00:02,  6.64it/s] 19%|█▉        | 3/16 [00:00<00:02,  4.72it/s] 25%|██▌       | 4/16 [00:00<00:02,  5.31it/s] 31%|███▏      | 5/16 [00:00<00:01,  5.96it/s] 38%|███▊      | 6/16 [00:01<00:01,  5.92it/s] 44%|████▍     | 7/16 [00:01<00:01,  6.38it/s] 50%|█████     | 8/16 [00:01<00:01,  5.92it/s] 56%|█████▋    | 9/16 [00:01<00:01,  6.39it/s] 62%|██████▎   | 10/16 [00:01<00:00,  6.66it/s] 69%|██████▉   | 11/16 [00:01<00:00,  6.83it/s] 75%|███████▌  | 12/16 [00:01<00:00,  6.00it/s] 81%|████████▏ | 13/16 [00:02<00:00,  4.54it/s] 88%|████████▊ | 14/16 [00:02<00:00,  4.77it/s] 94%|█████████▍| 15/16 [00:02<00:00,  5.32it/s]100%|██████████| 16/16 [00:02<00:00,  6.18it/s]                                               2026-03-27 21:00:09,678 [earnings_scanner] INFO   Step 1 完成：269 家已披露
+2026-03-27 21:00:09,678 [earnings_scanner] INFO   Step 2: 获取实际财务数据...
+2026-03-27 21:00:10,009 [earnings_scanner] INFO     实际数据进度: 20/269
+2026-03-27 21:00:10,392 [earnings_scanner] INFO     实际数据进度: 40/269
+2026-03-27 21:00:10,686 [earnings_scanner] INFO     实际数据进度: 60/269
+2026-03-27 21:00:11,084 [earnings_scanner] INFO     实际数据进度: 80/269
+2026-03-27 21:00:11,446 [earnings_scanner] INFO     实际数据进度: 100/269
+2026-03-27 21:00:11,784 [earnings_scanner] INFO     实际数据进度: 120/269
+2026-03-27 21:00:12,185 [earnings_scanner] INFO     实际数据进度: 140/269
+2026-03-27 21:00:12,507 [earnings_scanner] INFO     实际数据进度: 160/269
+2026-03-27 21:00:12,903 [earnings_scanner] INFO     实际数据进度: 180/269
+2026-03-27 21:00:13,258 [earnings_scanner] INFO     实际数据进度: 200/269
+2026-03-27 21:00:13,398 [earnings_scanner] INFO     实际数据进度: 220/269
+2026-03-27 21:00:13,503 [earnings_scanner] INFO     实际数据进度: 240/269
+2026-03-27 21:00:13,631 [earnings_scanner] INFO     实际数据进度: 260/269
+2026-03-27 21:00:13,691 [earnings_scanner] INFO     实际数据完成: 198/269
+2026-03-27 21:00:13,691 [earnings_scanner] INFO   Step 2 完成：198 家有数据
+2026-03-27 21:00:13,691 [earnings_scanner] INFO   Step 3: 获取一致预期...
+2026-03-27 21:00:15,204 [earnings_scanner] INFO     预期进度: 50/198
+2026-03-27 21:00:16,597 [earnings_scanner] INFO     预期进度: 100/198
+2026-03-27 21:00:17,962 [earnings_scanner] INFO     预期进度: 150/198
+2026-03-27 21:00:19,308 [earnings_scanner] INFO     预期数据完成: 185/198
+2026-03-27 21:00:19,308 [earnings_scanner] INFO   Step 3 完成：185 家有预期
+2026-03-27 21:00:19,308 [earnings_scanner] INFO   Step 4: 对比判定...
+2026-03-27 21:00:19,309 [earnings_scanner] INFO   ✅ 业绩超预期: 124 只
+2026-03-27 21:00:19,309 [daily_scan_v2] INFO 
+========================================
+2026-03-27 21:00:19,311 [new_high_scanner] INFO ==================================================
+2026-03-27 21:00:19,311 [new_high_scanner] INFO 💎 任务B：扣非净利润新高扫描 | 日期=20260327
+2026-03-27 21:00:19,311 [new_high_scanner] INFO ==================================================
+2026-03-27 21:00:19,311 [new_high_scanner] INFO   Step 1: 获取财报披露名单...
+2026-03-27 21:00:19,459 [new_high_scanner] INFO   Step 1 完成：128 家已披露
+2026-03-27 21:00:19,459 [new_high_scanner] INFO   Step 2: 检查扣非净利润新高...
+2026-03-27 21:00:28,330 [new_high_scanner] INFO   ✅ 扣非净利润新高: 0 只
+2026-03-27 21:00:28,457 [daily_scan_v2] INFO   🏭 行业映射: 已加载 5493 只
+2026-03-27 21:00:28,457 [daily_scan_v2] INFO 
+========================================
+2026-03-27 21:00:28,457 [daily_scan_v2] INFO 📐 任务C：回调买入信号扫描
+2026-03-27 21:00:28,460 [daily_scan_v2] INFO   扫描池: 131 只（超预期=124 + 新高=0 + 持仓）
+2026-03-27 21:00:38,930 [pullback_scanner] INFO   进度: 50/131
+2026-03-27 21:00:50,120 [pullback_scanner] INFO   进度: 100/131
+2026-03-27 21:00:56,851 [pullback_scanner] INFO   ✅ 回调买入扫描完成: 131 只 → 0 只信号
+2026-03-27 21:00:56,851 [daily_scan_v2] INFO   回调信号: 0 只
+2026-03-27 21:00:56,868 [daily_scan_v2] INFO   💾 入库: 124 条
+2026-03-27 21:01:05,133 [daily_scan_v2] INFO   📊 事件跟踪: 新增 34 个事件
+2026-03-27 21:01:05,145 [bitable_sync] INFO   Bitable 生成 124 条待写入记录
+2026-03-27 21:01:05,147 [bitable_sync] INFO   去重：输入 124 → 合并 124 → 跳过已有 121 → 新增 3
+2026-03-27 21:01:05,148 [bitable_sync] INFO   📝 已导出 3 条到 /root/.openclaw/workspace/smart-invest/data/bitable_pending.json
+2026-03-27 21:01:05,149 [daily_scan_v2] INFO   📝 Bitable 同步: 124 条生成 → 3 条新增
+2026-03-27 21:01:05,151 [daily_scan_v2] INFO 
+✅ 扫描完成 | 耗时 62.8s | 超预期=124 | 扣非新高=0 | 回调信号=0
+
+===FEISHU_CARD_JSON_START===
+{"config": {"wide_screen_mode": true}, "header": {"title": {"tag": "plain_text", "content": "🏆 备选股池日报 2026-03-27"}, "template": "blue"}, "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": "📊 共发现 **124** 只 | 超预期 **34** 只 | ⚠️ 非经常性 **3** 只 | 首次覆盖 **90** 只"}}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏭 超预期板块：半导体(5) > 机械基件(3) > 保险(3) > 生物制药(2) > 电气设备(2)"}}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "🏆 **业绩超预期**（实际 vs 券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "profit_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rev_expected", "display_name": "预期增速", "data_type": "text"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "欧科亿(688308)", "profit_growth": "**+2510%**", "profit_expected": "+54%", "rev_growth": "-", "rev_expected": "+20%", "rtype": "业绩预告", "ann_date": "2026-03-28"}, {"stock": "中国平安(601318)", "profit_growth": "**+22%**", "profit_expected": "+17%", "rev_growth": "**+2%**", "rev_expected": "+10%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "中国太保(601601)", "profit_growth": "**+16%**", "profit_expected": "+7%", "rev_growth": "**+8%**", "rev_expected": "+5%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "中信证券(600030)", "profit_growth": "**+40%**", "profit_expected": "+10%", "rev_growth": "**+29%**", "rev_expected": "+14%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "汇顶科技(603160)", "profit_growth": "**+31%**", "profit_expected": "+21%", "rev_growth": "**+8%**", "rev_expected": "+38%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "吉比特(603444)", "profit_growth": "**+97%**", "profit_expected": "+12%", "rev_growth": "**+68%**", "rev_expected": "+11%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "华新建材(600801)", "profit_growth": "**+51%**", "profit_expected": "+28%", "rev_growth": "**+3%**", "rev_expected": "+10%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "中国国航(601111)", "profit_growth": "**+2%**", "profit_expected": "-297%", "rev_growth": "**+3%**", "rev_expected": "+8%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "华虹公司(688347)", "profit_growth": "**-7%**", "profit_expected": "-104%", "rev_growth": "**+20%**", "rev_expected": "+26%", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "百奥赛图(688796)", "profit_growth": "**+405%**", "profit_expected": "+86%", "rev_growth": "**+41%**", "rev_expected": "+33%", "rtype": "财报", "ann_date": "2026-03-27"}]}, {"tag": "hr"}, {"tag": "div", "text": {"tag": "lark_md", "content": "📋 **首次覆盖**（有实际数据，暂无券商一致预期）"}}, {"tag": "table", "page_size": 10, "row_height": "low", "header_style": {"text_align": "center", "background_style": "grey", "bold": true}, "columns": [{"name": "stock", "display_name": "股票", "data_type": "text"}, {"name": "profit_growth", "display_name": "利润增速", "data_type": "lark_md"}, {"name": "rev_growth", "display_name": "营收增速", "data_type": "lark_md"}, {"name": "rtype", "display_name": "类型", "data_type": "text"}, {"name": "ann_date", "display_name": "披露日", "data_type": "text"}], "rows": [{"stock": "尚水智能(301513)", "profit_growth": "**-26%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-27"}, {"stock": "埃泰克(603293)", "profit_growth": "**+4%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-27"}, {"stock": "大普微(301666)", "profit_growth": "**+154%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-26"}, {"stock": "坤彩科技(603826)", "profit_growth": "**+194%**", "rev_growth": "-", "rtype": "业绩预告", "ann_date": "2026-03-28"}, {"stock": "日照港(600017)", "profit_growth": "**-32%**", "rev_growth": "**-8%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "华安证券(600909)", "profit_growth": "**+41%**", "rev_growth": "**+31%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "航天机电(600151)", "profit_growth": "**-184%**", "rev_growth": "**-33%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "两面针(600249)", "profit_growth": "**-52%**", "rev_growth": "**+1%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "乐凯胶片(600135)", "profit_growth": "**-24%**", "rev_growth": "**-11%**", "rtype": "财报", "ann_date": "2026-03-27"}, {"stock": "金自天正(600560)", "profit_growth": "**-6%**", "rev_growth": "**+7%**", "rtype": "财报", "ann_date": "2026-03-27"}]}, {"tag": "hr"}, {"tag": "note", "elements": [{"tag": "plain_text", "content": "⏰ 扫描时间 21:01 | 数据源：Tushare + AkShare"}]}]}
+===FEISHU_CARD_JSON_END===
