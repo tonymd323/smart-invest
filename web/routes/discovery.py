@@ -32,12 +32,12 @@ async def discovery_page(
                COALESCE(s.industry, dp.industry) as industry,
                dp.source, dp.score, dp.signal,
                dp.status, dp.discovered_at, dp.expires_at,
-               e.report_period,
+               e.report_type as report_period,
                e.net_profit_yoy
         FROM discovery_pool dp
         LEFT JOIN stocks s ON dp.stock_code = s.code
         LEFT JOIN (
-            SELECT stock_code, report_period, net_profit_yoy,
+            SELECT stock_code, report_type, net_profit_yoy,
                    ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY report_date DESC) as rn
             FROM earnings
         ) e ON dp.stock_code = e.stock_code AND e.rn = 1
