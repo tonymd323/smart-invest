@@ -111,125 +111,100 @@ def _parse_json_or_dict(s: str) -> dict:
     return {}
 
 
+def _format_beat_summary(data):
+    """格式化超预期信号摘要"""
+    parts = []
+    name = data.get('name') or data.get('stock_name') or data.get('stock_code', '')
+    if name and '.S' in name:
+        name = data.get('name', name)
+    dtype = DISCLOSURE_TYPE_MAP.get(data.get('disclosure_type', ''), data.get('disclosure_type', ''))
+    actual = data.get('actual_profit_yoy') or data.get('actual_yoy')
+    expected = data.get('expected_profit_yoy') or data.get('expected_yoy')
+    diff = data.get('profit_diff') or data.get('beat_diff') or data.get('beat_diff_pct')
+    rev_actual = data.get('actual_rev_yoy')
+    rev_expected = data.get('expected_rev_yoy')
+    report = data.get('report_date') or data.get('report_period', '')
+    dedt = data.get('profit_dedt')
+    is_beat = data.get('is_beat')
+    score = data.get('score')
+
+    if name and '.S' not in str(name): parts.append(f"📊 {name}")
+    if dtype: parts.append(f"类型: {dtype}")
+    if actual is not None: parts.append(f"实际利润增速: {actual:+.1f}%")
+    if expected is not None: parts.append(f"预期增速: {expected:+.1f}%")
+    if diff is not None:
+        emoji = '🔥' if diff > 20 else '📈' if diff > 0 else '📉'
+        parts.append(f"{emoji} 超预期差: {diff:+.1f}pp")
+    if is_beat is True: parts.append("✅ 确认超预期")
+    elif is_beat is False: parts.append("❌ 未超预期")
+    if rev_actual is not None and rev_expected is not None:
+        parts.append(f"营收: {rev_actual:+.1f}% vs 预期{rev_expected:+.1f}%")
+    if dedt is not None: parts.append(f"扣非净利: {dedt:.2f}亿")
+    if score is not None and score > 0: parts.append(f"评分: {score:.0f}")
+    if report: parts.append(f"报告期: {report}")
+    return parts
+
+
+def _format_new_high_summary(data):
+    """格式化扣非新高摘要"""
+    parts = []
+    name = data.get('name') or data.get('stock_code', '')
+    if name and '.S' in str(name): name = ''
+    qnp = data.get('quarterly_net_profit') or data.get('quarterly_profit')
+    prev = data.get('prev_quarterly_high') or data.get('prev_high')
+    growth = data.get('growth_pct') or data.get('growth_vs_high')
+    report = data.get('report_period') or data.get('report_date', '')
+    close = data.get('close')
+    pe = data.get('pe')
+
+    if name: parts.append(f"📊 {name}")
+    if qnp is not None: parts.append(f"单季度扣非: {qnp:.2f}亿")
+    if prev is not None: parts.append(f"前高: {prev:.2f}亿")
+    if growth is not None: parts.append(f"增长: {growth:+.1f}%")
+    if close is not None: parts.append(f"收盘: ¥{close:.2f}")
+    if pe is not None and pe < 1000: parts.append(f"PE: {pe:.1f}")
+    if report: parts.append(f"报告期: {report}")
+    return parts
+
+
+def _format_pullback_summary(data):
+    """格式化回调买入摘要"""
+    parts = []
+    code = data.get('stock_code', '')
+    score = data.get('score')
+    level = data.get('level', '')
+    if code: parts.append(f"📊 {code}")
+    if score is not None: parts.append(f"评分: {score:.0f}")
+    if level: parts.append(f"级别: {level}")
+    return parts
+
+
 def format_summary(summary_str: str, analysis_type: str = '') -> str:
-    """将 summary JSON/dict 字符串转为人类可读文本
-    
-    支持多种格式：
-    - earnings_beat_daily: {"name": ..., "profit_diff": ...} (双引号 JSON)
-    - earnings_beat (v2):  {'stock_code': ..., 'beat_diff_pct': ...} (单引号 Python dict)
-    - quarterly_profit_new_high_daily: {"name": ..., "growth_vs_high": ...}
-    - profit_new_high (v2): {'stock_code': ..., 'growth_pct': ...}
-    """
+    """将 summary JSON/dict 字符串转为人类可读文本"""
     if not summary_str:
         return ''
-    
-    # 跳过非结构化文本
     if not summary_str.strip().startswith('{'):
         return summary_str
-    
+
     data = _parse_json_or_dict(summary_str)
     if not data:
-        return summary_str[:200]  # 解析失败，截断返回
+        return summary_str[:200]
 
-    parts = []
     atype = data.get('analysis_type', analysis_type)
 
     if 'earnings_beat' in atype:
-        # 超预期信号 — 兼容多种格式
-        # daily 格式: {name, disclosure_type, actual_profit_yoy, expected_profit_yoy, profit_diff, ...}
-        # v2 格式:    {stock_code, stock_name, actual_profit_yoy, beat_diff_pct, report_period, ...}
-        name = data.get('name') or data.get('stock_name') or data.get('stock_code', '')
-        # 过滤掉仍然是代码格式的名称
-        if name and '.S' in name:
-            name = data.get('name', name)
-        dtype = DISCLOSURE_TYPE_MAP.get(data.get('disclosure_type', ''), data.get('disclosure_type', ''))
-        actual = data.get('actual_profit_yoy') or data.get('actual_yoy')
-        expected = data.get('expected_profit_yoy') or data.get('expected_yoy')
-        diff = data.get('profit_diff') or data.get('beat_diff') or data.get('beat_diff_pct')
-        rev_actual = data.get('actual_rev_yoy')
-        rev_expected = data.get('expected_rev_yoy')
-        report = data.get('report_date') or data.get('report_period', '')
-        dedt = data.get('profit_dedt')
-        is_beat = data.get('is_beat')
-        score = data.get('score')
-
-        if name and '.S' not in str(name):
-            parts.append(f"📊 {name}")
-        if dtype:
-            parts.append(f"类型: {dtype}")
-        if actual is not None:
-            parts.append(f"实际利润增速: {actual:+.1f}%")
-        if expected is not None:
-            parts.append(f"预期增速: {expected:+.1f}%")
-        if diff is not None:
-            emoji = '🔥' if diff > 20 else '📈' if diff > 0 else '📉'
-            parts.append(f"{emoji} 超预期差: {diff:+.1f}pp")
-        if is_beat is True:
-            parts.append("✅ 确认超预期")
-        elif is_beat is False:
-            parts.append("❌ 未超预期")
-        if rev_actual is not None and rev_expected is not None:
-            parts.append(f"营收: {rev_actual:+.1f}% vs 预期{rev_expected:+.1f}%")
-        if dedt is not None:
-            parts.append(f"扣非净利: {dedt:.2f}亿")
-        if score is not None and score > 0:
-            parts.append(f"评分: {score:.0f}")
-        if report:
-            parts.append(f"报告期: {report}")
-
+        parts = _format_beat_summary(data)
     elif 'profit_new_high' in atype or 'new_high' in atype:
-        # 扣非新高 — 兼容两种格式
-        name = data.get('name') or data.get('stock_code', '')
-        # 过滤掉代码格式的名称
-        if name and '.S' in str(name):
-            name = ''
-        qnp = data.get('quarterly_net_profit') or data.get('quarterly_profit')
-        prev = data.get('prev_quarterly_high') or data.get('prev_high')
-        growth = data.get('growth_pct') or data.get('growth_vs_high')
-        report = data.get('report_period') or data.get('report_date', '')
-        close = data.get('close')
-        pe = data.get('pe')
-
-        if name:
-            parts.append(f"📊 {name}")
-        if qnp is not None:
-            parts.append(f"单季度扣非: {qnp:.2f}亿")
-        if prev is not None:
-            parts.append(f"前高: {prev:.2f}亿")
-        if growth is not None:
-            parts.append(f"增长: {growth:+.1f}%")
-        if close is not None:
-            parts.append(f"收盘: ¥{close:.2f}")
-        if pe is not None and pe < 1000:
-            parts.append(f"PE: {pe:.1f}")
-        if report:
-            parts.append(f"报告期: {report}")
-
+        parts = _format_new_high_summary(data)
     elif 'pullback' in atype:
-        # 回调买入
-        code = data.get('stock_code', '')
-        score = data.get('score')
-        level = data.get('level', '')
-
-        if code:
-            parts.append(f"📊 {code}")
-        if score is not None:
-            parts.append(f"评分: {score:.0f}")
-        if level:
-            parts.append(f"级别: {level}")
-
+        parts = _format_pullback_summary(data)
     else:
-        # 通用：取前几个有意义的字段
         skip = {'stock_code', 'analysis_type', 'created_at'}
+        parts = []
         for k, v in data.items():
-            if k in skip or v is None:
-                continue
-            if isinstance(v, float):
-                parts.append(f"{k}: {v:.2f}")
-            else:
-                parts.append(f"{k}: {v}")
-            if len(parts) >= 5:
-                break
+            if k in skip or v is None: continue
+            parts.append(f"{k}: {v:.2f}" if isinstance(v, float) else f"{k}: {v}")
+            if len(parts) >= 5: break
 
     return ' | '.join(parts) if parts else summary_str[:100]
 
