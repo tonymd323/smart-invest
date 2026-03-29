@@ -10,7 +10,7 @@ from web.services import get_db_stats, get_conn, paginate_query, map_analysis_ty
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
-SORT_WHITELIST = ['created_at', 'score', 'stock_code']
+SORT_WHITELIST = ['ar.created_at', 'ar.score', 'ar.stock_code']
 
 
 @router.get("/signals", response_class=HTMLResponse)

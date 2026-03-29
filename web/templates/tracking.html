@@ -1,64 +1,50 @@
 {% extends "base.html" %}
+{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select %}
 {% block title %}T+N 跟踪 — 投资系统 2.2{% endblock %}
-
 {% block content %}
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-gray-800">📈 T+N 跟踪</h2>
+    <p class="text-gray-500 text-sm mt-1">{{ total }} 条记录</p>
 </div>
 
-<!-- 筛选 -->
-<div class="flex gap-4 mb-4 flex-wrap">
-    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/tracking?status='+this.value">
-        <option value="" {{ 'selected' if not current_status }}>全部状态</option>
-        <option value="active" {{ 'selected' if current_status=='active' }}>跟踪中</option>
-        <option value="completed" {{ 'selected' if current_status=='completed' }}>已完成</option>
-        <option value="expired" {{ 'selected' if current_status=='expired' }}>已过期</option>
-    </select>
-    <span class="text-gray-500 text-sm self-center">{{ tracking|length }} 条</span>
+<div class="flex gap-4 mb-4 flex-wrap items-center">
+    {{ filter_select("status", [("","全部"),("active","跟踪中"),("completed","已完成"),("expired","已过期")], status, base_url) }}
+    {{ search_box(search, "搜索代码/名称...", base_url, {"status":status}) }}
 </div>
 
 {% if tracking %}
-<div class="overflow-x-auto">
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>股票</th>
-            <th>类型</th>
-            <th>入池日</th>
-            <th>入池价</th>
-            <th>T+1</th>
-            <th>T+5</th>
-            <th>T+10</th>
-            <th>T+20</th>
-            <th>状态</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for t in tracking %}
-    <tr>
-        <td>
-            <span class="font-medium">{{ t.stock_name }}</span>
-            {% if t.stock_name != t.stock_code %}
-            <span class="text-gray-400 text-xs">{{ t.stock_code }}</span>
-            {% endif %}
-        </td>
-        <td><span class="text-xs text-blue-600">{{ t.event_type_zh }}</span></td>
-        <td class="text-sm">{{ t.event_date or '' }}</td>
-        <td class="text-sm">{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
-        <td class="text-sm {{ 'up' if (t.return_1d or 0) > 0 else 'down' if (t.return_1d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_1d) if t.return_1d is not none else '-' }}%</td>
-        <td class="text-sm {{ 'up' if (t.return_5d or 0) > 0 else 'down' if (t.return_5d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_5d) if t.return_5d is not none else '-' }}%</td>
-        <td class="text-sm {{ 'up' if (t.return_10d or 0) > 0 else 'down' if (t.return_10d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_10d) if t.return_10d is not none else '-' }}%</td>
-        <td class="text-sm {{ 'up' if (t.return_20d or 0) > 0 else 'down' if (t.return_20d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_20d) if t.return_20d is not none else '-' }}%</td>
-        <td><span class="text-xs">{{ t.tracking_status_zh }}</span></td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b">
+            <tr>
+                <th class="text-left px-4 py-2 text-gray-500">股票</th>
+                <th class="text-left px-4 py-2 text-gray-500">类型</th>
+                <th class="text-right px-4 py-2 text-gray-500">入场价</th>
+                <th class="text-right px-4 py-2">{{ sort_header("1日", "return_1d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("5日", "return_5d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("10日", "return_10d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("20日", "return_20d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2 text-gray-500">状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in tracking %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2"><span class="font-medium">{{ t.stock_name }}</span></td>
+                <td class="px-4 py-2 text-xs text-gray-500">{{ t.event_type_zh }}</td>
+                <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.return_1d and t.return_1d>0 else 'text-green-500' if t.return_1d and t.return_1d<0 else '' }}">{{ "%+.1f"|format(t.return_1d) if t.return_1d is not none else '-' }}%</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.return_5d and t.return_5d>0 else 'text-green-500' if t.return_5d and t.return_5d<0 else '' }}">{{ "%+.1f"|format(t.return_5d) if t.return_5d is not none else '-' }}%</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.return_10d and t.return_10d>0 else 'text-green-500' if t.return_10d and t.return_10d<0 else '' }}">{{ "%+.1f"|format(t.return_10d) if t.return_10d is not none else '-' }}%</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.return_20d and t.return_20d>0 else 'text-green-500' if t.return_20d and t.return_20d<0 else '' }}">{{ "%+.1f"|format(t.return_20d) if t.return_20d is not none else '-' }}%</td>
+                <td class="px-4 py-2 text-xs text-gray-400">{{ t.tracking_status_zh }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+{{ pagination(page, total_pages, base_url, {"status":status,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
-<div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
-    <div class="text-4xl mb-3">📊</div>
-    <p class="text-gray-500">暂无跟踪数据</p>
-</div>
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无跟踪记录</div>
 {% endif %}
 {% endblock %}

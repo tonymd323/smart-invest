@@ -19,12 +19,12 @@
     <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b">
             <tr>
-                <th class="text-left px-4 py-2">{{ sort_header("股票", "stock_code", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2">{{ sort_header("股票", "ar.stock_code", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
                 <th class="text-left px-4 py-2 text-gray-500">类型</th>
-                <th class="text-right px-4 py-2">{{ sort_header("评分", "score", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("评分", "ar.score", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
                 <th class="text-center px-4 py-2 text-gray-500">信号</th>
                 <th class="text-left px-4 py-2 text-gray-500">摘要</th>
-                <th class="text-left px-4 py-2">{{ sort_header("时间", "created_at", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2">{{ sort_header("时间", "ar.created_at", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
             </tr>
         </thead>
         <tbody>

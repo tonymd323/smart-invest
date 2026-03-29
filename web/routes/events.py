@@ -10,7 +10,7 @@ from web.services import get_db_stats, get_conn, paginate_query, map_event_type,
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
-SORT_WHITELIST = ['created_at', 'event_date', 'stock_code']
+SORT_WHITELIST = ['et.created_at', 'et.event_date', 'et.stock_code']
 
 
 @router.get("/events", response_class=HTMLResponse)
@@ -19,7 +19,7 @@ async def events_page(
     event_type: Optional[str] = None,
     days: int = Query(7),
     search: Optional[str] = None,
-    sort: str = Query("created_at"),
+    sort: str = Query("et.created_at"),
     order: str = Query("desc"),
     page: int = Query(1, ge=1),
 ):

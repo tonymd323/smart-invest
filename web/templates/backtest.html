@@ -1,84 +1,63 @@
 {% extends "base.html" %}
+{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select %}
 {% block title %}策略回测 — 投资系统 2.2{% endblock %}
-
 {% block content %}
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-gray-800">📊 策略回测</h2>
+    <p class="text-gray-500 text-sm mt-1">{{ total }} 条回测记录</p>
 </div>
 
 <!-- 策略胜率 -->
-{% if perf %}
-<div class="bg-white rounded-lg p-4 border border-gray-200 mb-6">
-    <h3 class="font-semibold mb-3">策略胜率</h3>
-    <table class="data-table text-sm">
-        <thead>
-            <tr><th>信号类型</th><th>出现次数</th><th>平均收益</th><th>胜率</th></tr>
-        </thead>
-        <tbody>
-        {% for p in perf %}
-        <tr>
-            <td>{{ p.signal_type_zh }}</td>
-            <td>{{ p.total }}</td>
-            <td class="{{ 'up' if (p.avg_return or 0) > 0 else 'down' if (p.avg_return or 0) < 0 else '' }}">{{ "%+.2f"|format(p.avg_return) if p.avg_return is not none else '-' }}%</td>
-            <td>{{ "%.0f"|format((p.win_rate or 0) * 100) }}%</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+{% if performance %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    {% for p in performance %}
+    <div class="bg-white rounded-lg border p-4">
+        <div class="text-sm text-gray-500">{{ p.signal_type_zh }}</div>
+        <div class="text-2xl font-bold mt-1">{{ "%.0f"|format(p.win_rate * 100) if p.win_rate else '-' }}%</div>
+        <div class="text-xs text-gray-400">{{ p.total }} 条 · 平均收益 {{ "%+.1f"|format(p.avg_return) if p.avg_return else '-' }}%</div>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}
 
-<!-- 回测结果 -->
-<div class="flex gap-4 mb-4 flex-wrap">
-    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/backtest?type='+this.value">
-        <option value="" {{ 'selected' if not current_type }}>全部类型</option>
-        <option value="超预期" {{ 'selected' if current_type=='超预期' }}>超预期</option>
-        <option value="历史新高" {{ 'selected' if current_type=='历史新高' }}>历史新高</option>
-        <option value="首次覆盖" {{ 'selected' if current_type=='首次覆盖' }}>首次覆盖</option>
-    </select>
-    <span class="text-gray-500 text-sm self-center">{{ results|length }} 条</span>
+<div class="flex gap-4 mb-4 flex-wrap items-center">
+    {{ filter_select("signal_type", [("","全部类型"),("earnings_beat","超预期"),("profit_new_high","扣非新高")], signal_type, base_url) }}
+    {{ search_box(search, "搜索代码/名称...", base_url, {"signal_type":signal_type}) }}
 </div>
 
-{% if results %}
-<div class="overflow-x-auto">
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>股票</th>
-            <th>类型</th>
-            <th>日期</th>
-            <th>入场价</th>
-            <th>T+5</th>
-            <th>T+10</th>
-            <th>T+20</th>
-            <th>结果</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for r in results %}
-    <tr>
-        <td>
-            <span class="font-medium">{{ r.stock_name }}</span>
-            {% if r.stock_name != r.stock_code %}
-            <span class="text-gray-400 text-xs">{{ r.stock_code }}</span>
-            {% endif %}
-        </td>
-        <td><span class="text-xs text-blue-600">{{ r.event_type_zh }}</span></td>
-        <td class="text-sm">{{ r.event_date or '' }}</td>
-        <td class="text-sm">{{ "%.2f"|format(r.entry_price) if r.entry_price else '-' }}</td>
-        <td class="text-sm {{ 'up' if (r.return_5d or 0) > 0 else 'down' if (r.return_5d or 0) < 0 else '' }}">{{ "%+.2f"|format(r.return_5d) if r.return_5d is not none else '-' }}%</td>
-        <td class="text-sm {{ 'up' if (r.return_10d or 0) > 0 else 'down' if (r.return_10d or 0) < 0 else '' }}">{{ "%+.2f"|format(r.return_10d) if r.return_10d is not none else '-' }}%</td>
-        <td class="text-sm {{ 'up' if (r.return_20d or 0) > 0 else 'down' if (r.return_20d or 0) < 0 else '' }}">{{ "%+.2f"|format(r.return_20d) if r.return_20d is not none else '-' }}%</td>
-        <td>{% if r.is_win == 1 %}<span class="tag-buy">胜</span>{% elif r.is_win == 0 %}<span class="tag-avoid">败</span>{% else %}<span class="text-gray-400">-</span>{% endif %}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+{% if backtest %}
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b">
+            <tr>
+                <th class="text-left px-4 py-2">{{ sort_header("日期", "event_date", sort, order, base_url, {"signal_type":signal_type,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2 text-gray-500">股票</th>
+                <th class="text-left px-4 py-2 text-gray-500">类型</th>
+                <th class="text-right px-4 py-2">{{ sort_header("5日", "return_5d", sort, order, base_url, {"signal_type":signal_type,"search":search or ""}) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("20日", "return_20d", sort, order, base_url, {"signal_type":signal_type,"search":search or ""}) }}</th>
+                <th class="text-center px-4 py-2 text-gray-500">结果</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in backtest %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2 text-xs text-gray-400">{{ b.event_date[:10] if b.event_date else '' }}</td>
+                <td class="px-4 py-2"><span class="font-medium">{{ b.stock_name }}</span></td>
+                <td class="px-4 py-2 text-xs text-gray-500">{{ b.event_type_zh }}</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if b.return_5d and b.return_5d>0 else 'text-green-500' if b.return_5d and b.return_5d<0 else '' }}">{{ "%+.1f"|format(b.return_5d) if b.return_5d is not none else '-' }}%</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if b.return_20d and b.return_20d>0 else 'text-green-500' if b.return_20d and b.return_20d<0 else '' }}">{{ "%+.1f"|format(b.return_20d) if b.return_20d is not none else '-' }}%</td>
+                <td class="text-center px-4 py-2">
+                    {% if b.is_win == 1 %}<span class="text-green-500">✅</span>
+                    {% elif b.is_win == 0 %}<span class="text-red-400">❌</span>
+                    {% else %}<span class="text-gray-300">-</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+{{ pagination(page, total_pages, base_url, {"signal_type":signal_type,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
-<div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
-    <div class="text-4xl mb-3">📈</div>
-    <p class="text-gray-500">暂无回测数据</p>
-</div>
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无回测数据</div>
 {% endif %}
 {% endblock %}
