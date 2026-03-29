@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select %}
+{% from "macros/list_controls.html" import search_box, filter_select, pagination %}
 {% block title %}事件流 — 投资系统 2.2{% endblock %}
 {% block content %}
 <div class="mb-6">
@@ -8,15 +8,17 @@
 </div>
 
 <div class="flex gap-4 mb-4 flex-wrap items-center">
-    {{ filter_select("event_type", [("","全部类型"),("capital_buy","增持/回购"),("capital_sell","减持"),("major_contract","重大合同"),("finance_report","财报/经营"),("finance_dividend","分红派息"),("policy利好","政策利好"),("policy利空","政策利空"),("ops_production","投产/扩产"),("ops_restructure","重组/并购"),("risk_warning","风险警示")], event_type, base_url) }}
+    {{ filter_select("event_type", [("","全部类型"),("capital_buy","增持/回购"),("capital_sell","减持"),("major_contract","重大合同"),("finance_report","财报/经营"),("finance_dividend","分红派息"),("policy利好","政策利好"),("policy利空","政策利空"),("earnings_beat","超预期"),("profit_new_high","扣非新高"),("ops_production","投产/扩产"),("ops_restructure","重组/并购"),("risk_warning","风险警示")], event_type, base_url) }}
     {{ filter_select("sentiment", [("","全部情感"),("positive","利好"),("negative","利空"),("neutral","中性")], sentiment, base_url) }}
     {{ filter_select("days", [("1","今日"),("3","3天"),("7","7天"),("30","30天")], days|string, base_url) }}
-    {{ search_box(search, "搜索代码/名称/标题...", base_url, {"event_type":event_type,"sentiment":sentiment,"days":days}) }}
+    {{ search_box(search, "搜索代码/名称...", base_url, {"event_type":event_type,"sentiment":sentiment,"days":days}) }}
 </div>
 
 {% if events %}
 <div class="space-y-3">
     {% for e in events %}
+    {% if e.source_type == 'news' %}
+    <!-- 新闻事件 -->
     <div class="bg-white rounded-lg border {% if e.sentiment == 'positive' %}border-green-200{% elif e.sentiment == 'negative' %}border-red-200{% else %}border-gray-200{% endif %} p-4">
         <div class="flex items-start justify-between mb-1">
             <div class="flex items-center gap-2">
@@ -36,11 +38,36 @@
             <span class="text-xs text-gray-400">{{ e.created_at[:16] if e.created_at else '' }}</span>
         </div>
         <div class="text-sm text-gray-700 ml-7">{{ e.title }}</div>
-        {% if e.source %}<div class="text-xs text-gray-400 ml-7 mt-1">来源: {{ e.source }}</div>{% endif %}
+        {% if e.source %}<div class="text-xs text-gray-400 ml-7 mt-1">{{ e.source }}</div>{% endif %}
     </div>
+    {% else %}
+    <!-- 信号跟踪 -->
+    <div class="bg-white rounded-lg border border-blue-200 p-4">
+        <div class="flex items-start justify-between mb-1">
+            <div class="flex items-center gap-2">
+                {% if e.event_type == 'earnings_beat' %}<span class="text-blue-600">🔥</span>
+                {% elif e.event_type == 'profit_new_high' %}<span class="text-blue-600">📊</span>
+                {% else %}<span class="text-gray-400">📌</span>{% endif %}
+                <span class="font-medium text-gray-900">{{ e.stock_name }}</span>
+                <span class="text-gray-400 text-xs">{{ e.stock_code }}</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-600">{{ e.event_type_zh }}</span>
+                {% if e.profit_diff is not none %}
+                <span class="text-xs font-mono {{ 'text-green-600' if e.profit_diff > 0 else 'text-red-600' }}">{{ "%+.1f"|format(e.profit_diff) }}pp</span>
+                {% endif %}
+            </div>
+            <span class="text-xs text-gray-400">{{ e.created_at[:16] if e.created_at else '' }}</span>
+        </div>
+        <div class="flex gap-4 ml-7 mt-1 text-xs text-gray-500">
+            {% if e.return_5d is not none %}<span>5日: <span class="font-mono {{ 'text-green-600' if e.return_5d > 0 else 'text-red-600' }}">{{ "%+.1f"|format(e.return_5d) }}%</span></span>{% endif %}
+            {% if e.return_20d is not none %}<span>20日: <span class="font-mono {{ 'text-green-600' if e.return_20d > 0 else 'text-red-600' }}">{{ "%+.1f"|format(e.return_20d) }}%</span></span>{% endif %}
+            {% if e.entry_price is not none %}<span>入场: ¥{{ "%.2f"|format(e.entry_price) }}</span>{% endif %}
+            <span class="text-gray-400">{{ e.tracking_status or 'pending' }}</span>
+        </div>
+    </div>
+    {% endif %}
     {% endfor %}
 </div>
-{{ pagination(page, total_pages, base_url, {"event_type":event_type,"sentiment":sentiment,"days":days,"search":search or "","sort":sort,"order":order}) }}
+{{ pagination(page, total_pages, base_url, {"event_type":event_type,"sentiment":sentiment,"days":days,"search":search or ""}) }}
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">📭 暂无事件（晚间扫描后自动生成）</div>
 {% endif %}
