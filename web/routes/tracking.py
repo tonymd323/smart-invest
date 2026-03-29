@@ -7,6 +7,27 @@ from typing import Optional
 
 from web.services import get_db_stats, get_conn, paginate_query, map_event_type, map_tracking_status
 
+
+def _fmt_period(period: str) -> str:
+    """格式化报告期：20251231 → 2025年报，20260331 → 2026Q1预告"""
+    if not period:
+        return ''
+    p = str(period).replace('-', '')
+    if len(p) < 8:
+        return period
+    year = p[:4]
+    md = p[4:]
+    if md == '1231':
+        return f'{year}年报'
+    elif md == '0331':
+        return f'{year}Q1预告'
+    elif md == '0630':
+        return f'{year}中报'
+    elif md == '0930':
+        return f'{year}Q3预告'
+    else:
+        return f'{year}-{md}'
+
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
@@ -30,6 +51,7 @@ async def tracking_page(
                COALESCE(s.name, et.stock_name, et.stock_code) as stock_name,
                et.event_type, et.event_date, et.entry_price,
                et.return_1d, et.return_5d, et.return_10d, et.return_20d,
+               et.report_period, et.actual_yoy, et.expected_yoy, et.profit_diff,
                et.tracking_status, et.last_updated
         FROM event_tracking et
         LEFT JOIN stocks s ON et.stock_code = s.code
@@ -54,6 +76,7 @@ async def tracking_page(
         d = dict(r)
         d['event_type_zh'] = map_event_type(d.get('event_type'))
         d['tracking_status_zh'] = map_tracking_status(d.get('tracking_status'))
+        d['period_zh'] = _fmt_period(d.get('report_period', ''))
         results.append(d)
 
     return templates.TemplateResponse("tracking.html", {

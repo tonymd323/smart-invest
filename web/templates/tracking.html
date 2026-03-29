@@ -24,6 +24,9 @@
             <tr>
                 <th class="text-left px-4 py-2 text-gray-500">股票</th>
                 <th class="text-left px-4 py-2 text-gray-500">类型</th>
+                <th class="text-left px-4 py-2 text-gray-500">报告期</th>
+                <th class="text-right px-4 py-2 text-gray-500">实际增速</th>
+                <th class="text-right px-4 py-2 text-gray-500">预期增速</th>
                 <th class="text-right px-4 py-2 text-gray-500">入场价</th>
                 <th class="text-right px-4 py-2">{{ sort_header("1日", "return_1d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
                 <th class="text-right px-4 py-2">{{ sort_header("5日", "return_5d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
@@ -37,6 +40,9 @@
             <tr class="border-b hover:bg-gray-50">
                 <td class="px-4 py-2"><span class="font-medium">{{ t.stock_name }}</span></td>
                 <td class="px-4 py-2 text-xs text-gray-500">{{ t.event_type_zh }}</td>
+                <td class="px-4 py-2 text-xs">{{ t.period_zh }}</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.actual_yoy and t.actual_yoy>0 else 'text-green-500' if t.actual_yoy and t.actual_yoy<0 else '' }}">{{ "%+.1f"|format(t.actual_yoy) if t.actual_yoy is not none else '-' }}%</td>
+                <td class="text-right px-4 py-2 font-mono text-xs text-gray-400">{{ "%+.1f"|format(t.expected_yoy) if t.expected_yoy is not none else '-' }}%</td>
                 <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
                 <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.return_1d and t.return_1d>0 else 'text-green-500' if t.return_1d and t.return_1d<0 else '' }}">{{ "%+.1f"|format(t.return_1d) if t.return_1d is not none else '-' }}%</td>
                 <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.return_5d and t.return_5d>0 else 'text-green-500' if t.return_5d and t.return_5d<0 else '' }}">{{ "%+.1f"|format(t.return_5d) if t.return_5d is not none else '-' }}%</td>

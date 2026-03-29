@@ -3,6 +3,7 @@ version: "3.8"
 services:
   smart-invest:
     build: .
+    image: smart-invest:latest
     container_name: smart-invest
     ports:
       - "8080:8080"
