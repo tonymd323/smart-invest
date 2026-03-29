@@ -86,8 +86,17 @@ class EarningsAnalyzer:
             stock_code = rec["stock_code"]
             stock_name = rec.get("stock_name", stock_code)
 
-            # 实际利润增速
+            # 实际利润增速（预告用上限，实际财报用中值）
+            is_forecast = rec.get("is_forecast", 0)
             actual_yoy = rec.get("net_profit_yoy", 0) or 0
+            yoy_lower = rec.get("net_profit_yoy_lower")
+            yoy_upper = rec.get("net_profit_yoy_upper")
+            forecast_type = rec.get("forecast_type", "")
+            
+            # 对于预告，用上限做超预期判断（更敏感）
+            if is_forecast and yoy_upper is not None:
+                actual_yoy = yoy_upper
+            
             report_date = rec.get("report_date", "")
 
             # 动态选年份: 2025-12-31 → 25E, 2026-03-31 → 26E
@@ -143,6 +152,10 @@ class EarningsAnalyzer:
                 "analysis_type": "earnings_beat",
                 "report_period": rec.get("report_date"),
                 "actual_profit_yoy": actual_yoy,
+                "yoy_lower": yoy_lower,
+                "yoy_upper": yoy_upper,
+                "is_forecast": is_forecast,
+                "forecast_type": forecast_type,
                 "beat_diff_pct": beat_diff,
                 "is_beat": is_beat,
                 "is_miss": is_miss,

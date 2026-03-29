@@ -20,7 +20,7 @@ async def signals_page(
     report_type: Optional[List[str]] = Query(None),
     days: int = Query(7),
     search: Optional[str] = None,
-    sort: str = Query("created_at"),
+    sort: str = Query("ar.created_at"),
     order: str = Query("desc"),
     page: int = Query(1, ge=1),
 ):

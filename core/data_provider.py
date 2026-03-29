@@ -366,6 +366,85 @@ class FinancialProvider(BaseProvider):
             logger.error(f"[FinancialProvider] fetch_price 失败 {stock_code}: {e}")
         return {}
 
+    def fetch_forecast(self, stock_code: str) -> List[dict]:
+        """
+        获取业绩预告数据（东方财富 API）
+
+        返回: List[dict]，每个 dict 包含:
+            - report_date: 报告期
+            - forecast_type: 预告类型（预增/预减/扭亏/首亏/续亏/略增/略减）
+            - net_profit_yoy: 净利润同比增速（%，取中值）
+            - net_profit_yoy_lower: 增速下限（%）
+            - net_profit_yoy_upper: 增速上限（%）
+            - net_profit: 预计净利润（亿元）
+            - content: 预告全文
+        """
+        try:
+            import requests
+            code = _ts_code_to_em(stock_code)
+            params = {
+                'reportName': 'RPT_PUBLIC_OP_NEWPREDICT',
+                'columns': 'ALL',
+                'filter': f'(SECURITY_CODE="{code}")',
+                'pageNumber': 1,
+                'pageSize': 10,
+                'sortTypes': -1,
+                'sortColumns': 'REPORT_DATE'
+            }
+            resp = requests.get(self.BASE_URL, params=params, timeout=10)
+            data = resp.json()
+
+            if not data.get('result') or not data['result'].get('data'):
+                return []
+
+            results = []
+            for item in data['result']['data']:
+                # 只要净利润相关的预告
+                finance_code = item.get('PREDICT_FINANCE_CODE', '')
+                if finance_code not in ('004', '005'):  # 004=归母净利润, 005=扣非净利润
+                    continue
+
+                report_date = (item.get('REPORT_DATE') or '')[:10]
+                if not report_date:
+                    continue
+
+                lower = item.get('ADD_AMP_LOWER')
+                upper = item.get('ADD_AMP_UPPER')
+                # 计算中值
+                if lower is not None and upper is not None:
+                    mid = (lower + upper) / 2
+                elif lower is not None:
+                    mid = lower
+                elif upper is not None:
+                    mid = upper
+                else:
+                    mid = None
+
+                amt_lower = item.get('PREDICT_AMT_LOWER')
+                amt_upper = item.get('PREDICT_AMT_UPPER')
+                net_profit = None
+                if amt_lower is not None and amt_upper is not None:
+                    net_profit = (amt_lower + amt_upper) / 2 / 1e8  # 转亿元
+
+                results.append({
+                    'stock_code': stock_code,
+                    'report_date': report_date,
+                    'report_type': 'Q1' if '03-31' in report_date else 'Q3' if '09-30' in report_date else 'forecast',
+                    'forecast_type': item.get('PREDICT_TYPE', ''),
+                    'net_profit_yoy': mid,
+                    'net_profit_yoy_lower': lower,
+                    'net_profit_yoy_upper': upper,
+                    'net_profit': net_profit,
+                    'content': item.get('PREDICT_CONTENT', ''),
+                    'is_forecast': 1,
+                })
+
+            return results
+
+        except Exception as e:
+            logger.error(f"[FinancialProvider] fetch_forecast 失败 {stock_code}: {e}")
+            return []
+
 
 # ── ConsensusProvider ─────────────────────────────────────────────────────────
 

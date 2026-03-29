@@ -168,6 +168,12 @@ class Pipeline:
                                 f"[Pipeline] {code}: "
                                 f"{len(dicts)} 条来自 {provider.last_source}"
                             )
+                        # FinancialProvider 额外采集业绩预告
+                        if type(provider).__name__ == 'FinancialProvider' and hasattr(provider, 'fetch_forecast'):
+                            forecasts = provider.fetch_forecast(code)
+                            if forecasts:
+                                all_records.extend(forecasts)
+                                logger.info(f"[Pipeline] {code}: {len(forecasts)} 条业绩预告")
                     except Exception as e:
                         logger.error(f"[Pipeline] {code} Provider 异常: {e}")
                         # 不中断，继续其他 Provider
@@ -222,11 +228,13 @@ class Pipeline:
         try:
             # Step 1: 写入基础数据
             for rec in records:
+                is_forecast = rec.get("is_forecast", 0)
                 conn.execute("""
                     INSERT OR REPLACE INTO earnings 
                     (stock_code, report_date, net_profit, net_profit_yoy,
-                     revenue, revenue_yoy, roe, gross_margin, eps)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     revenue, revenue_yoy, roe, gross_margin, eps,
+                     is_forecast, net_profit_yoy_lower, net_profit_yoy_upper, forecast_type)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     rec.get("stock_code"),
                     rec.get("report_date"),
@@ -237,6 +245,10 @@ class Pipeline:
                     rec.get("roe"),
                     rec.get("gross_margin"),
                     rec.get("eps"),
+                    is_forecast,
+                    rec.get("net_profit_yoy_lower"),
+                    rec.get("net_profit_yoy_upper"),
+                    rec.get("forecast_type"),
                 ))
                 written += 1
 
