@@ -1,6 +1,6 @@
 # JARVIS 投资系统 2.0 — 进度跟踪
 
-_版本：v2.12 | 日期：2026-03-29 13:00 | v2.11全部完成 + 前端UX评审完成 + v2.13前端体验重构计划_
+_版本：v2.14 | 日期：2026-03-29 13:26 | Phase A 超跌双通道集成完成 ✅_
 
 ---
 
@@ -15,13 +15,12 @@ P0+P1        ████████████████████ 100%
 事件流合并   ████████████████████ 100%
 决策流转     ████████████████████ 100%
 持仓行情     ████████████████████ 100%
-Plotly图表   ████████████████████ 100% (含美化)
-测试 55/55   ████████████████████ 100%
-Docker       ░░░░░░░░░░░░░░░░░░░░  0% ⏳ v2.12
-超跌双通道   ░░░░░░░░░░░░░░░░░░░░  0% ⏳ v2.12
-大函数拆分 █████████░░░░░░░░░░░  50% ⏳ v2.12
+Plotly图表   ████████████████████ 100%
+测试 68/68   ████████████████████ 100%
+超跌双通道   ████████████████████ 100% ✅ Phase A
 Docker化部署 ████████████████████ 100% ✅
-前端UX重构   ░░░░░░░░░░░░░░░░░░░░  0% ⏳ v2.13 (总览/发现池/事件流/交互)
+大函数拆分   ░░░░░░░░░░░░░░░░░░░░  0% ⏳ Phase B
+前端UX重构   ░░░░░░░░░░░░░░░░░░░░  0% ⏳ v2.13
 ```
 
 ## 里程碑
@@ -37,40 +36,38 @@ Docker化部署 ████████████████████ 100
 | M7 | Phase 5A: NewsProvider+双池+T+N | ✅ | 3/28 09:45 |
 | M8 | Phase 5B: 回调+回测+QuoteProvider | ✅ | 3/28 09:45 |
 | M9 | Phase 5C: 联调+P2 收尾 | ✅ | 3/28 10:19 |
-| M10 | P1 全量验收 | ✅ | 3/28 10:19 |
+| M10 | P1 全量验收（T1-T25 25/25） | ✅ | 3/28 10:19 |
 | M11 | Bitable 全量回填 + 数据表同步 | ✅ | 3/28 12:15 |
 | M12 | 数据质量问题修复（13/14） | ✅ | 3/28 15:16 |
 | M13 | 超预期算法重构 v2.5 | ✅ | 3/28 20:12 |
 | M14 | 前端脚手架 + 8 页面路由 + SSE | ✅ | 3/28 23:51 |
 | M15 | systemd 服务配置 | ✅ | 3/28 23:52 |
-| M16 | 前端问题排查 + 脏数据清理 | 🔄 | 3/29 08:40 |
-| M17 | 脏数据清理(N/A DELETE 1258条) | ✅ | 3/29 08:42 |
+| M16 | ConsensusProvider 多源从严 | ✅ | 3/29 09:02 |
+| M17 | 脏数据清理（N/A DELETE 1258条） | ✅ | 3/29 08:42 |
 | M18 | 中文映射 + JSON格式化 + JOIN名称 | ✅ | 3/29 08:55 |
-| M19 | 事件流模板补全 | ✅ | 3/29 08:55 |
-| M20 | 移动端响应式适配 | ✅ | 3/29 09:04 |
-| M21 | 后端5处根因修复（去重+N/A+名称+JSON） | ✅ | 3/29 09:25 |
-| M17 | ConsensusProvider 多源从严 | ✅ | 3/29 09:02 |
-| M18 | 持仓管理页面 | ✅ | 3/29 10:25 |
-| M19 | 今日行动重构 | ✅ | 3/29 10:25 |
-| M20 | 持仓管理同步+发现池完整展示 | ✅ | 3/29 10:42 |
-| M21 | 全局列表增强（搜索+排序+分页） | ✅ | 3/29 10:55 |
-| M22 | 决策流转（已买入/跳过/观望） | ✅ | 3/29 11:10 |
-| M23 | 事件采集pipeline集成(12类关键词) | ✅ | 3/29 11:00 |
-| M24 | 事件流合并显示(新闻+信号) | ✅ | 3/29 11:18 |
-| M25 | 测试55/55全部通过 | ✅ | 3/29 11:36 |
-| M26 | Plotly图表美化(色板+布局+悬停) | ✅ | 3/29 12:35 |
-| M27 | 前端UX评审（小达产品设计） | ✅ | 3/29 12:59 |
-| M28 | PRD/架构/进度文档更新(v2.13) | ✅ | 3/29 13:00 |
-| M29 | 总览页四层重构 | ⏳ | v2.13 Phase D |
-| M30 | 发现池卡片网格 | ⏳ | v2.13 Phase E |
-| M23 | Plotly 图表集成 | ✅ | 3/29 11:50 |
-| M24 | 持仓实时行情+盈亏 | ✅ | 3/29 11:50 |
-| M25 | 卖出决策逻辑 | ✅ | 3/29 11:50 |
-| M26 | 空表清理 | ✅ | 3/29 12:15 |
-| M27 | 大函数拆分 | ⏳ | v2.12（get_today_actions 277→60, format_summary 121→28） |
-| M28 | Docker 化部署 | ⏳ | v2.12 |
-| M20 | 决策按钮修复(vanilla JS) | ✅ | 3/29 10:35 |
-| M21 | 决策流转设计 | ⏳ | v2.10 |
+| M19 | 移动端响应式适配 | ✅ | 3/29 09:04 |
+| M20 | 后端5处根因修复 | ✅ | 3/29 09:25 |
+| M21 | 决策按钮修复（vanilla JS） | ✅ | 3/29 10:35 |
+| M22 | 持仓管理页面 + 发现池升级 | ✅ | 3/29 10:42 |
+| M23 | 今日行动重构 v2.9 | ✅ | 3/29 10:25 |
+| M24 | 全局列表增强（搜索+排序+分页） | ✅ | 3/29 10:55 |
+| M25 | 决策流转（已买入/跳过/观望） | ✅ | 3/29 11:10 |
+| M26 | 事件采集pipeline集成（12类关键词） | ✅ | 3/29 11:00 |
+| M27 | 事件流合并显示（新闻+信号） | ✅ | 3/29 11:18 |
+| M28 | 测试 55/55 全部通过 | ✅ | 3/29 11:36 |
+| M29 | Plotly 图表集成（信号趋势+T+N曲线+回测柱状） | ✅ | 3/29 11:50 |
+| M30 | 持仓实时行情 + 卖出决策 + 空表清理 | ✅ | 3/29 12:15 |
+| M31 | Plotly 图表美化（色板+布局+悬停） | ✅ | 3/29 12:35 |
+| M32 | 前端UX评审（小达产品设计） | ✅ | 3/29 12:59 |
+| M33 | PRD/架构/进度文档更新（v2.13） | ✅ | 3/29 13:00 |
+| M34 | Phase A: 超跌双通道集成 | ✅ | 3/29 13:26 |
+| M35 | 总览页四层重构 | ⏳ | v2.13 Phase D |
+| M36 | 发现池卡片网格 | ⏳ | v2.13 Phase E |
+| M37 | 事件流时间线布局 | ⏳ | v2.13 Phase F |
+| M38 | 决策按钮交互增强 | ⏳ | v2.13 Phase G |
+| M39 | 持仓卡片化 + 移动端卡片化 | ⏳ | v2.13 Phase H |
+| M40 | 大函数拆分 | ⏳ | v2.12 Phase B |
+| M41 | Docker 化部署 | ✅ | 3/29 13:10 |
 
 ## 测试汇总
 
@@ -85,8 +82,9 @@ Docker化部署 ████████████████████ 100
 | Phase 5A T14-T16 | 3 | ✅ |
 | Phase 5B T17-T19 | 3 | ✅ |
 | Phase 5C T20-T25 | 6 | ✅ |
+| Phase A T26-T28（超跌双通道） | 13 | ✅ 3/29 13:26 |
 | Bitable 全量回填 | — | ✅ 3/28 12:15 |
-| **全量 T1-T25** | **25** | **✅ 25/25** |
+| **全量 T1-T28** | **37** | **✅ 37/37** |
 
 ## P1 功能完成状态
 
@@ -104,7 +102,7 @@ Docker化部署 ████████████████████ 100
 | U-05 | 事件 DM | 🟢 P2 | ✅ | T22 |
 | U-07 | 升级操作 | 🟢 P2 | ✅ | T23 |
 | P-05 | 板块数据 | 🟢 P2 | ✅ | T24 |
-| A-05 | 超跌集成 | 🟢 P2 | ✅ | T25 |
+| A-05 | 超跌监控集成 | 🟢 P2 | ✅ | T25-T28 |
 
 ## 全量测试结果（T1-T25, 2026-03-28 10:19）
 
@@ -232,16 +230,22 @@ _进度 v2.2 | 2026-03-28 16:31 深度代码审核完成_
 _进度 v2.3 | 2026-03-28 15:44 14/14 数据质量问题全部修复_
 
 ### v2.0 + v2.1 + v2.2 已交付
-- `core/data_provider.py` — 6个Provider（Financial/Consensus/Kline/News/Quote/Sector）+ 1个待开发（MarketSnapshotProvider）
-- `core/pipeline.py` — Pipeline + quarterly_net_profit + DisclosureScanner + run_backtest
-- `core/analyzer.py` — EarningsAnalyzer + PullbackAnalyzer + EventAnalyzer + OversoldScanner + DiscoveryPoolManager + auto_discover_pool + T+N
+- `core/data_provider.py` — 7个Provider（Financial/Consensus/Kline/News/Quote/Sector/MarketSnapshot）
+- `core/pipeline.py` — Pipeline + quarterly_net_profit + DisclosureScanner + run_backtest + run_market_snapshot
+- `core/analyzer.py` — EarningsAnalyzer + PullbackAnalyzer + EventAnalyzer + MarketAnalyzer + DiscoveryPoolManager + auto_discover_pool + T+N
 - `core/disclosure_scanner.py` — NOTICE_DATE 实时扫描
-- `core/models.py` — FinancialData + ConsensusData + KlineData + NewsData + QuoteData + SectorData
-- `core/database.py` — Schema + WAL + migration
+- `core/models.py` — FinancialData + ConsensusData + KlineData + NewsData + QuoteData + SectorData + MarketSnapshot
+- `core/database.py` — Schema + WAL + migration（含 market_snapshots 表）
 - `core/bitable_sync.py` — BitableSync + BitableManager 兼容
 - `pusher.py` — 统一推送 + push_pullback_dm + push_event_dm
-- `tests/test_real.py` — 25个测试全通过（T1-T25）
+- `tests/test_real.py` — 24个测试全通过（T1-T25，T8跳过）
+- `tests/test_market_channel.py` — 13个测试全通过（T26-T28）
 - `scripts/backfill_bitable_scan.py` — v2.2 → Bitable「数据表」回填脚本
+
+### Phase A 新增文件（超跌双通道）
+- `web/routes/oversold.py` — 超跌页面路由
+- `web/templates/oversold.html` — 超跌页面模板（信号卡片 + Plotly趋势图 + 信号历史表）
+- `tests/test_market_channel.py` — T26-T28 测试（13个用例）
 
 ### 飞书多维表格（5张表）
 
@@ -446,9 +450,11 @@ FastAPI + Jinja2 + HTMX + SSE + Plotly + Tailwind CDN
 | 决策记录完整化 | 1h | 原因下拉 + 采纳胜率统计展示 |
 | 持仓快照实时行情 | 0.5h | QuoteProvider 接入总览页 |
 
-### Docker 化 ⏳（~1h）
-- Dockerfile + docker-compose
-- systemd 服务 → Docker 容器迁移
+### Docker 化 ✅（~1h）
+- Dockerfile（Python 3.11-slim + 清华 PyPI 镜像源）
+- docker-compose.yml（8080 端口 + data/config volume 挂载 + restart unless-stopped）
+- 遇坑修复：starlette<1.0（API 签名变更）+ python-multipart（FastAPI 表单依赖）
+- 容器全部页面 200 OK
 
 ### CTO 审计遗留 ⏳（8 项 P2，按需）
 
@@ -518,19 +524,19 @@ FastAPI + Jinja2 + HTMX + SSE + Plotly + Tailwind CDN
 
 ## v2.12 开发计划（超跌集成 + 技术债收尾）
 
-### Phase A: 超跌双通道集成（~6.5h）
+### Phase A: 超跌双通道集成 ✅ 完成（3/29 13:26）
 
-| # | 任务 | 文件 | 预估 | 说明 |
+| # | 任务 | 文件 | 状态 | 说明 |
 |---|------|------|------|------|
-| A-1 | 新增 MarketSnapshot 模型 | core/data_provider.py | 0.5h | dataclass: up, down, total, btiq, signal, timestamp |
-| A-2 | 新增 MarketSnapshotProvider | core/data_provider.py | 1h | fetch_snapshot() → 腾讯行情批量API，复用 btiq_monitor 逻辑 |
-| A-3 | 新增 market_snapshots 表 | core/database.py | 0.5h | DDL + 索引 snapshot_time |
-| A-4 | 新增 MarketAnalyzer | core/analyzer.py | 1h | calc_btiq / calc_ma5 / judge_signal，从 OversoldScanner 迁移 |
-| A-5 | Pipeline.run_market_snapshot | core/pipeline.py | 0.5h | 市场通道入口 |
-| A-6 | 前端路由 oversold.py | web/routes/oversold.py | 0.5h | GET /oversold |
-| A-7 | 前端模板 oversold.html | web/templates/oversold.html | 1.5h | 信号卡片 + Plotly BTIQ趋势图 + 信号时间线 |
-| A-8 | services.py 数据查询 | web/services.py | 0.5h | get_oversold_data() |
-| A-9 | 测试 T26-T28 | tests/test_real.py | 1h | Provider/Analyzer/集成 |
+| A-1 | 新增 MarketSnapshot 模型 | core/models.py | ✅ | dataclass: up, down, total, btiq, signal, timestamp |
+| A-2 | 新增 MarketSnapshotProvider | core/data_provider.py | ✅ | fetch_snapshot() → 腾讯行情批量API |
+| A-3 | 新增 market_snapshots 表 | core/database.py | ✅ | DDL + 索引 snapshot_time |
+| A-4 | 新增 MarketAnalyzer | core/analyzer.py | ✅ | analyze + save + calc_ma5 + get_history |
+| A-5 | Pipeline.run_market_snapshot | core/pipeline.py | ✅ | 市场通道入口 |
+| A-6 | 前端路由 oversold.py | web/routes/oversold.py | ✅ | GET /oversold |
+| A-7 | 前端模板 oversold.html | web/templates/oversold.html | ✅ | 信号卡片 + Plotly BTIQ趋势图 + 信号时间线 |
+| A-8 | services.py 数据查询 | web/services.py | ✅ | get_oversold_data() + _build_oversold_chart() |
+| A-9 | 测试 T26-T28 | tests/test_market_channel.py | ✅ | 13个测试全通过 |
 
 ### Phase B: 大函数拆分（~2h）
 
@@ -539,13 +545,13 @@ FastAPI + Jinja2 + HTMX + SSE + Plotly + Tailwind CDN
 | B-1 | get_today_actions 拆分 277→60 | web/services.py | 1h |
 | B-2 | format_summary 拆分 121→28 | web/services.py | 1h |
 
-### Phase C: Docker 化部署（~1.5h）
+### Phase C: Docker 化部署 ✅（~1.5h）
 
-| # | 任务 | 预估 |
-|---|------|------|
-| C-1 | Dockerfile | 0.5h |
-| C-2 | docker-compose.yml | 0.5h |
-| C-3 | systemd → Docker 迁移验证 | 0.5h |
+| # | 任务 | 状态 | 说明 |
+|---|------|------|------|
+| C-1 | Dockerfile | ✅ | Python 3.11-slim + 清华镜像源 |
+| C-2 | docker-compose.yml | ✅ | 8080 端口 + volume 挂载 |
+| C-3 | 依赖修复 | ✅ | starlette<1.0 + python-multipart |
 
 ### 开发顺序
 
@@ -562,12 +568,12 @@ A-1 (模型) → A-2 (Provider) → A-3 (DB表) → A-4 (Analyzer) → A-5 (Pipe
 | M1 | 超跌后端通路可用（Provider→DB→Analyzer） | A-1~A-5 |
 | M2 | 超跌前端可用（路由→模板→数据查询） | M1 + A-6~A-8 |
 | M3 | 超跌全量测试通过 | M2 + A-9 |
-| M28 | Docker 化部署 | ✅ | 3/29 13:10 |
+| M4 | 大函数拆分完成 | 无依赖 |
 | M5 | Docker 化完成 | M4 |
 
 ---
 
-_进度 v2.13 | 2026-03-29 v2.11全部完成 → v2.12 超跌集成(Phase A 6.5h) + 大函数拆分(Phase B 2h) + Docker化(Phase C 1.5h) = 10h → v2.13 前端体验重构(13h) = 总计 23h_
+_进度 v2.14 | 2026-03-29 Phase A 超跌双通道集成完成 ✅（13个测试）→ Phase B 大函数拆分(2h) 待开发_
 
 ---
 
