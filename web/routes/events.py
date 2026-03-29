@@ -99,10 +99,10 @@ async def events_page(
     start = (page - 1) * page_size
     events = all_events[start:start + page_size]
 
-    # 按日期分组（时间线用）
+    # 按日期分组（只对分页后的数据分组）
     from collections import OrderedDict
     grouped = OrderedDict()
-    for ev in all_events:
+    for ev in events:
         date_str = (ev.get('created_at') or '')[:10] or '未知日期'
         if date_str not in grouped:
             grouped[date_str] = []
