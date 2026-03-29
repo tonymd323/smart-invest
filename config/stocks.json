@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated_at": "2026-03-29 12:17",
+  "updated_at": "2026-03-29 08:39",
   "updated_by": "web",
   "holdings": [
     {
@@ -42,6 +42,11 @@
       "code": "300750.SZ",
       "name": "宁德时代",
       "sector": "锂电"
+    },
+    {
+      "code": "002810.SZ",
+      "name": "山东赫达",
+      "sector": "化工原料"
     }
   ],
   "_rules": "改这里=全局生效。任何agent修改持仓/备选，必须同步此文件。"

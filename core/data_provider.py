@@ -1010,16 +1010,19 @@ def _get_news_data_class():
 class NewsProvider(BaseProvider):
     """
     新闻采集 Provider
-    主源：东方财富个股新闻 API
-    降级：RSS 文章缓存（event_monitor 路径）
+
+    降级链（v2.14 更新）：
+    1. AKShare stock_news_em（东方财富资讯 API 封装） — 主源
+    2. 东方财富公告列表 API — 备用（只有公司公告）
+    3. RSS 文章缓存关键词匹配 — 最后降级
 
     用法：
         provider = NewsProvider()
         news_list = provider.fetch("600660.SH")  # List[NewsData]
     """
 
-    # 东方财富个股新闻 API
-    EM_NEWS_URL = "https://search-api-web.eastmoney.com/api/suggest/get"
+    # 东方财富公告列表 API（备用）
+    EM_ANN_URL = "https://np-anotice-stock.eastmoney.com/api/security/ann"
 
     # RSS 缓存路径（复用 rss-reader skill 和 event_monitor 的数据）
     RSS_CACHE_PATH = Path.home() / ".openclaw/skills/rss-reader/data/articles.json"
@@ -1050,10 +1053,11 @@ class NewsProvider(BaseProvider):
         """
         获取指定股票的最新新闻
 
-        降级逻辑：
-        1. 尝试东方财富个股新闻 API（或预注入数据）
-        2. 失败 → 降级到 RSS 文章缓存关键词匹配
-        3. 都失败 → 返回空列表
+        降级逻辑（v2.14）：
+        1. 预注入数据（最高优先级）
+        2. AKShare stock_news_em（东方财富资讯封装）
+        3. 东方财富公告列表 API
+        4. RSS 文章缓存关键词匹配
         """
         NewsData = _get_news_data_class()
 
@@ -1077,14 +1081,20 @@ class NewsProvider(BaseProvider):
                 self.last_source = "eastmoney"
                 return results
 
-        # 尝试东方财富个股新闻 API
-        results = self._fetch_from_eastmoney(stock_code, limit)
+        # AKShare 新闻（主源）
+        results = self._fetch_from_akshare(stock_code, limit)
         if results:
-            self.last_source = "eastmoney"
+            self.last_source = "akshare"
+            return results
+
+        # 东方财富公告列表（备用）
+        results = self._fetch_from_em_list(stock_code, limit)
+        if results:
+            self.last_source = "eastmoney_ann"
             return results
 
         # 降级到 RSS 匹配
-        logger.info(f"[NewsProvider] {stock_code} 东财无新闻，降级到 RSS 匹配")
+        logger.info(f"[NewsProvider] {stock_code} API 无数据，降级到 RSS 匹配")
         results = self._fetch_from_rss(stock_code, limit)
         if results:
             self.last_source = "rss"
@@ -1092,6 +1102,53 @@ class NewsProvider(BaseProvider):
 
         logger.warning(f"[NewsProvider] {stock_code} 所有数据源均无新闻")
         self.last_source = "none"
+        return []
+
+    def _fetch_from_akshare(self, stock_code: str, limit: int = 20) -> List:
+        """
+        从 AKShare 获取个股新闻（主源）
+
+        使用 ak.stock_news_em()，底层调用东方财富资讯 API。
+        返回格式：新闻标题、新闻内容、发布时间、文章来源、新闻链接
+        """
+        NewsData = _get_news_data_class()
+        try:
+            import akshare as ak
+            code = _ts_code_to_em(stock_code)
+            df = ak.stock_news_em(symbol=code)
+
+            if df is None or df.empty:
+                return []
+
+            results = []
+            for _, row in df.head(limit).iterrows():
+                title = str(row.get("新闻标题", ""))
+                content = str(row.get("新闻内容", ""))[:500]
+                pub_date = str(row.get("发布时间", ""))
+                source_name = str(row.get("文章来源", ""))
+                url = str(row.get("新闻链接", ""))
+
+                if not title:
+                    continue
+
+                results.append(NewsData(
+                    stock_code=stock_code,
+                    title=title,
+                    content=content,
+                    source="akshare",
+                    pub_date=pub_date,
+                    url=url,
+                    source_name=source_name,
+                ))
+
+            if results:
+                logger.info(f"[NewsProvider] AKShare 返回 {len(results)} 条新闻: {stock_code}")
+            return results
+
+        except ImportError:
+            logger.error("[NewsProvider] akshare 库未安装")
+        except Exception as e:
+            logger.error(f"[NewsProvider] AKShare 新闻获取失败 {stock_code}: {e}")
         return []
 
     def _fetch_from_eastmoney(self, stock_code: str, limit: int = 20) -> List:
