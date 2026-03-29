@@ -85,9 +85,10 @@ fetch('/api/chart/backtest_winrate').then(r=>r.json()).then(d=>{
         ],{
             ...CHART.layout,
             title:{text:'策略胜率 & 平均收益',font:{size:14,color:'#334155'},x:0.02},
-            yaxis:{...CHART.layout.yaxis,title:{text:'胜率',standoff:8},range:[0,100],ticksuffix:'%'},
-            yaxis2:{title:{text:'平均收益',standoff:8},overlaying:'y',side:'right',ticksuffix:'%',
+            yaxis:{...CHART.layout.yaxis,range:[0,100],ticksuffix:'%'},
+            yaxis2:{overlaying:'y',side:'right',ticksuffix:'%',
                     gridcolor:'transparent',linecolor:'#e2e8f0',tickfont:{size:11}},
+            margin:{t:48,r:44,b:36,l:44},
             showlegend:true,
         },CHART.config);
     }

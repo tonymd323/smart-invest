@@ -1,6 +1,6 @@
 # JARVIS 投资系统 2.0 — PRD
 
-_版本：v2.6 | 日期：2026-03-29 | P1 完成, T1-T25 全量通过, 前端开发中, ConsensusProvider 多源从严需求变更_
+_版本：v2.7 | 日期：2026-03-29 | v2.11 全部完成, 新增超跌监控集成 + 大函数拆分 + Docker化_
 
 ---
 
@@ -266,6 +266,121 @@ ALTER TABLE consensus ADD COLUMN source_detail TEXT;  -- JSON: {"akshare": {...}
 ### D. 新闻事件（✅ 已完成）
 - JARVIS 已实现 events + event_tracking 合并显示
 - NewsProvider 已集成
+
+---
+
+## v2.12 需求 — 超跌监控集成 + 技术债收尾
+
+### 背景
+超跌全市场监控（BTIQ 涨跌比指标）当前是独立脚本 `scripts/btiq_monitor.py`，通过 Cron 每30分钟运行，直接推送飞书但**不入库 SQLite**。存在三个问题：
+1. **前端无展示** — 9个页面中没有超跌数据，信号看板/今日行动均未纳入
+2. **无历史可查** — 结果不入数据库，无法画趋势图、回溯信号准确性
+3. **架构孤岛** — 不经过 Pipeline/Analyzer，与系统其他模块割裂
+
+同时 `core/analyzer.py` 中已有 `OversoldScanner` 类但从未被 Pipeline 调用，代码已写好但未接入。
+
+### 需求
+
+#### A. 数据采集层改造 — 双通道架构
+
+**核心原则：** 采集粒度与分析粒度对齐。单股采集→单股分析，市场采集→市场分析。
+
+| 改动 | 说明 |
+|------|------|
+| 新增 `MarketSnapshotProvider` | 全市场快照采集，接口为 `fetch_snapshot()`（非 `fetch(stock_code)`） |
+| 新增 `market_snapshots` 表 | 存储 BTIQ 历史：btiq, up/down/total, ma5, signal, timestamp |
+| Pipeline 新增 `run_market_snapshot()` | 市场通道入口，与单股通道 `run()` 并列 |
+
+**数据流：**
+```
+MarketSnapshotProvider.fetch_snapshot()
+    → 腾讯行情批量 API（4秒扫完 4913 只）
+    → MarketSnapshot(up, down, total, btiq, timestamp)
+    → MarketAnalyzer.analyze(snapshot)
+    → BTIQ + MA5 + signal
+    → 写入 market_snapshots 表
+    → 前端可查 / 飞书推送
+```
+
+#### B. 分析层改造 — MarketAnalyzer
+
+| 改动 | 说明 |
+|------|------|
+| 新增 `MarketAnalyzer` 类 | 与 EarningsAnalyzer / PullbackAnalyzer 并列 |
+| 迁移 OversoldScanner 逻辑 | calc_btiq / calc_ma5 / judge_signal 从 analyzer.py 底部迁移到 MarketAnalyzer |
+| Pipeline.run_market_snapshot 调用 | 采集完自动分析，结果入库 |
+
+#### C. 前端新增超跌页面
+
+| 页面 | 路由 | 功能 |
+|------|------|------|
+| 📉 超跌监控 | `/oversold` | BTIQ 实时值 + MA5 趋势图 + 历史信号时间线 |
+
+**页面内容：**
+- 信号卡片：当前 BTIQ 值 + MA5 + 状态（正常/超跌/冰点/过热）
+- Plotly 折线图：BTIQ 历史曲线 + 30/25 阈值参考线
+- 信号历史：超跌/冰点触发时间线
+- 总览仪表板新增市场情绪指标卡片
+
+#### D. Cron 改造
+
+| 旧 | 新 |
+|----|-----|
+| `btiq_monitor.py` 独立脚本 | `Pipeline.run_market_snapshot()` |
+| 直接推飞书 | SQLite 入库 → 前端可查 → 飞书推送 |
+
+#### E. 验收标准
+- [ ] MarketSnapshotProvider 可获取全市场数据并返回 MarketSnapshot
+- [ ] market_snapshots 表正确存储 BTIQ 历史
+- [ ] Pipeline.run_market_snapshot() 端到端可用
+- [ ] MarketAnalyzer 正确计算 BTIQ/MA5/signal
+- [ ] 前端 `/oversold` 页面展示 BTIQ 趋势图 + 信号时间线
+- [ ] 总览仪表板显示市场情绪指标
+- [ ] 测试用例 T26-T28 全部通过
+- [ ] Cron 从 btiq_monitor.py 切换到新通道
+- [ ] 既有 T1-T25 回归通过
+
+### 工时估算
+
+| 模块 | 改动 | 预估 |
+|------|------|------|
+| `core/data_provider.py` | 新增 MarketSnapshotProvider + MarketSnapshot 模型 | 1h |
+| `core/database.py` | 新增 market_snapshots 表 + 索引 | 0.5h |
+| `core/analyzer.py` | 新增 MarketAnalyzer（逻辑从 OversoldScanner 迁移） | 1h |
+| `core/pipeline.py` | 新增 run_market_snapshot() | 0.5h |
+| `web/routes/` | 新增 oversold.py 路由 | 0.5h |
+| `web/templates/` | 新增 oversold.html（Plotly 图表） | 1.5h |
+| `web/services.py` | 新增 get_oversold_data() | 0.5h |
+| 测试 | T26-T28 | 1h |
+| **超跌集成小计** | | **~6.5h** |
+
+---
+
+### F. 大函数拆分
+
+| 函数 | 当前行数 | 目标行数 | 拆分方式 |
+|------|---------|---------|---------|
+| `get_today_actions()` | ~277 | ~60 | 拆为 _calc_portfolio_actions + _calc_buy_candidates + _calc_watch_alerts |
+| `format_summary()` | ~121 | ~28 | 拆为 _format_earnings_section + _format_pullback_section + _format_event_section |
+| 预估 | | | 2h |
+
+### G. Docker 化部署
+
+| 任务 | 预估 |
+|------|------|
+| Dockerfile（Python 3.11 + 依赖） | 0.5h |
+| docker-compose.yml（FastAPI + SQLite volume） | 0.5h |
+| systemd → Docker 迁移 | 0.5h |
+| 预估 | 1.5h |
+
+### v2.12 总工时
+
+| 模块 | 预估 |
+|------|------|
+| 超跌监控集成 | 6.5h |
+| 大函数拆分 | 2h |
+| Docker 化 | 1.5h |
+| **总计** | **~10h** |
 
 ---
 

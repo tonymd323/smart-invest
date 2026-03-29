@@ -67,8 +67,9 @@ fetch('/api/chart/tn_returns').then(r=>r.json()).then(data=>{
         Plotly.newPlot(el,traces,{
             ...CHART.layout,
             title:{text:'T+N 收益曲线（活跃跟踪）',font:{size:14,color:'#334155'},x:0.02},
-            xaxis:{...CHART.layout.xaxis,title:{text:'持有天数',standoff:12},dtick:5},
-            yaxis:{...CHART.layout.yaxis,title:{text:'收益率',standoff:8},ticksuffix:'%',zeroline:true,zerolinecolor:'#e2e8f0'},
+            xaxis:{...CHART.layout.xaxis,dtick:5},
+            yaxis:{...CHART.layout.yaxis,ticksuffix:'%',zeroline:true,zerolinecolor:'#e2e8f0'},
+            margin:{t:48,r:16,b:36,l:44},
         },CHART.config);
     } else { el.innerHTML='<div class="text-center text-gray-400 py-20">暂无活跃跟踪数据</div>'; }
 });

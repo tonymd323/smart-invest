@@ -1,16 +1,18 @@
 # JARVIS 投资系统 2.0 — 架构设计
 
-_版本：v2.9 | 日期：2026-03-29 | 今日行动页重构完成 + HTMX/Tailwind 本地化_
+_版本：v2.10 | 日期：2026-03-29 | 双通道架构（单股+市场）+ MarketSnapshotProvider_
 
 ---
 
 ## 架构原则
 
-三层分离 | 数据驱动 | 自动降级 | 零重复 | 双池分离 | 采集分析职责分离
+三层分离 | 数据驱动 | 自动降级 | 零重复 | 双池分离 | 采集分析职责分离 | **采集粒度与分析粒度对齐**
 
 ## 系统分层
 
-### Layer 0: Provider（6 个，5 个在线）
+### Layer 0: Provider（7 个，6 个在线）
+
+**单股通道 Provider（逐只采集）：**
 
 | Provider | 主源 | 降级源 | Pipeline 使用 | 状态 |
 |----------|------|--------|-------------|------|
@@ -21,6 +23,14 @@ _版本：v2.9 | 日期：2026-03-29 | 今日行动页重构完成 + HTMX/Tailwi
 | NewsProvider | RSS + 东方财富个股新闻 | — | ❌ 单独调用 | ✅ 生产（EventAnalyzer.detect_from_codes） |
 | SectorProvider | 东方财富板块数据 | — | ❌ | ⏸️ 备用 |
 
+**市场通道 Provider（全市场快照）：**
+
+| Provider | 主源 | Pipeline 使用 | 状态 |
+|----------|------|-------------|------|
+| MarketSnapshotProvider | 腾讯行情批量 API | ✅ run_market_snapshot() | 🔨 v2.12 开发中 |
+
+> **设计原则：** 单股 Provider 接口为 `fetch(stock_code)`，市场 Provider 接口为 `fetch_snapshot()`。不强行统一粒度。
+
 ### Layer 0.5: DisclosureScanner
 
 - 基于东方财富 `NOTICE_DATE` 实时扫描财报/业绩预告披露日
@@ -28,15 +38,26 @@ _版本：v2.9 | 日期：2026-03-29 | 今日行动页重构完成 + HTMX/Tailwi
 - filter: `(NOTICE_DATE>'{datetime}')`，SQL 单引号格式
 - 输出：新披露股票代码列表，跟 DB diff 后只扫新增的
 
-### Layer 1: Pipeline（pipeline.py）
+### Layer 1: Pipeline（pipeline.py）— 双通道
 
+**单股通道** `Pipeline.run(stock_codes)`：
 - DisclosureScanner 获取新披露列表（use_disclosure_filter=True）
 - 串行调 FinancialProvider → 写入 SQLite earnings 表
 - 自动计算 quarterly_net_profit（累计净利润差值法）
 - 数据质量校验
 - `fetch_and_apply_consensus()` → ConsensusProvider 并行获取 AkShare + 东方财富 F10 多年一致预期（25E/26E/27E）→ 取净利润增速更高值 → 写 consensus 表（含 source_detail）→ 按报告期匹配预期年份 → 计算 expectation_diff_pct
 
-### Layer 2: Analyzer（analyzer.py）
+**市场通道** `Pipeline.run_market_snapshot()` — 🔨 v2.12：
+- MarketSnapshotProvider.fetch_snapshot() → 全市场 4913 只股票实时行情
+- MarketAnalyzer.analyze(snapshot) → BTIQ + MA5 + signal
+- 写入 market_snapshots 表
+- 返回市场情绪信号（buy/warn/hot/none）
+
+> **两个通道独立运行，互不干扰。** 单股通道由 Cron 21:00 晚间扫描触发，市场通道由 Cron 每30分钟触发。
+
+### Layer 2: Analyzer（analyzer.py）— 单股 + 市场双层
+
+**单股分析器（由 Pipeline.run 调用）：**
 
 | Analyzer | 功能 | 状态 |
 |----------|------|------|
@@ -45,7 +66,14 @@ _版本：v2.9 | 日期：2026-03-29 | 今日行动页重构完成 + HTMX/Tailwi
 | EventAnalyzer | Pipeline 事件 + 新闻事件检测 | ✅ 生产 |
 | DiscoveryPoolManager | 自动发现池入场/过期（7天） | ✅ 生产 |
 | EarningsAnalyzer.update_tn | T+N 收益跟踪 | ✅ 生产 |
-| OversoldScanner | BTIQ 全市场超跌扫描 | ✅ 生产 |
+
+**市场分析器（由 Pipeline.run_market_snapshot 调用）：**
+
+| Analyzer | 功能 | 状态 |
+|----------|------|------|
+| MarketAnalyzer | BTIQ 涨跌比 + MA5 趋势 + 超跌/冰点/过热信号 | 🔨 v2.12 开发中 |
+
+> **旧代码状态：** `OversoldScanner`（analyzer.py 底部）将被重构为 `MarketAnalyzer`。逻辑迁移，接口升级为接收 MarketSnapshot 对象。
 
 ### Layer 3: 同步（BitableSync）
 
@@ -94,6 +122,7 @@ _版本：v2.9 | 日期：2026-03-29 | 今日行动页重构完成 + HTMX/Tailwi
 | events | 2+ | 结构化事件 |
 | event_tracking | 236 | T+N 收益跟踪 |
 | backtest | 160 | 回测记录 |
+| market_snapshots | — | 🔨 v2.12：全市场快照（btiq/up/down/ma5/signal） |
 
 ## 飞书多维表格（5 张）
 
@@ -105,23 +134,34 @@ _版本：v2.9 | 日期：2026-03-29 | 今日行动页重构完成 + HTMX/Tailwi
 | T+N 跟踪 | tblNZIrovX0WRmW3 | 入池后收益跟踪 |
 | 回测 | tblP6OwkzGQns8Uc | 历史信号收益 |
 
-## Cron 时间线（v2.4 上线版）
+## Cron 时间线（v2.12 更新版）
 
 ```
+── 单股通道 ──────────────────────────────────────────────
 07:03  A股早报（巴菲特群飞书卡片）
-07:05  早盘新披露扫描（18h 窗口）→ Pipeline → DB
-09-14  盘中轻检（每30分钟 pullback_predictor）+ 超跌监控（每30分钟 btiq_monitor）
+07:05  早盘新披露扫描（18h 窗口）→ Pipeline.run() → DB
 15:15  回调买入预测（全市场扫描）
 15:30  盘后新披露扫描（4h 窗口）+ pool-monitor 收盘总结
 18:05  A股晚报（指数 + 板块轮动）
 18:30  回测更新（backtest_update + Bitable 写入）
 21:00  晚间全量扫描（12h 窗口）
-       → Pipeline → fetch_and_apply_consensus
+       → Pipeline.run() → fetch_and_apply_consensus
        → scan_beat_expectation + scan_new_high
        → auto_discover_pool + update_tn_tracking
        → EventAnalyzer（pipeline + news）
        → Bitable 3 张表同步
        → 飞书卡片推送
+
+── 市场通道（v2.12 新增）─────────────────────────────────
+09-14  超跌监控 每30分钟 → Pipeline.run_market_snapshot()
+       → MarketSnapshotProvider.fetch_snapshot()
+       → MarketAnalyzer.analyze()
+       → market_snapshots 表
+       → 飞书 DM 推送（signal=buy/warn 时）
+
+── 已废弃 ──────────────────────────────────────────────
+~~btiq_monitor.py (独立脚本) → 被 Pipeline.run_market_snapshot() 替代~~
+~~09-14 盘中轻检 (pullback_predictor) → 已集成到 Pipeline~~
 ```
 
 ## 前端 (FastAPI + Jinja2 + HTMX)
@@ -138,19 +178,20 @@ _版本：v2.9 | 日期：2026-03-29 | 今日行动页重构完成 + HTMX/Tailwi
               subprocess 调用 Pipeline
 ```
 
-### 页面清单（v2.10）
+### 页面清单（v2.12）
 
 | # | 页面 | 路由 | 功能 | 搜索 | 排序 | 分页 | 状态 |
 |---|------|------|------|------|------|------|------|
-| 1 | 🏠 总览 | `/` `/dashboard` | 信号摘要 + 持仓 + 系统健康 | — | — | — | ✅ |
+| 1 | 🏠 总览 | `/` `/dashboard` | 信号摘要 + 持仓 + 市场情绪 + 系统健康 | — | — | — | ✅ |
 | 2 | 📌 今日行动 | `/action` | 综合研判操作建议 | — | — | — | ✅ v2.9 |
-| 3 | 📋 信号看板 | `/signals` | 原始信号列表 | ⏳ | ⏳ | ⏳ | 🔄 改造中 |
-| 4 | 🔍 发现池 | `/discovery` | 自动发现候选股 | ⏳ | ⏳ | ⏳ | 🔄 改造中 |
-| 5 | 📰 事件流 | `/events` | 事件时间线 | ⏳ | ⏳ | ⏳ | 🔄 改造中 |
-| 6 | 📈 T+N 跟踪 | `/tracking` | 入池后收益跟踪 | ⏳ | ⏳ | ⏳ | 🔄 改造中 |
-| 7 | 📊 策略回测 | `/backtest` | 历史信号收益 | ⏳ | ⏳ | ⏳ | 🔄 改造中 |
+| 3 | 📋 信号看板 | `/signals` | 原始信号列表 | ✅ | ✅ | ✅ | ✅ |
+| 4 | 🔍 发现池 | `/discovery` | 自动发现候选股 | ✅ | ✅ | ✅ | ✅ |
+| 5 | 📰 事件流 | `/events` | 事件时间线 | ✅ | ✅ | ✅ | ✅ |
+| 6 | 📈 T+N 跟踪 | `/tracking` | 入池后收益跟踪 | ✅ | ✅ | ✅ | ✅ |
+| 7 | 📊 策略回测 | `/backtest` | 历史信号收益 | ✅ | ✅ | ✅ | ✅ |
 | 8 | ⚙️ 系统控制 | `/system` | Pipeline 触发 + Cron | — | — | — | ✅ |
-| 9 | 📒 持仓管理 | `/portfolio` | 跟踪池增删改查 + 发现池升级 | ⏳ | ⏳ | ⏳ | 🔄 改造中 |
+| 9 | 📒 持仓管理 | `/portfolio` | 跟踪池增删改查 + 发现池升级 | ✅ | ✅ | ✅ | ✅ |
+| 10 | 📉 超跌监控 | `/oversold` | BTIQ 趋势图 + MA5 + 信号时间线 | — | — | — | 🔨 v2.12 |
 
 ### 通用列表组件（v2.10）
 
@@ -268,4 +309,4 @@ get_today_actions() = f(信号 × 持仓 × 行情 × 回调评分 × 发现池)
 
 ---
 
-_架构 v2.12 | 2026-03-29 | 技术债收尾：空表清理+大函数拆分+Docker化_
+_架构 v2.10 | 2026-03-29 | 双通道架构（单股+市场）+ MarketSnapshotProvider + 超跌页面_
