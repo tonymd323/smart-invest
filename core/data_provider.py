@@ -371,10 +371,9 @@ class FinancialProvider(BaseProvider):
 
 class ConsensusProvider(BaseProvider):
     """
-    一致预期 Provider
-    主源：AkShare 东方财富增长对比表（stock_zh_growth_comparison_em）
-    返回多年预期：净利润增长率-25E/26E/27E
-    降级：东方财富 F10 API
+    一致预期 Provider — v2.6 多源从严
+    策略：同时获取 AkShare + 东方财富 F10，以净利润增速为锚取更高值（更严格门槛）。
+    预注入数据仍为最高优先级。
 
     用法：
         provider = ConsensusProvider()
@@ -382,11 +381,15 @@ class ConsensusProvider(BaseProvider):
         result = provider.fetch("600660.SH")  # ConsensusData (当年) 或 None
         # 多年预期
         results = provider.fetch_multi_year("600660.SH")  # {"25E": ConsensusData, ...}
+        # 多年预期 + 详细对比
+        results = provider.fetch_multi_year("600660.SH")
+        detail = provider.last_source_detail  # {"25E": {"akshare": {...}, ...}, ...}
     """
 
     def __init__(self, data: dict = None):
         self.data = data or {}
         self.last_source: str = "none"
+        self.last_source_detail: dict = {}  # 每年两源对比详情
 
     def fetch(self, stock_code: str) -> Optional[ConsensusData]:
         """获取当年一致预期（取最近一年可用数据）"""
@@ -401,12 +404,15 @@ class ConsensusProvider(BaseProvider):
 
     def fetch_multi_year(self, stock_code: str) -> dict:
         """
-        获取多年一致预期
+        获取多年一致预期 — v2.6 多源从严
 
         Returns:
             {"25E": ConsensusData, "26E": ConsensusData, "27E": ConsensusData}
+            通过 provider.last_source_detail 获取每年的两源对比详情
         """
-        # 尝试预注入数据
+        import math
+
+        # 1. 预注入数据（最高优先级，直接返回）
         if stock_code in self.data:
             raw = self.data[stock_code]
             result = {}
@@ -423,23 +429,75 @@ class ConsensusProvider(BaseProvider):
                     )
             if result:
                 self.last_source = "preloaded"
+                self.last_source_detail = {}
                 return result
 
-        # 主源：AkShare 东方财富增长对比表
-        result = self._fetch_from_akshare_growth(stock_code)
-        if result:
-            self.last_source = "akshare_growth"
-            return result
+        # 2. 并行获取两源
+        akshare_data = self._fetch_from_akshare_growth(stock_code)
+        eastmoney_data = self._fetch_from_em_f10(stock_code)
 
-        # 降级：东方财富 F10
-        result = self._fetch_from_em_f10(stock_code)
-        if result:
-            self.last_source = "eastmoney_f10"
-            return result
+        if not akshare_data and not eastmoney_data:
+            logger.warning(f"[ConsensusProvider] {stock_code} 两源均无预期数据")
+            self.last_source = "none"
+            self.last_source_detail = {}
+            return {}
 
-        logger.warning(f"[ConsensusProvider] {stock_code} 所有数据源均无预期数据")
-        self.last_source = "none"
-        return {}
+        # 3. 合并：以净利润增速为锚，取更高值
+        result = {}
+        detail = {}
+        all_years = set(list(akshare_data.keys()) + list(eastmoney_data.keys()))
+
+        for year in sorted(all_years):
+            ak = akshare_data.get(year)
+            em = eastmoney_data.get(year)
+
+            # 构建对比详情
+            year_detail = {}
+            if ak:
+                year_detail["akshare"] = {"profit": ak.net_profit_yoy, "rev": ak.rev_yoy}
+            if em:
+                year_detail["eastmoney"] = {"profit": em.net_profit_yoy, "rev": em.rev_yoy}
+
+            if ak and em:
+                # 两源都有：取净利润增速更高的
+                if ak.net_profit_yoy >= em.net_profit_yoy:
+                    winner = ak
+                    winner.source = f"max:{ak.source}"
+                    year_detail["selected"] = ak.source
+                else:
+                    winner = em
+                    winner.source = f"max:{em.source}"
+                    year_detail["selected"] = em.source
+                result[year] = winner
+
+                # 两源差距过大 warning
+                diff = abs(ak.net_profit_yoy - em.net_profit_yoy)
+                if diff > 10:
+                    logger.warning(
+                        f"[ConsensusProvider] {stock_code} {year} 两源差距 {diff:.1f}pp "
+                        f"(akshare={ak.net_profit_yoy:.1f}%, eastmoney={em.net_profit_yoy:.1f}%)"
+                    )
+            elif ak:
+                result[year] = ak
+                year_detail["selected"] = ak.source
+            elif em:
+                result[year] = em
+                year_detail["selected"] = em.source
+
+            detail[year] = year_detail
+
+        # 确定 last_source
+        sources_used = set()
+        for d in detail.values():
+            if "akshare" in d:
+                sources_used.add("akshare_growth")
+            if "eastmoney" in d:
+                sources_used.add("eastmoney_f10")
+        winners = [d.get("selected", "") for d in detail.values()]
+        self.last_source = "+".join(sorted(sources_used)) + f":max={winners[0]}" if winners else "none"
+        self.last_source_detail = detail
+
+        return result
 
     def _fetch_from_akshare_growth(self, stock_code: str) -> dict:
         """从 AkShare 东方财富增长对比表获取多年预期"""

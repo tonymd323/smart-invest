@@ -15,35 +15,50 @@
     {% block head %}{% endblock %}
 </head>
 <body class="bg-gray-50 min-h-screen">
+
+    <!-- 移动端顶部栏 -->
+    <header class="lg:hidden fixed top-0 left-0 right-0 h-14 bg-gray-900 text-white flex items-center px-4 z-50">
+        <button id="menu-btn" class="p-2 -ml-2 rounded hover:bg-gray-700" onclick="toggleMenu()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+        <h1 class="ml-3 text-lg font-bold">📊 投资系统</h1>
+    </header>
+
+    <!-- 移动端遮罩 -->
+    <div id="overlay" class="lg:hidden fixed inset-0 bg-black/50 z-40 hidden" onclick="toggleMenu()"></div>
+
     <!-- 侧边栏 -->
-    <nav class="fixed top-0 left-0 h-full w-56 bg-gray-900 text-gray-300 flex flex-col z-50">
+    <nav id="sidebar" class="fixed top-0 left-0 h-full w-56 bg-gray-900 text-gray-300 flex flex-col z-50
+                             -translate-x-full lg:translate-x-0 transition-transform duration-200">
         <div class="p-4 border-b border-gray-700">
             <h1 class="text-xl font-bold text-white">📊 投资系统 2.2</h1>
             <p class="text-xs text-gray-500 mt-1">Smart Invest Dashboard</p>
         </div>
         <div class="flex-1 py-4">
-            <a href="/" class="nav-item {% if active == 'dashboard' %}active{% endif %}">
+            <a href="/" class="nav-item {% if active == 'dashboard' %}active{% endif %}" onclick="closeMenuMobile()">
                 🏠 总览
             </a>
-            <a href="/action" class="nav-item {% if active == 'action' %}active{% endif %}">
+            <a href="/action" class="nav-item {% if active == 'action' %}active{% endif %}" onclick="closeMenuMobile()">
                 📌 今日行动
             </a>
-            <a href="/signals" class="nav-item {% if active == 'signals' %}active{% endif %}">
+            <a href="/signals" class="nav-item {% if active == 'signals' %}active{% endif %}" onclick="closeMenuMobile()">
                 📋 信号看板
             </a>
-            <a href="/discovery" class="nav-item {% if active == 'discovery' %}active{% endif %}">
+            <a href="/discovery" class="nav-item {% if active == 'discovery' %}active{% endif %}" onclick="closeMenuMobile()">
                 🔍 发现池
             </a>
-            <a href="/events" class="nav-item {% if active == 'events' %}active{% endif %}">
+            <a href="/events" class="nav-item {% if active == 'events' %}active{% endif %}" onclick="closeMenuMobile()">
                 📰 事件流
             </a>
-            <a href="/tracking" class="nav-item {% if active == 'tracking' %}active{% endif %}">
+            <a href="/tracking" class="nav-item {% if active == 'tracking' %}active{% endif %}" onclick="closeMenuMobile()">
                 📈 T+N 跟踪
             </a>
-            <a href="/backtest" class="nav-item {% if active == 'backtest' %}active{% endif %}">
+            <a href="/backtest" class="nav-item {% if active == 'backtest' %}active{% endif %}" onclick="closeMenuMobile()">
                 📊 策略回测
             </a>
-            <a href="/system" class="nav-item {% if active == 'system' %}active{% endif %}">
+            <a href="/system" class="nav-item {% if active == 'system' %}active{% endif %}" onclick="closeMenuMobile()">
                 ⚙️ 系统控制
             </a>
         </div>
@@ -55,13 +70,26 @@
     </nav>
 
     <!-- 主内容 -->
-    <main class="ml-56 p-6">
+    <main class="pt-14 lg:pt-0 lg:ml-56 p-4 lg:p-6">
         {% block content %}{% endblock %}
     </main>
 
     {% block scripts %}{% endblock %}
 
     <script>
+        // 侧边栏开关（移动端）
+        function toggleMenu() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('overlay');
+            sb.classList.toggle('-translate-x-full');
+            ov.classList.toggle('hidden');
+        }
+        function closeMenuMobile() {
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('overlay').classList.add('hidden');
+            }
+        }
         // 更新服务器时间
         setInterval(() => {
             const el = document.getElementById('server-time');

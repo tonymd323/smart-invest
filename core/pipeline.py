@@ -16,6 +16,7 @@
 import sqlite3
 import logging
 import time
+import json
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
@@ -489,12 +490,14 @@ def fetch_and_apply_consensus(db_path: str, stock_codes: list = None) -> dict:
                 skipped += 1
                 continue
 
-            # 2. 写入 consensus 表
+            # 2. 写入 consensus 表（含 source_detail 多源对比详情）
+            year_detail = provider.last_source_detail
             for year, consensus_data in multi.items():
+                detail_json = json.dumps(year_detail.get(year)) if year_detail.get(year) else None
                 conn.execute("""
                     INSERT OR REPLACE INTO consensus
-                    (stock_code, year, net_profit_yoy, rev_yoy, num_analysts, source)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    (stock_code, year, net_profit_yoy, rev_yoy, num_analysts, source, source_detail)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                 """, (
                     code,
                     year,
@@ -502,6 +505,7 @@ def fetch_and_apply_consensus(db_path: str, stock_codes: list = None) -> dict:
                     consensus_data.rev_yoy,
                     consensus_data.num_analysts,
                     consensus_data.source,
+                    detail_json,
                 ))
                 fetched += 1
 

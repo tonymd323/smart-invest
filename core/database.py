@@ -237,7 +237,15 @@ def _migrate_schema(conn: sqlite3.Connection):
     for table, col, col_type in migrations:
         if col not in existing_cols:
             conn.execute(f'ALTER TABLE {table} ADD COLUMN {col} {col_type}')
-            # logger not available here; caller can log if needed
+
+    # consensus 表迁移 — v2.6 多源从严
+    consensus_cols = {row[1] for row in conn.execute('PRAGMA table_info(consensus)').fetchall()}
+    consensus_migrations = [
+        ('consensus', 'source_detail', 'TEXT'),  # JSON: 两源原始值 + 选择结果
+    ]
+    for table, col, col_type in consensus_migrations:
+        if col not in consensus_cols:
+            conn.execute(f'ALTER TABLE {table} ADD COLUMN {col} {col_type}')
 
 
 def init_db(db_path: Optional[str] = None) -> str:
