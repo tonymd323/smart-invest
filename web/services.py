@@ -494,3 +494,255 @@ def get_strategy_performance():
         d['signal_type_zh'] = map_event_type(d.get('signal_type'))
         results.append(d)
     return results
+
+
+# ============================================================
+# 今日行动 — 综合研判（v2.9 重构）
+# ============================================================
+
+def _load_positions():
+    """加载持仓配置"""
+    config_path = Path(__file__).parent.parent / "config" / "stocks.json"
+    if not config_path.exists():
+        return []
+    with open(config_path) as f:
+        config = json.load(f)
+    return config.get('stocks', [])
+
+
+def _get_current_prices(codes: list) -> dict:
+    """批量获取实时行情"""
+    if not codes:
+        return {}
+    try:
+        from core.data_provider import QuoteProvider
+        qp = QuoteProvider()
+        prices = {}
+        for code in codes:
+            records = qp.fetch(code)
+            if records:
+                q = records[0].to_dict()
+                prices[code] = {
+                    'price': q.get('price', 0),
+                    'change_pct': q.get('change_pct', 0),
+                    'high': q.get('high', 0),
+                    'low': q.get('low', 0),
+                }
+        return prices
+    except Exception:
+        return {}
+
+
+def get_today_actions():
+    """
+    今日行动 — 从信号推导出具体操作建议
+
+    返回结构:
+    [
+        {
+            "priority": "buy" | "wait" | "adjust" | "none",
+            "emoji": "🔥" | "⏳" | "⚠️" | "☕",
+            "stock_code": "600660.SH",
+            "stock_name": "福耀玻璃",
+            "current_price": 57.85,
+            "change_pct": 1.8,
+            "reasons": ["超预期 +9.1pp", "回调评分 72", "发现池内"],
+            "action_text": "建议买入 ¥56-58，目标 ¥68，止损 ¥50",
+            "suggestion": "buy",
+            "signals": [...],
+        },
+        ...
+    ]
+    """
+    conn = get_conn()
+    positions = _load_positions()
+    pos_map = {p['code']: p for p in positions}
+    pos_codes = [p['code'] for p in positions]
+
+    # 1. 获取今日及近3天的信号（只看持仓股+发现池）
+    signals_3d = get_scan_results(days=3)
+    code_signals = {}
+    signal_codes = set()
+    for s in signals_3d:
+        code = s['stock_code']
+        if code not in code_signals:
+            code_signals[code] = []
+        code_signals[code].append(s)
+        signal_codes.add(code)
+
+    # 只查价格的范围：持仓股 + 有信号的股票（最多20只）
+    all_codes = list(set(pos_codes) | signal_codes)[:20]
+
+    # 2. 获取发现池状态
+    pool = get_discovery_pool()
+    pool_map = {p['stock_code']: p for p in pool}
+
+    # 3. 获取实时行情
+    prices = _get_current_prices(all_codes)
+
+    # 4. 获取回调评分（只查有信号的股票）
+    pullback_scores = {}
+    try:
+        if signal_codes:
+            placeholders = ','.join(['?'] * len(signal_codes))
+            rows = conn.execute(f"""
+                SELECT stock_code, score, signal, summary
+                FROM analysis_results
+                WHERE analysis_type = 'pullback_score'
+                AND stock_code IN ({placeholders})
+                ORDER BY created_at DESC
+            """, list(signal_codes)).fetchall()
+            for r in rows:
+                code = r[0]
+                if code not in pullback_scores:
+                    pullback_scores[code] = {'score': r[1], 'signal': r[2]}
+    except Exception:
+        pass
+
+    # 5. 合成行动建议（只处理有信号或有持仓的股票）
+    action_codes = set(signal_codes) | set(pos_codes)
+    actions = []
+
+    for code in action_codes:
+        pos = pos_map.get(code, {})
+        code_sigs = code_signals.get(code, [])
+        in_pool = code in pool_map
+        price_info = prices.get(code, {})
+        current_price = price_info.get('price', 0)
+        change_pct = price_info.get('change_pct', 0)
+        pb = pullback_scores.get(code, {})
+        target = pos.get('target')
+        stop_loss = pos.get('stop_loss')
+        is_holding = pos.get('holding', False)
+        entry_price = pos.get('entry')
+
+        reasons = []
+        signals_detail = []
+        priority = 'none'
+        action_text = ''
+
+        # 分析信号
+        has_beat = False
+        has_new_high = False
+        beat_diff = 0
+        for sig in code_sigs:
+            atype = sig.get('analysis_type', '')
+            if 'earnings_beat' in atype:
+                has_beat = True
+                signals_detail.append(sig)
+                st = sig.get('summary_text', '')
+                reasons.append(st.split('|')[0].strip() if st else '超预期')
+                # 提取 beat_diff
+                try:
+                    if '超预期差' in st:
+                        diff_str = st.split('超预期差:')[1].split('pp')[0].strip().replace('+', '').replace('📈', '').replace('🔥', '').strip()
+                        beat_diff = float(diff_str)
+                except:
+                    pass
+            elif 'profit_new_high' in atype:
+                has_new_high = True
+                signals_detail.append(sig)
+                reasons.append('扣非新高')
+
+        # 发现池状态
+        if in_pool:
+            reasons.append('发现池内')
+
+        # 回调评分
+        pb_score = pb.get('score', 0)
+        if pb_score and pb_score >= 60:
+            reasons.append(f'回调评分 {pb_score:.0f}')
+
+        # === 生成行动建议 ===
+
+        if has_beat and beat_diff > 0:
+            # 超预期信号
+            if is_holding:
+                # 已持仓
+                if beat_diff > 20:
+                    priority = 'buy'
+                    if current_price > 0:
+                        entry_low = current_price * 0.99
+                        entry_high = current_price * 1.01
+                        action_text = f'超预期强劲，可加仓 ¥{entry_low:.2f}-{entry_high:.2f}'
+                    else:
+                        action_text = '超预期强劲，可考虑加仓'
+                    if target:
+                        action_text += f'，目标 ¥{target:.2f}'
+                else:
+                    priority = 'wait'
+                    action_text = '超预期但幅度有限，持有观望'
+            else:
+                # 未持仓
+                if pb_score and pb_score >= 60 and current_price > 0:
+                    priority = 'buy'
+                    entry_low = current_price * 0.98
+                    entry_high = current_price * 1.01
+                    action_text = f'超预期+回调到位，建议买入 ¥{entry_low:.2f}-{entry_high:.2f}'
+                    if target:
+                        action_text += f'，目标 ¥{target:.2f}'
+                    if stop_loss:
+                        action_text += f'，止损 ¥{stop_loss:.2f}'
+                elif in_pool and current_price > 0:
+                    priority = 'buy'
+                    entry_low = current_price * 0.98
+                    entry_high = current_price * 1.01
+                    action_text = f'超预期+发现池内，建议买入 ¥{entry_low:.2f}-{entry_high:.2f}'
+                    if target:
+                        action_text += f'，目标 ¥{target:.2f}'
+                elif in_pool:
+                    priority = 'buy'
+                    action_text = f'超预期+发现池内，建议关注'
+                else:
+                    priority = 'wait'
+                    action_text = f'超预期信号，先加入关注，等回调再买'
+
+        elif has_new_high:
+            # 扣非新高
+            if pb_score and pb_score >= 60:
+                priority = 'buy'
+                action_text = f'扣非新高+回调到位，可考虑买入 ¥{current_price*0.98:.2f}-{current_price*1.01:.2f}'
+            else:
+                priority = 'wait'
+                action_text = f'扣非新高但未回调到位，等回调至支撑位再考虑'
+
+        elif is_holding and code in pos_map:
+            # 已持仓但无新信号 — 检查风险
+            hold_sigs = code_signals.get(code, [])
+            has_avoid = any(s.get('signal') == 'avoid' for s in hold_sigs)
+            if has_avoid:
+                priority = 'adjust'
+                action_text = f'信号偏弱，考虑减仓'
+                if stop_loss:
+                    action_text += f'，止损 ¥{stop_loss:.2f}'
+                reasons = [r for r in reasons if '超预期' not in r] + ['低于预期']
+            else:
+                # 持有中无特殊信号
+                pass
+
+        # 生成最终行动项
+        if priority != 'none':
+            emoji_map = {'buy': '🔥', 'wait': '⏳', 'adjust': '⚠️', 'none': '☕'}
+            action = {
+                'priority': priority,
+                'emoji': emoji_map.get(priority, '☕'),
+                'stock_code': code,
+                'stock_name': pos.get('name', code),
+                'current_price': current_price,
+                'change_pct': change_pct,
+                'reasons': reasons,
+                'action_text': action_text,
+                'suggestion': priority,
+                'target': target,
+                'stop_loss': stop_loss,
+                'is_holding': is_holding,
+                'entry_price': entry_price,
+            }
+            actions.append(action)
+
+    # 排序: buy > adjust > wait > none
+    priority_order = {'buy': 0, 'adjust': 1, 'wait': 2, 'none': 3}
+    actions.sort(key=lambda x: (priority_order.get(x['priority'], 9), -x.get('current_price', 0)))
+
+    conn.close()
+    return actions
