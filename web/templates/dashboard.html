@@ -109,6 +109,8 @@ fetch('/api/chart/signal_trend').then(r=>r.json()).then(data=>{
             title:{text:'近30天信号趋势',font:{size:14,color:'#334155'},x:0.02},
             xaxis:{...CHART.layout.xaxis,title:{text:'日期',standoff:12}},
             yaxis:{...CHART.layout.yaxis,title:{text:'信号数',standoff:8},rangemode:'tozero'},
+            legend:{orientation:'h',y:1.12,x:0.5,xanchor:'center',font:{size:11}},
+            margin:{t:64,r:16,b:48,l:56},
         },CHART.config);
     } else { el.innerHTML='<div class="text-center text-gray-400 py-16">暂无信号数据</div>'; }
 });

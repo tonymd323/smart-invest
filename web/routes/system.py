@@ -280,7 +280,15 @@ async def chart_signal_trend():
     """).fetchall()
     conn.close()
 
-    type_map = {'earnings_beat': '超预期', 'profit_new_high': '扣非新高', 'pullback_buy_daily': '回调买入'}
+    type_map = {
+        'earnings_beat': '超预期',
+        'earnings_beat_daily': '超预期',
+        'profit_new_high': '扣非新高',
+        'quarterly_profit_new_high_daily': '扣非新高',
+        'pullback_buy_daily': '回调买入',
+        'pullback_score': '回调评分',
+        'oversold_btiq': '超跌监控',
+    }
     series = {}
     for r in rows:
         t = type_map.get(r[1], r[1])

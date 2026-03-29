@@ -1,0 +1,36 @@
+# Docker
+.dockerignore
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Docs (not needed at runtime)
+docs/
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Archived scripts
+scripts/archived/
+
+# Data temp files (DB is mounted as volume)
+data/bitable_*.json
+data/logs/
+data/oversold/
+
+# OS files
+.DS_Store
+Thumbs.db

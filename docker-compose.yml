@@ -1,16 +1,14 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  web:
+  smart-invest:
     build: .
+    container_name: smart-invest
     ports:
       - "8080:8080"
     volumes:
-      - ./data:/app/data
-      - ./config:/app/config
-      - ./scripts:/app/scripts
-      - ./core:/app/core
-      - ./web:/app/web
-      - ./scanners:/app/scanners
+      - ./data:/app/data      # SQLite DB + 配置数据
+      - ./config:/app/config   # stocks.json
+    environment:
+      - PYTHONUNBUFFERED=1
     restart: unless-stopped
-    command: python3 web/main.py
