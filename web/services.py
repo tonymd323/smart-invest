@@ -839,3 +839,116 @@ def get_today_actions():
     actions.sort(key=lambda x: (priority_order.get(x['priority'], 9), -x.get('current_price', 0)))
 
     return actions
+
+
+def get_oversold_data() -> dict:
+    """
+    获取超跌监控数据（供 oversold 页面使用）
+
+    Returns:
+        {
+            "current": {...} 或 None,  -- 最新一次快照
+            "history": [...],           -- 历史快照（按时间正序）
+            "chart_json": str,          -- Plotly 图表数据 JSON
+        }
+    """
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+
+    try:
+        # 最新快照
+        row = conn.execute("""
+            SELECT snapshot_time, btiq, ma5, signal, up_count, down_count, flat_count, total_count
+            FROM market_snapshots
+            ORDER BY created_at DESC
+            LIMIT 1
+        """).fetchone()
+
+        current = None
+        if row:
+            signal_map = {'buy': '超跌买入', 'warn': '冰点警告', 'hot': '过热', None: '正常'}
+            current = {
+                "snapshot_time": row["snapshot_time"],
+                "btiq": row["btiq"],
+                "ma5": row["ma5"],
+                "signal": row["signal"],
+                "signal_text": signal_map.get(row["signal"], row["signal"] or "正常"),
+                "up_count": row["up_count"],
+                "down_count": row["down_count"],
+                "flat_count": row["flat_count"],
+                "total_count": row["total_count"],
+            }
+
+        # 历史数据（最近 7 天 ≈ 336 次，每30分钟一次）
+        rows = conn.execute("""
+            SELECT snapshot_time, btiq, ma5, signal
+            FROM market_snapshots
+            ORDER BY snapshot_time ASC
+            LIMIT 336
+        """).fetchall()
+
+        history = [dict(r) for r in rows]
+
+        # 构造 Plotly 图表数据
+        chart_json = _build_oversold_chart(history)
+
+        return {
+            "current": current,
+            "history": history,
+            "chart_json": chart_json,
+        }
+    finally:
+        conn.close()
+
+
+def _build_oversold_chart(history: list) -> str:
+    """构造超跌监控 Plotly 图表数据 JSON"""
+    if not history:
+        return "{}"
+
+    times = [h["snapshot_time"] for h in history if h.get("snapshot_time")]
+    btiq_vals = [h["btiq"] for h in history if h.get("btiq") is not None]
+    ma5_vals = [h["ma5"] for h in history if h.get("ma5") is not None]
+
+    # 对齐长度
+    btiq_times = [h["snapshot_time"] for h in history if h.get("btiq") is not None]
+    ma5_times = [h["snapshot_time"] for h in history if h.get("ma5") is not None]
+
+    traces = [
+        {
+            "x": btiq_times,
+            "y": btiq_vals,
+            "name": "BTIQ 涨跌比",
+            "type": "scatter",
+            "mode": "lines",
+            "line": {"color": "#3b82f6", "width": 2},
+        },
+        {
+            "x": ma5_times,
+            "y": ma5_vals,
+            "name": "MA5 均值",
+            "type": "scatter",
+            "mode": "lines",
+            "line": {"color": "#f59e0b", "width": 2, "dash": "dash"},
+        },
+    ]
+
+    # 阈值线
+    shapes = [
+        {"type": "line", "x0": btiq_times[0] if btiq_times else "", "x1": btiq_times[-1] if btiq_times else "",
+         "y0": 30, "y1": 30, "line": {"color": "#ef4444", "width": 1, "dash": "dot"}},
+        {"type": "line", "x0": btiq_times[0] if btiq_times else "", "x1": btiq_times[-1] if btiq_times else "",
+         "y0": 25, "y1": 25, "line": {"color": "#dc2626", "width": 1, "dash": "dot"}},
+    ]
+
+    layout = {
+        "title": "BTIQ 涨跌比趋势",
+        "xaxis": {"title": "时间"},
+        "yaxis": {"title": "BTIQ (%)", "range": [0, 100]},
+        "shapes": shapes,
+        "legend": {"orientation": "h", "y": -0.15},
+        "margin": {"t": 40, "b": 60, "l": 50, "r": 20},
+        "height": 400,
+    }
+
+    return json.dumps({"data": traces, "layout": layout}, ensure_ascii=False)

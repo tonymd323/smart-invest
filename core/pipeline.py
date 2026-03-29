@@ -289,6 +289,64 @@ class Pipeline:
                 """, (quarterly, row_id))
             prev_net_profit = net_profit
 
+    def run_market_snapshot(self) -> Dict[str, Any]:
+        """
+        市场通道：全市场快照采集 → 分析 → 入库
+
+        与单股通道 run() 并列，互不干扰。
+        数据流：MarketSnapshotProvider.fetch_snapshot() → MarketAnalyzer.analyze() → SQLite
+
+        Returns:
+            {
+                "btiq": float,
+                "ma5": float | None,
+                "signal": str | None,
+                "up_count": int,
+                "down_count": int,
+                "total_count": int,
+                "elapsed_ms": int,
+            }
+        """
+        from core.data_provider import MarketSnapshotProvider
+        from core.analyzer import MarketAnalyzer
+
+        t0 = time.time()
+
+        try:
+            # Step 1: 采集全市场快照
+            provider = MarketSnapshotProvider()
+            snapshot = provider.fetch_snapshot()
+            logger.info(
+                f"[Pipeline] 市场快照: up={snapshot.up_count} "
+                f"down={snapshot.down_count} btiq={snapshot.btiq}%"
+            )
+
+            # Step 2: 分析（计算 MA5 + 信号判断）
+            analyzer = MarketAnalyzer(db_path=self.db_path)
+            result = analyzer.analyze(snapshot)
+
+            # Step 3: 保存到 market_snapshots 表
+            analyzer.save(result)
+
+            elapsed = int((time.time() - t0) * 1000)
+            result["elapsed_ms"] = elapsed
+
+            logger.info(
+                f"[Pipeline] 市场通道完成: BTIQ={result['btiq']}% "
+                f"MA5={result['ma5']} signal={result['signal']} ({elapsed}ms)"
+            )
+            return result
+
+        except Exception as e:
+            logger.error(f"[Pipeline] 市场通道失败: {e}")
+            return {
+                "btiq": None,
+                "ma5": None,
+                "signal": None,
+                "error": str(e),
+                "elapsed_ms": int((time.time() - t0) * 1000),
+            }
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  run_backtest — 回测更新 (A-07)

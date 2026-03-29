@@ -1254,7 +1254,142 @@ class DiscoveryPoolManager:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  超跌全市场扫描 (A-05)
+#  MarketAnalyzer — 市场级分析（v2.12 市场通道专用）
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class MarketAnalyzer:
+    """
+    市场级分析器 — 与 EarningsAnalyzer / PullbackAnalyzer 并列
+
+    职责：分析全市场快照数据，计算 BTIQ 涨跌比 + MA5 趋势 + 超跌信号
+    数据流：MarketSnapshotProvider.fetch_snapshot() → MarketAnalyzer.analyze() → SQLite
+
+    逻辑从 OversoldScanner 迁移，接口升级为接收 MarketSnapshot 对象。
+    """
+
+    ALERT_THRESHOLD = 30   # 超跌信号阈值（MA5 < 30）
+    WARN_THRESHOLD = 25    # 冰点警告（MA5 < 25）
+    HOT_THRESHOLD = 80     # 过热警告（MA5 > 80）
+
+    def __init__(self, db_path: str):
+        self.db_path = db_path
+
+    def analyze(self, snapshot) -> Dict:
+        """
+        分析全市场快照，计算 MA5 和信号。
+
+        Args:
+            snapshot: MarketSnapshot 对象（需有 btiq 属性）
+
+        Returns:
+            完善后的 snapshot 数据 dict，含 ma5 + signal
+        """
+        btiq = snapshot.btiq if hasattr(snapshot, 'btiq') else snapshot.get('btiq')
+
+        # 从 DB 计算 MA5
+        ma5 = self._calc_ma5(btiq)
+
+        # 信号判断
+        signal = self._judge_signal(btiq, ma5)
+
+        result = {
+            "btiq": btiq,
+            "ma5": ma5,
+            "signal": signal,
+            "up_count": snapshot.up_count if hasattr(snapshot, 'up_count') else snapshot.get('up_count'),
+            "down_count": snapshot.down_count if hasattr(snapshot, 'down_count') else snapshot.get('down_count'),
+            "flat_count": snapshot.flat_count if hasattr(snapshot, 'flat_count') else snapshot.get('flat_count'),
+            "total_count": snapshot.total_count if hasattr(snapshot, 'total_count') else snapshot.get('total_count'),
+            "snapshot_time": snapshot.snapshot_time if hasattr(snapshot, 'snapshot_time') else snapshot.get('snapshot_time'),
+        }
+
+        logger.info(f"[MarketAnalyzer] BTIQ={btiq}% MA5={ma5} signal={signal}")
+        return result
+
+    def save(self, result: Dict):
+        """保存分析结果到 market_snapshots 表"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            try:
+                conn.execute("""
+                    INSERT INTO market_snapshots
+                    (snapshot_time, btiq, up_count, down_count, flat_count, total_count, ma5, signal, source)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'tencent')
+                """, (
+                    result.get("snapshot_time"),
+                    result.get("btiq"),
+                    result.get("up_count"),
+                    result.get("down_count"),
+                    result.get("flat_count"),
+                    result.get("total_count"),
+                    result.get("ma5"),
+                    result.get("signal"),
+                ))
+                conn.commit()
+            finally:
+                conn.close()
+            logger.info(f"[MarketAnalyzer] 快照已保存: BTIQ={result.get('btiq')}%")
+        except Exception as e:
+            logger.error(f"[MarketAnalyzer] 保存失败: {e}")
+
+    def _calc_ma5(self, current_btiq: float) -> Optional[float]:
+        """从 market_snapshots 表取最近 4 条 + 当前值，计算 MA5"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("""
+                SELECT btiq FROM market_snapshots
+                ORDER BY created_at DESC
+                LIMIT 4
+            """).fetchall()
+            conn.close()
+
+            values = [current_btiq]
+            for row in rows:
+                val = row["btiq"]
+                if val is not None:
+                    values.append(float(val))
+
+            if len(values) < 2:
+                return None
+
+            return round(sum(values) / len(values), 2)
+        except Exception as e:
+            logger.debug(f"[MarketAnalyzer] MA5 计算失败: {e}")
+            return None
+
+    @staticmethod
+    def _judge_signal(btiq: float, ma5: Optional[float] = None) -> Optional[str]:
+        """信号判断"""
+        if ma5 is not None:
+            if ma5 < MarketAnalyzer.WARN_THRESHOLD:
+                return "warn"  # 冰点
+            if ma5 < MarketAnalyzer.ALERT_THRESHOLD:
+                return "buy"   # 超跌
+        if ma5 is not None and ma5 > MarketAnalyzer.HOT_THRESHOLD:
+            return "hot"       # 过热
+        return None
+
+    def get_history(self, days: int = 30) -> List[Dict]:
+        """获取历史快照数据（供前端趋势图使用）"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("""
+                SELECT snapshot_time, btiq, ma5, signal, up_count, down_count
+                FROM market_snapshots
+                ORDER BY snapshot_time DESC
+                LIMIT ?
+            """, (days * 48,)).fetchall()  # 每30分钟一次 ≈ 48次/天
+            conn.close()
+            return [dict(r) for r in rows]
+        except Exception as e:
+            logger.error(f"[MarketAnalyzer] 历史查询失败: {e}")
+            return []
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  超跌全市场扫描 (A-05) [已废弃 — 由 MarketAnalyzer 替代]
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class OversoldScanner:
