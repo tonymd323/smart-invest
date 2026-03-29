@@ -36,10 +36,12 @@
             <thead class="bg-gray-50 border-b">
                 <tr>
                     <th class="text-left px-4 py-2 text-gray-500">股票</th>
+                    <th class="text-right px-4 py-2 text-gray-500">现价</th>
+                    <th class="text-right px-4 py-2 text-gray-500">涨跌</th>
                     <th class="text-right px-4 py-2 text-gray-500">股数</th>
-                    <th class="text-right px-4 py-2 text-gray-500">成本价</th>
-                    <th class="text-right px-4 py-2 text-gray-500">目标价</th>
-                    <th class="text-right px-4 py-2 text-gray-500">止损价</th>
+                    <th class="text-right px-4 py-2 text-gray-500">成本</th>
+                    <th class="text-right px-4 py-2 text-gray-500">市值</th>
+                    <th class="text-right px-4 py-2 text-gray-500">盈亏</th>
                     <th class="text-center px-4 py-2 text-gray-500">操作</th>
                 </tr>
             </thead>
@@ -47,10 +49,14 @@
                 {% for h in holdings %}
                 <tr class="border-b hover:bg-gray-50">
                     <td class="px-4 py-2"><span class="font-medium">{{ h.name }}</span><span class="text-gray-400 ml-1">{{ h.code }}</span></td>
+                    <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(h.price) if h.price else '-' }}</td>
+                    <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if h.change_pct>0 else 'text-green-500' if h.change_pct<0 else '' }}">{{ "%+.2f"|format(h.change_pct) if h.change_pct else '-' }}%</td>
                     <td class="text-right px-4 py-2 font-mono">{{ h.shares }}</td>
-                    <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(h.cost) if h.cost else '-' }}</td>
-                    <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(h.target) if h.get('target') else '-' }}</td>
-                    <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(h.stop_loss) if h.get('stop_loss') else '-' }}</td>
+                    <td class="text-right px-4 py-2 font-mono text-xs">{{ "%.2f"|format(h.cost) if h.cost else '-' }}</td>
+                    <td class="text-right px-4 py-2 font-mono">{{ "%.0f"|format(h.market_value) if h.market_value else '-' }}</td>
+                    <td class="text-right px-4 py-2 font-mono {{ 'text-red-500' if h.pnl>0 else 'text-green-500' if h.pnl<0 else '' }}">
+                        {% if h.pnl %}{{ "%+.0f"|format(h.pnl) }} ({{ "%+.1f"|format(h.pnl_pct) }}%){% else %}-{% endif %}
+                    </td>
                     <td class="text-center px-4 py-2">
                         <button onclick="toggleEdit('h','{{h.code}}')" class="text-xs text-blue-500 hover:text-blue-700 mr-2">编辑</button>
                         <form method="post" action="/portfolio/holding/delete" class="inline" onsubmit="return confirm('确认删除？')">

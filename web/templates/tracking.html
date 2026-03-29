@@ -7,6 +7,11 @@
     <p class="text-gray-500 text-sm mt-1">{{ total }} 条记录</p>
 </div>
 
+<!-- 收益曲线图 -->
+<div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+    <div id="tn-chart" style="height: 350px;"></div>
+</div>
+
 <div class="flex gap-4 mb-4 flex-wrap items-center">
     {{ filter_select("status", [("","全部"),("active","跟踪中"),("completed","已完成"),("expired","已过期")], status, base_url) }}
     {{ search_box(search, "搜索代码/名称...", base_url, {"status":status}) }}
@@ -47,4 +52,22 @@
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无跟踪记录</div>
 {% endif %}
+
+<script src="/static/plotly.min.js"></script>
+<script>
+fetch('/api/chart/tn_returns').then(r=>r.json()).then(data=>{
+    if(data.length){
+        Plotly.newPlot('tn-chart', data.map(t=>({
+            x:t.x, y:t.y, name:t.name, type:'scatter', mode:'lines+markers',
+            line:{width:2}, marker:{size:6}
+        })), {
+            title:'T+N 收益曲线（活跃跟踪）',
+            xaxis:{title:'持有天数'}, yaxis:{title:'收益率(%)',ticksuffix:'%'},
+            legend:{orientation:'h',y:-0.2}, margin:{t:40,r:20}
+        }, {responsive:true});
+    } else {
+        document.getElementById('tn-chart').innerHTML='<div class="text-center text-gray-400 py-20">暂无活跃跟踪数据</div>';
+    }
+});
+</script>
 {% endblock %}

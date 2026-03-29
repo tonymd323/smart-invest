@@ -8,6 +8,7 @@ from typing import Optional
 import json
 
 from web.services import get_db_stats, get_conn, paginate_query, map_signal, map_source
+from core.data_provider import QuoteProvider
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
@@ -81,11 +82,43 @@ async def portfolio_page(
         d['source_zh'] = map_source(d.get('source'))
         pool_candidates.append(d)
 
+    # 持仓实时行情+盈亏
+    holdings_with_price = []
+    try:
+        qp = QuoteProvider()
+        for h in stocks.get("holdings", []):
+            price_info = {'price': 0, 'change_pct': 0}
+            try:
+                records = qp.fetch(h['code'])
+                if records:
+                    q = records[0].to_dict()
+                    price_info = {'price': q.get('price', 0), 'change_pct': q.get('change_pct', 0)}
+            except Exception:
+                pass
+            cost = h.get('cost', 0) or 0
+            shares = h.get('shares', 0) or 0
+            price = price_info['price']
+            market_value = price * shares if price and shares else 0
+            cost_total = cost * shares if cost and shares else 0
+            pnl = market_value - cost_total
+            pnl_pct = (pnl / cost_total * 100) if cost_total > 0 else 0
+            holdings_with_price.append({
+                **h,
+                'price': price,
+                'change_pct': price_info['change_pct'],
+                'market_value': market_value,
+                'cost_total': cost_total,
+                'pnl': pnl,
+                'pnl_pct': pnl_pct,
+            })
+    except Exception:
+        holdings_with_price = [{**h, 'price': 0, 'change_pct': 0, 'market_value': 0, 'cost_total': 0, 'pnl': 0, 'pnl_pct': 0} for h in stocks.get("holdings", [])]
+
     return templates.TemplateResponse("portfolio.html", {
         "request": request,
         "active": "portfolio",
         "db_stats": db_stats,
-        "holdings": stocks.get("holdings", []),
+        "holdings": holdings_with_price,
         "watchlist": stocks.get("watchlist", []),
         "pool_candidates": pool_candidates,
         "pool_total": total,

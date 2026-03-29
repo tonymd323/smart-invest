@@ -70,6 +70,11 @@
     </div>
 </div>
 
+<!-- 信号趋势图 -->
+<div class="bg-white rounded-lg p-4 border border-gray-200 mb-6">
+    <div id="signal-trend-chart" style="height: 250px;"></div>
+</div>
+
 <!-- 最近事件 -->
 <div class="bg-white rounded-lg p-4 border border-gray-200">
     <h3 class="text-sm font-semibold text-gray-600 mb-3">📰 最近事件</h3>
@@ -87,4 +92,22 @@
     <p class="text-gray-400 text-sm">暂无事件</p>
     {% endif %}
 </div>
+
+<script src="/static/plotly.min.js"></script>
+<script>
+fetch('/api/chart/signal_trend').then(r=>r.json()).then(data=>{
+    if(data.length){
+        Plotly.newPlot('signal-trend-chart', data.map(s=>({
+            x:s.x, y:s.y, name:s.name, type:'scatter', fill:'tozeroy',
+            mode:'lines', line:{width:1.5}
+        })), {
+            title:'近30天信号趋势',
+            xaxis:{title:'日期'}, yaxis:{title:'信号数'},
+            legend:{orientation:'h',y:-0.2}, margin:{t:40,r:20}
+        }, {responsive:true});
+    } else {
+        document.getElementById('signal-trend-chart').innerHTML='<div class="text-center text-gray-400 py-16">暂无信号数据</div>';
+    }
+});
+</script>
 {% endblock %}

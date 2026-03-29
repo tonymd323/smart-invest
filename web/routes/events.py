@@ -49,10 +49,13 @@ async def events_page(
     # 查询2: 信号跟踪（event_tracking表）
     sql2 = """
         SELECT et.id, et.stock_code, et.event_type, et.event_date,
+               et.report_period, et.actual_yoy, et.expected_yoy,
                et.profit_diff, et.entry_price, et.return_1d, et.return_5d,
                et.return_10d, et.return_20d, et.tracking_status,
                et.created_at,
-               COALESCE(s.name, et.stock_code) as stock_name, 'signal' as source_type
+               COALESCE(s.name, et.stock_code) as stock_name,
+               COALESCE(s.industry, '') as industry,
+               'signal' as source_type
         FROM event_tracking et
         LEFT JOIN stocks s ON et.stock_code = s.code
         WHERE et.created_at >= datetime('now', ?)

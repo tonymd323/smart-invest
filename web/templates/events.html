@@ -47,7 +47,18 @@
         <div class="text-sm text-gray-700 mt-1">{{ e.title }}</div>
         {% if e.source %}<div class="text-xs text-gray-400 mt-1">{{ e.source }}</div>{% endif %}
         {% else %}
-        <!-- 信号：收益数据 -->
+        <!-- 信号：实际vs预期 + 收益 -->
+        <div class="text-sm text-gray-600 mt-1">
+            {% if e.actual_yoy is not none and e.expected_yoy is not none %}
+            实际 <span class="font-mono {{ 'text-green-600' if e.actual_yoy > 0 else 'text-red-600' }}">{{ "%+.1f"|format(e.actual_yoy) }}%</span>
+            vs 预期 <span class="font-mono">{{ "%+.1f"|format(e.expected_yoy) }}%</span>
+            <span class="text-xs text-gray-400 ml-1">差 {{ "%+.1f"|format(e.profit_diff) }}pp</span>
+            {% elif e.profit_diff is not none %}
+            超预期差 <span class="font-mono {{ 'text-green-600' if e.profit_diff > 0 else 'text-red-600' }}">{{ "%+.1f"|format(e.profit_diff) }}pp</span>
+            {% endif %}
+            {% if e.report_period %}<span class="text-xs text-gray-400 ml-2">{{ e.report_period }}</span>{% endif %}
+            {% if e.industry %}<span class="text-xs text-gray-400 ml-1">· {{ e.industry }}</span>{% endif %}
+        </div>
         <div class="flex gap-4 mt-1 text-xs text-gray-500">
             {% if e.return_1d is not none %}<span>1日: <span class="font-mono {{ 'text-green-600' if e.return_1d > 0 else 'text-red-600' }}">{{ "%+.1f"|format(e.return_1d) }}%</span></span>{% endif %}
             {% if e.return_5d is not none %}<span>5日: <span class="font-mono {{ 'text-green-600' if e.return_5d > 0 else 'text-red-600' }}">{{ "%+.1f"|format(e.return_5d) }}%</span></span>{% endif %}

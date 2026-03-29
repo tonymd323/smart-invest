@@ -173,12 +173,120 @@ async def record_decision(request: Request):
             """, (code,))
             conn.commit()
 
+        # === 已卖出: 从 stocks.json 持仓移除 ===
+        elif action == "sold" and stocks_json.exists():
+            with open(stocks_json) as f:
+                config = json.load(f)
+            config["holdings"] = [h for h in config.get("holdings", []) if h["code"] != code]
+            config["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+            config["updated_by"] = "web:decision:sold"
+            with open(stocks_json, "w") as f:
+                json.dump(config, f, ensure_ascii=False, indent=2)
+            # 完成 T+N 跟踪
+            conn.execute("""
+                UPDATE event_tracking SET tracking_status = 'completed', last_updated = datetime('now','localtime')
+                WHERE stock_code = ? AND tracking_status = 'active'
+            """, (code,))
+            conn.commit()
+
     except Exception as e:
         return HTMLResponse(f'<span class="text-xs text-red-400">记录失败: {e}</span>')
     finally:
         conn.close()
 
     # 返回 HTMX 替换内容
-    action_labels = {"bought": "✅ 已买入", "skip": "⏭️ 已跳过", "watch": "👀 观望中"}
+    action_labels = {"bought": "✅ 已买入", "sold": "💰 已卖出", "skip": "⏭️ 已跳过", "watch": "👀 观望中"}
     label = action_labels.get(action, action)
     return HTMLResponse(f'<span class="text-xs text-gray-400">{label}</span>')
+
+
+# ============================================================
+# 图表数据 API（v2.11 Plotly 集成）
+# ============================================================
+
+@router.get("/api/chart/tn_returns")
+async def chart_tn_returns():
+    """T+N 收益曲线数据"""
+    from fastapi.responses import JSONResponse
+    import sqlite3
+    db = str(PROJECT_ROOT / "data" / "smart_invest.db")
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute("""
+        SELECT et.stock_code, COALESCE(s.name, et.stock_code) as stock_name,
+               et.event_date, et.return_1d, et.return_5d, et.return_10d, et.return_20d
+        FROM event_tracking et
+        LEFT JOIN stocks s ON et.stock_code = s.code
+        WHERE et.entry_price IS NOT NULL AND et.tracking_status = 'active'
+        ORDER BY et.event_date DESC
+        LIMIT 20
+    """).fetchall()
+    conn.close()
+
+    traces = {}
+    for r in rows:
+        code = r['stock_code']
+        name = r['stock_name']
+        key = f"{name}({code[:6]})"
+        if key not in traces:
+            traces[key] = {'x': ['1日', '5日', '10日', '20日'], 'y': [], 'name': key}
+        traces[key]['y'] = [
+            r['return_1d'] or 0, r['return_5d'] or 0,
+            r['return_10d'] or 0, r['return_20d'] or 0
+        ]
+
+    return JSONResponse(list(traces.values()))
+
+
+@router.get("/api/chart/backtest_winrate")
+async def chart_backtest_winrate():
+    """回测胜率柱状图数据"""
+    from fastapi.responses import JSONResponse
+    import sqlite3
+    db = str(PROJECT_ROOT / "data" / "smart_invest.db")
+    conn = sqlite3.connect(db)
+    rows = conn.execute("""
+        SELECT event_type, COUNT(*) as total,
+               SUM(CASE WHEN is_win=1 THEN 1 ELSE 0 END) as wins,
+               AVG(return_20d) as avg_return
+        FROM backtest WHERE return_20d IS NOT NULL
+        GROUP BY event_type
+    """).fetchall()
+    conn.close()
+
+    type_map = {'earnings_beat': '超预期', 'profit_new_high': '扣非新高'}
+    data = {
+        'labels': [type_map.get(r[0], r[0]) for r in rows],
+        'win_rates': [round(r[2]/r[1]*100, 1) if r[1] else 0 for r in rows],
+        'avg_returns': [round(r[3] or 0, 2) for r in rows],
+        'totals': [r[1] for r in rows],
+    }
+    return JSONResponse(data)
+
+
+@router.get("/api/chart/signal_trend")
+async def chart_signal_trend():
+    """近30天信号趋势"""
+    from fastapi.responses import JSONResponse
+    import sqlite3
+    db = str(PROJECT_ROOT / "data" / "smart_invest.db")
+    conn = sqlite3.connect(db)
+    rows = conn.execute("""
+        SELECT date(created_at) as day, analysis_type, COUNT(*) as cnt
+        FROM analysis_results
+        WHERE created_at >= datetime('now', '-30 days')
+        GROUP BY day, analysis_type
+        ORDER BY day
+    """).fetchall()
+    conn.close()
+
+    type_map = {'earnings_beat': '超预期', 'profit_new_high': '扣非新高', 'pullback_buy_daily': '回调买入'}
+    series = {}
+    for r in rows:
+        t = type_map.get(r[1], r[1])
+        if t not in series:
+            series[t] = {'x': [], 'y': [], 'name': t}
+        series[t]['x'].append(r[0])
+        series[t]['y'].append(r[2])
+
+    return JSONResponse(list(series.values()))

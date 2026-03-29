@@ -7,6 +7,11 @@
     <p class="text-gray-500 text-sm mt-1">{{ total }} 条回测记录</p>
 </div>
 
+<!-- 胜率柱状图 -->
+<div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+    <div id="winrate-chart" style="height: 300px;"></div>
+</div>
+
 <!-- 策略胜率 -->
 {% if performance %}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -60,4 +65,26 @@
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无回测数据</div>
 {% endif %}
+
+<script src="/static/plotly.min.js"></script>
+<script>
+fetch('/api/chart/backtest_winrate').then(r=>r.json()).then(d=>{
+    if(d.labels.length){
+        Plotly.newPlot('winrate-chart', [{
+            x:d.labels, y:d.win_rates, type:'bar', name:'胜率',
+            text:d.win_rates.map(v=>v+'%'), textposition:'outside',
+            marker:{color:d.win_rates.map(v=>v>=50?'#22c55e':'#ef4444')}
+        },{
+            x:d.labels, y:d.avg_returns, type:'scatter', mode:'lines+markers',
+            name:'平均收益(%)', yaxis:'y2',
+            line:{color:'#3b82f6',width:2}
+        }], {
+            title:'策略胜率 & 平均收益',
+            yaxis:{title:'胜率(%)',range:[0,100],ticksuffix:'%'},
+            yaxis2:{title:'平均收益(%)',overlaying:'y',side:'right',ticksuffix:'%'},
+            legend:{orientation:'h',y:-0.2}, margin:{t:40,r:50}
+        }, {responsive:true});
+    }
+});
+</script>
 {% endblock %}
