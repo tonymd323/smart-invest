@@ -36,7 +36,6 @@ def run(args):
         scan_ms = int((time.time() - t0) * 1000)
         results['scanner'] = {'codes': len(new_codes), 'ms': scan_ms}
         print(f'   ✅ {len(new_codes)} 家新披露 ({scan_ms}ms)')
-        log.detail(f"Step1 扫描: {len(new_codes)} 家新披露 ({scan_ms}ms)")
 
         if not new_codes:
             print('   无新披露，结束')
@@ -57,7 +56,6 @@ def run(args):
         fetched = run_result.get('stocks_fetched', 0) if isinstance(run_result, dict) else 0
         results['pipeline'] = {'collected': fetched, 'ms': pipe_ms}
         print(f'   ✅ {fetched}/{len(test_codes)} 采集成功 ({pipe_ms}ms)')
-        log.detail(f"Step2 采集: {fetched}/{len(test_codes)} 成功 ({pipe_ms}ms)")
 
         # Step 2b: 一致预期
         print(f'\n📊 Step 2b: 一致预期采集')
@@ -68,7 +66,6 @@ def run(args):
         c_fetched = consensus_result.get("fetched", 0)
         c_updated = consensus_result.get("updated", 0)
         print(f'   ✅ fetched={c_fetched} updated={c_updated} ({consensus_ms}ms)')
-        log.detail(f"Step2b 一致预期: fetched={c_fetched} updated={c_updated} ({consensus_ms}ms)")
 
         # Step 3: Analyzer
         print(f'\n🔍 Step 3: Analyzer')
@@ -123,7 +120,6 @@ def run(args):
             print(f'   └─ 事件(pipeline): 跳过 ({e})')
             events = []
 
-        log.detail(f"Step3 分析: beats={len(beats)} highs={len(highs)} pool={len(auto_pool)} pullback={len(pullback_results)} events={len(events)}")
 
         # Step 3b: 新闻事件采集
         print(f'\n📰 Step 3b: 新闻事件采集')
@@ -152,11 +148,9 @@ def run(args):
             news_ms = int((time.time() - t0_news) * 1000)
             results['news_events'] = {'codes': len(news_codes), 'events': len(news_events), 'ms': news_ms}
             print(f'   ✅ {len(news_codes)} 只股票扫描，{len(news_events)} 条新闻事件 ({news_ms}ms)')
-            log.detail(f"Step3b 新闻: {len(news_codes)} 只扫描, {len(news_events)} 条事件 ({news_ms}ms)")
         except Exception as e:
             print(f'   ⚠️ 新闻事件采集失败: {e}')
             results['news_events'] = {'error': str(e)}
-            log.detail(f"Step3b 新闻: 失败 - {e}")
 
         ana_ms = int((time.time() - t0) * 1000)
         results['analyzer'] = {
@@ -199,9 +193,19 @@ def run(args):
                 except Exception as e:
                     print(f'   ⚠️ {code}: {e}')
             print(f'   ✅ K线采集完成: {kline_ok}/{len(missing_codes)}')
-            log.detail(f"Step3c K线: {kline_ok}/{len(missing_codes)} 只采集完成")
         else:
             print(f'   跟踪股K线已全部就绪')
+
+        # Step 3d: 回调买入评分
+        print('\n📊 Step 3d: 回调买入评分')
+        from core.analyzer import PullbackAnalyzer
+        pa = PullbackAnalyzer(db_path=str(DB_PATH))
+        pullback_results = pa.scan()
+        pb_signals = [r for r in pullback_results if r.get('score', 0) > 0]
+        print(f'   扫描: {len(pullback_results)} 只 | 信号: {len(pb_signals)} 只')
+        for s in pb_signals[:5]:
+            print(f"   → {s['stock_code']} {s.get('stock_name','')} 分={s['score']} {s['grade']}")
+        results['pullback'] = len(pb_signals)
 
         # Step 4: 数据质量
         print(f'\n🔍 Step 4: 数据质量验证')

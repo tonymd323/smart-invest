@@ -71,6 +71,11 @@ class FeishuPusher:
         self.card_gen = CardGenerator()
         self.target = target or self._load_default_target()
         self._push_log: list = []
+        
+        # 飞书 HTTP API 凭证（从环境变量读取）
+        self._app_id = _os.getenv("FEISHU_APP_ID", "")
+        self._app_secret = _os.getenv("FEISHU_APP_SECRET", "")
+        self._token_cache = {"token": "", "expires_at": 0}
     
     # ── 公开接口 ──────────────────────────────────────────────────────────────
     
@@ -254,15 +259,22 @@ class FeishuPusher:
         """
         实际发送消息（纯文本）
         
-        优先尝试通过 OpenClaw CLI 发送，如果不可用则记录到日志。
+        优先级：飞书 HTTP API → OpenClaw CLI → 日志降级
         """
         if not target:
             logger.warning("未配置推送目标，消息仅记录到日志")
             logger.info(f"消息内容:\n{text}")
             return True
         
+        # 方式 1：飞书 HTTP API 直发（容器化部署推荐）
+        if self._app_id and self._app_secret:
+            try:
+                return self._do_send_http(text, target, msg_type="text")
+            except Exception as e:
+                logger.warning(f"HTTP API 发送失败，降级到 CLI: {e}")
+        
+        # 方式 2：OpenClaw CLI
         try:
-            # 尝试通过 OpenClaw CLI 发送
             cmd = [
                 "openclaw", "message", "send",
                 "--channel", "feishu",
@@ -281,8 +293,8 @@ class FeishuPusher:
                 logger.error(f"OpenClaw CLI 返回错误: {result.stderr}")
                 return False
         except FileNotFoundError:
-            # openclaw CLI 不可用，尝试通过 Agent 模式
-            logger.info("OpenClaw CLI 不可用，消息内容记录到日志供 Agent 转发")
+            # 两种方式都不可用，记录到日志
+            logger.info("CLI 不可用且未配置 HTTP API，消息仅记录到日志")
             logger.info(f"消息内容:\n{text}")
             return True
         except subprocess.TimeoutExpired:
@@ -293,13 +305,21 @@ class FeishuPusher:
         """
         实际发送飞书交互式卡片
         
-        通过 OpenClaw CLI 发送卡片消息。
+        优先级：飞书 HTTP API → OpenClaw CLI → 日志降级
         """
         if not target:
             logger.warning("未配置推送目标，卡片内容记录到日志")
             logger.info(f"卡片JSON:\n{card_json}")
             return True
 
+        # 方式 1：飞书 HTTP API 直发（卡片用 interactive 类型）
+        if self._app_id and self._app_secret:
+            try:
+                return self._do_send_http(card_json, target, msg_type="interactive")
+            except Exception as e:
+                logger.warning(f"HTTP API 卡片发送失败，降级到 CLI: {e}")
+
+        # 方式 2：OpenClaw CLI
         try:
             cmd = [
                 "openclaw", "message", "send",
@@ -317,15 +337,121 @@ class FeishuPusher:
                 return True
             else:
                 logger.error(f"卡片发送 CLI 错误: {result.stderr}")
-                # 降级：尝试纯文本
                 return self._do_send("[卡片发送失败，内容见日志]", target)
         except FileNotFoundError:
-            logger.info("OpenClaw CLI 不可用，卡片内容记录到日志")
+            logger.info("CLI 不可用且未配置 HTTP API，卡片内容记录到日志")
             logger.info(f"卡片JSON:\n{card_json}")
             return True
         except subprocess.TimeoutExpired:
             logger.error("卡片发送 CLI 超时")
             return False
+
+    # ── 飞书 HTTP API ──────────────────────────────────────────────────────────
+
+    def _do_send_http(self, content: str, target: str, msg_type: str = "text") -> bool:
+        """
+        通过飞书 Open API 直接发送消息。
+        
+        Args:
+            content: 消息内容（text 类型为纯文本，interactive 类型为卡片 JSON）
+            target: 接收者 ID（chat_id 格式 oc_xxx 或 open_id 格式 ou_xxx）
+            msg_type: 消息类型（text / interactive）
+        
+        Returns:
+            是否发送成功
+        """
+        import urllib.request
+        import urllib.error
+        
+        # 1. 获取 tenant_access_token
+        token = self._get_tenant_token()
+        if not token:
+            logger.error("无法获取飞书 tenant_access_token")
+            return False
+        
+        # 2. 判断接收类型
+        if target.startswith("oc_"):
+            receive_id_type = "chat_id"
+        elif target.startswith("ou_"):
+            receive_id_type = "open_id"
+        else:
+            logger.error(f"未知的 target 格式: {target}")
+            return False
+        
+        # 3. 构造消息体
+        if msg_type == "text":
+            msg_content = json.dumps({"text": content})
+        else:
+            msg_content = content  # interactive 类型已经是 JSON 字符串
+        
+        payload = {
+            "receive_id": target,
+            "msg_type": msg_type,
+            "content": msg_content,
+        }
+        
+        # 4. 发送请求
+        url = f"https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type={receive_id_type}"
+        data = json.dumps(payload).encode("utf-8")
+        
+        req = urllib.request.Request(url, data=data, method="POST")
+        req.add_header("Content-Type", "application/json; charset=utf-8")
+        req.add_header("Authorization", f"Bearer {token}")
+        
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                if result.get("code") == 0:
+                    logger.info(f"飞书 HTTP API 发送成功 (msg_type={msg_type})")
+                    return True
+                else:
+                    logger.error(f"飞书 API 返回错误: code={result.get('code')}, msg={result.get('msg')}")
+                    return False
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace") if e.fp else ""
+            logger.error(f"飞书 API HTTP 错误 {e.code}: {body[:200]}")
+            return False
+        except Exception as e:
+            logger.error(f"飞书 API 请求异常: {e}")
+            return False
+
+    def _get_tenant_token(self) -> str:
+        """
+        获取飞书 tenant_access_token（带缓存，有效期 2 小时）。
+        """
+        import urllib.request
+        
+        now = time.time()
+        if self._token_cache["token"] and now < self._token_cache["expires_at"]:
+            return self._token_cache["token"]
+        
+        url = "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
+        payload = json.dumps({
+            "app_id": self._app_id,
+            "app_secret": self._app_secret,
+        }).encode("utf-8")
+        
+        req = urllib.request.Request(url, data=payload, method="POST")
+        req.add_header("Content-Type", "application/json")
+        
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                if result.get("code") == 0:
+                    token = result["tenant_access_token"]
+                    expire = result.get("expire", 7200)
+                    self._token_cache = {
+                        "token": token,
+                        "expires_at": now + expire - 60,  # 提前 60 秒刷新
+                    }
+                    logger.info("tenant_access_token 刷新成功")
+                    return token
+                else:
+                    logger.error(f"获取 token 失败: {result}")
+                    return ""
+        except Exception as e:
+            logger.error(f"获取 token 异常: {e}")
+            return ""
     
     def _load_default_target(self) -> str:
         """从配置文件加载默认推送目标"""

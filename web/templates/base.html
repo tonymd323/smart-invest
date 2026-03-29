@@ -67,6 +67,9 @@
             <a href="/system" class="nav-item {% if active == 'system' %}active{% endif %}" onclick="closeMenuMobile()">
                 ⚙️ 系统控制
             </a>
+            <a href="/logs" class="nav-item {% if active == 'logs' %}active{% endif %}" onclick="closeMenuMobile()">
+                📜 运行日志
+            </a>
         </div>
         <div class="p-4 border-t border-gray-700 text-xs text-gray-500">
             <div>{{ db_stats.db_size_mb }}MB</div>
