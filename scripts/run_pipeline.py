@@ -38,13 +38,12 @@ def run(args):
     test_codes = new_codes[:args.max_stocks]
     print(f'   测试范围: {len(test_codes)} 只')
 
-    # Step 2: Pipeline 采集
+    # Step 2: Pipeline 采集（仅 FinancialProvider，其他 Provider 有专用脚本）
     print(f'\n📊 Step 2: Pipeline 采集')
     t0 = time.time()
     from core.pipeline import Pipeline
-    from core.data_provider import FinancialProvider, KlineProvider, QuoteProvider, SectorProvider
-    providers = [FinancialProvider(), KlineProvider(), QuoteProvider(), SectorProvider()]
-    pipeline = Pipeline(db_path=str(DB_PATH), providers=providers)
+    from core.data_provider import FinancialProvider
+    pipeline = Pipeline(db_path=str(DB_PATH), providers=[FinancialProvider()])
     run_result = pipeline.run(test_codes)
     pipe_ms = int((time.time() - t0) * 1000)
     fetched = run_result.get('stocks_fetched', 0) if isinstance(run_result, dict) else 0
