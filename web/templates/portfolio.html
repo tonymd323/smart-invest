@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}持仓管理 — 投资系统 2.2{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">📒 持仓管理</h2>
+    <p class="text-gray-500 text-sm mt-1">管理跟踪池与关注池，修改即时生效</p>
+</div>
+
+<!-- 持仓（跟踪池） -->
+<div class="mb-8">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold text-gray-700">📊 持仓（跟踪池）</h3>
+        <button onclick="document.getElementById('add-holding-form').classList.toggle('hidden')"
+                class="text-sm px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">
+            + 添加持仓
+        </button>
+    </div>
+
+    <!-- 添加表单 -->
+    <div id="add-holding-form" class="hidden mb-4 bg-white rounded-lg border border-blue-200 p-4">
+        <form method="post" action="/portfolio/holding/add" class="grid grid-cols-2 lg:grid-cols-6 gap-3">
+            <input name="code" placeholder="代码 (600660.SH)" required class="border rounded px-2 py-1 text-sm">
+            <input name="name" placeholder="名称 (福耀玻璃)" required class="border rounded px-2 py-1 text-sm">
+            <input name="shares" type="number" placeholder="股数" class="border rounded px-2 py-1 text-sm">
+            <input name="cost" type="number" step="0.01" placeholder="成本价" class="border rounded px-2 py-1 text-sm">
+            <input name="target" type="number" step="0.01" placeholder="目标价" class="border rounded px-2 py-1 text-sm">
+            <input name="stop_loss" type="number" step="0.01" placeholder="止损价" class="border rounded px-2 py-1 text-sm">
+            <div class="col-span-2 lg:col-span-6 flex gap-2">
+                <button type="submit" class="px-4 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">保存</button>
+                <button type="button" onclick="document.getElementById('add-holding-form').classList.add('hidden')"
+                        class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded text-sm hover:bg-gray-200">取消</button>
+            </div>
+        </form>
+    </div>
+
+    {% if holdings %}
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="text-left px-4 py-2 text-gray-500">股票</th>
+                    <th class="text-right px-4 py-2 text-gray-500">股数</th>
+                    <th class="text-right px-4 py-2 text-gray-500">成本价</th>
+                    <th class="text-right px-4 py-2 text-gray-500">目标价</th>
+                    <th class="text-right px-4 py-2 text-gray-500">止损价</th>
+                    <th class="text-center px-4 py-2 text-gray-500">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in holdings %}
+                <tr class="border-b hover:bg-gray-50" id="holding-row-{{ h.code | replace('.', '-') }}">
+                    <td class="px-4 py-2">
+                        <span class="font-medium">{{ h.name }}</span>
+                        <span class="text-gray-400 ml-1">{{ h.code }}</span>
+                    </td>
+                    <td class="text-right px-4 py-2 font-mono">{{ h.shares }}</td>
+                    <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(h.cost) if h.cost else '-' }}</td>
+                    <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(h.target) if h.get('target') else '-' }}</td>
+                    <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(h.stop_loss) if h.get('stop_loss') else '-' }}</td>
+                    <td class="text-center px-4 py-2">
+                        <button onclick="toggleEdit('holding', '{{ h.code }}')"
+                                class="text-xs text-blue-500 hover:text-blue-700 mr-2">编辑</button>
+                        <form method="post" action="/portfolio/holding/delete" class="inline"
+                              onsubmit="return confirm('确认删除 {{ h.name }}？')">
+                            <input type="hidden" name="code" value="{{ h.code }}">
+                            <button type="submit" class="text-xs text-red-400 hover:text-red-600">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                <!-- 编辑行 -->
+                <tr class="hidden bg-blue-50" id="edit-holding-{{ h.code | replace('.', '-') }}">
+                    <td colspan="6" class="px-4 py-3">
+                        <form method="post" action="/portfolio/holding/update" class="flex flex-wrap gap-3 items-end">
+                            <input type="hidden" name="code" value="{{ h.code }}">
+                            <div>
+                                <label class="text-xs text-gray-500">股数</label>
+                                <input name="shares" type="number" value="{{ h.shares }}" class="border rounded px-2 py-1 text-sm w-20">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">成本价</label>
+                                <input name="cost" type="number" step="0.01" value="{{ h.cost }}" class="border rounded px-2 py-1 text-sm w-24">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">目标价</label>
+                                <input name="target" type="number" step="0.01" value="{{ h.target or '' }}" class="border rounded px-2 py-1 text-sm w-24">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">止损价</label>
+                                <input name="stop_loss" type="number" step="0.01" value="{{ h.stop_loss or '' }}" class="border rounded px-2 py-1 text-sm w-24">
+                            </div>
+                            <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">保存</button>
+                            <button type="button" onclick="toggleEdit('holding', '{{ h.code }}')"
+                                    class="px-3 py-1 bg-gray-200 text-gray-600 rounded text-sm">取消</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg p-6 border border-gray-200 text-center text-gray-400">
+        暂无持仓，点击上方"添加持仓"开始
+    </div>
+    {% endif %}
+</div>
+
+<!-- 关注池 -->
+<div class="mb-8">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold text-gray-700">👀 关注池</h3>
+        <button onclick="document.getElementById('add-watchlist-form').classList.toggle('hidden')"
+                class="text-sm px-3 py-1 bg-green-50 text-green-600 rounded hover:bg-green-100">
+            + 添加关注
+        </button>
+    </div>
+
+    <!-- 添加表单 -->
+    <div id="add-watchlist-form" class="hidden mb-4 bg-white rounded-lg border border-green-200 p-4">
+        <form method="post" action="/portfolio/watchlist/add" class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+            <input name="code" placeholder="代码 (300054.SZ)" required class="border rounded px-2 py-1 text-sm">
+            <input name="name" placeholder="名称 (鼎龙股份)" required class="border rounded px-2 py-1 text-sm">
+            <input name="sector" placeholder="行业 (半导体材料)" class="border rounded px-2 py-1 text-sm">
+            <div class="flex gap-2">
+                <button type="submit" class="px-4 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700">保存</button>
+                <button type="button" onclick="document.getElementById('add-watchlist-form').classList.add('hidden')"
+                        class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded text-sm hover:bg-gray-200">取消</button>
+            </div>
+        </form>
+    </div>
+
+    {% if watchlist %}
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="text-left px-4 py-2 text-gray-500">股票</th>
+                    <th class="text-left px-4 py-2 text-gray-500">行业</th>
+                    <th class="text-center px-4 py-2 text-gray-500">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w in watchlist %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-2">
+                        <span class="font-medium">{{ w.name }}</span>
+                        <span class="text-gray-400 ml-1">{{ w.code }}</span>
+                    </td>
+                    <td class="px-4 py-2 text-gray-500">{{ w.get('sector', '') }}</td>
+                    <td class="text-center px-4 py-2">
+                        <form method="post" action="/portfolio/watchlist/delete" class="inline"
+                              onsubmit="return confirm('确认删除 {{ w.name }}？')">
+                            <input type="hidden" name="code" value="{{ w.code }}">
+                            <button type="submit" class="text-xs text-red-400 hover:text-red-600">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg p-6 border border-gray-200 text-center text-gray-400">
+        暂无关注
+    </div>
+    {% endif %}
+</div>
+
+<!-- 发现池升级入口 -->
+{% if pool_candidates %}
+<div class="mb-8">
+    <h3 class="text-lg font-semibold text-gray-700 mb-3">🔍 发现池候选（可升级）</h3>
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="text-left px-4 py-2 text-gray-500">股票</th>
+                    <th class="text-left px-4 py-2 text-gray-500">来源</th>
+                    <th class="text-right px-4 py-2 text-gray-500">评分</th>
+                    <th class="text-center px-4 py-2 text-gray-500">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pool_candidates %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-2">
+                        <span class="font-medium">{{ p.stock_name }}</span>
+                        <span class="text-gray-400 ml-1">{{ p.stock_code }}</span>
+                    </td>
+                    <td class="px-4 py-2 text-gray-500">{{ p.source_zh }}</td>
+                    <td class="text-right px-4 py-2 font-mono">{{ "%.0f"|format(p.score) if p.score else '-' }}</td>
+                    <td class="text-center px-4 py-2">
+                        <form method="post" action="/portfolio/pool/promote" class="inline-flex gap-1">
+                            <input type="hidden" name="code" value="{{ p.stock_code }}">
+                            <input type="hidden" name="name" value="{{ p.stock_name }}">
+                            <button type="submit" name="target" value="holding"
+                                    class="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">→ 持仓</button>
+                            <button type="submit" name="target" value="watchlist"
+                                    class="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded hover:bg-green-100">→ 关注</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function toggleEdit(type, code) {
+    const id = 'edit-' + type + '-' + code.replace('.', '-');
+    const row = document.getElementById(id);
+    if (row) row.classList.toggle('hidden');
+}
+</script>
+{% endblock %}

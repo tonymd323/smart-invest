@@ -11,7 +11,7 @@ from web.services import get_db_stats, get_discovery_pool
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
-STOCKS_JSON = Path(__file__).parent.parent / "config" / "stocks.json"
+STOCKS_JSON = Path(__file__).parent.parent.parent / "config" / "stocks.json"
 
 
 def _load_stocks() -> dict:
