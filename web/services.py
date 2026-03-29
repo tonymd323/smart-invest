@@ -603,6 +603,14 @@ def get_today_actions():
     action_codes = set(signal_codes) | set(pos_codes)
     actions = []
 
+    # 从 DB 查股票名称
+    name_map = {}
+    try:
+        rows = conn.execute("SELECT code, name FROM stocks").fetchall()
+        name_map = {r[0]: r[1] for r in rows if r[1]}
+    except Exception:
+        pass
+
     for code in action_codes:
         pos = pos_map.get(code, {})
         code_sigs = code_signals.get(code, [])
@@ -727,7 +735,7 @@ def get_today_actions():
                 'priority': priority,
                 'emoji': emoji_map.get(priority, '☕'),
                 'stock_code': code,
-                'stock_name': pos.get('name', code),
+                'stock_name': name_map.get(code) or pos.get('name', code),
                 'current_price': current_price,
                 'change_pct': change_pct,
                 'reasons': reasons,

@@ -62,19 +62,19 @@
         <!-- 决策按钮 -->
         {% if act.priority in ('buy', 'adjust') %}
         <div class="flex gap-2" id="decision-{{ act.stock_code | replace('.', '-') }}">
-            <button class="px-3 py-1.5 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
-                    hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"bought","reason":"{{ act.action_text }}"}'
-                    hx-target="#decision-{{ act.stock_code | replace('.', '-') }}" hx-swap="innerHTML">
+            <button class="px-3 py-1.5 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 decision-btn"
+                    data-code="{{ act.stock_code }}" data-action="bought"
+                    data-reason="{{ act.action_text }}">
                 ✅ 已买入
             </button>
-            <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
-                    hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"skip","reason":"{{ act.action_text }}"}'
-                    hx-target="#decision-{{ act.stock_code | replace('.', '-') }}" hx-swap="innerHTML">
+            <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200 decision-btn"
+                    data-code="{{ act.stock_code }}" data-action="skip"
+                    data-reason="{{ act.action_text }}">
                 ❌ 跳过
             </button>
-            <button class="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200"
-                    hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"watch"}'
-                    hx-target="#decision-{{ act.stock_code | replace('.', '-') }}" hx-swap="innerHTML">
+            <button class="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200 decision-btn"
+                    data-code="{{ act.stock_code }}" data-action="watch"
+                    data-reason="">
                 👀 观望
             </button>
         </div>
@@ -92,4 +92,31 @@
     <p class="text-gray-400 text-sm mt-2">去 <a href="/signals" class="text-blue-600">信号看板</a> 浏览原始信号</p>
 </div>
 {% endif %}
+
+<script>
+document.querySelectorAll('.decision-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const container = this.parentElement;
+        const code = this.dataset.code;
+        const action = this.dataset.action;
+        const reason = this.dataset.reason;
+        const btn = this;
+
+        // 禁用所有按钮
+        container.querySelectorAll('.decision-btn').forEach(b => b.disabled = true);
+
+        fetch('/api/decision', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({code, action, reason})
+        })
+        .then(r => r.text())
+        .then(html => { container.innerHTML = html; })
+        .catch(() => {
+            container.innerHTML = '<span class="text-xs text-red-400">提交失败</span>';
+            container.querySelectorAll('.decision-btn').forEach(b => b.disabled = false);
+        });
+    });
+});
+</script>
 {% endblock %}
