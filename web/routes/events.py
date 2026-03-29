@@ -22,5 +22,6 @@ async def events_page(request: Request, days: int = Query(7), event_type: str = 
         "db_stats": db_stats,
         "events": events,
         "days": days,
+        "event_type": event_type,
         "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     })

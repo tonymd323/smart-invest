@@ -438,6 +438,9 @@ FastAPI + Jinja2 + HTMX + SSE + Plotly + Tailwind CDN
 5. 移动端响应式改造（汉堡菜单 + 折叠导航）
 6. earnings 表加查询过滤（quarterly_net_profit > 0）
 
+**P2（低优先级改进）：**
+7. ConsensusProvider 预注入配置文件支持 — 增加 `config/consensus_overrides.json`，Pipeline 启动时自动加载，允许手动覆盖关键股票的预期数据（API 降级/限流时兜底）
+
 ---
 
 _进度 v2.5 | 2026-03-29 前端问题排查完成 + 数据清理进行中_

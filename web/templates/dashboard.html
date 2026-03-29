@@ -78,8 +78,8 @@
         {% for evt in recent_events %}
         <div class="flex items-start gap-3 text-sm py-2 border-b border-gray-100 last:border-0">
             <span class="text-xs text-gray-400 whitespace-nowrap">{{ evt.created_at[:16] if evt.created_at else '' }}</span>
-            <span class="font-medium">{{ evt.stock_name or evt.stock_code }}</span>
-            <span class="text-gray-500">{{ evt.title or evt.event_type }}</span>
+            <span class="font-medium">{{ evt.stock_name }}</span>
+            <span class="text-gray-500">{{ evt.event_type_zh or evt.event_type }}</span>
         </div>
         {% endfor %}
     </div>

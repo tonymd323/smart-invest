@@ -2,15 +2,15 @@
 {% block title %}信号看板 — 投资系统 2.2{% endblock %}
 {% block content %}
 <div class="mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">📡 信号看板</h2>
+    <h2 class="text-2xl font-bold text-gray-800">📋 信号看板</h2>
 </div>
 
 <!-- 筛选 -->
-<div class="flex gap-4 mb-4">
+<div class="flex gap-4 mb-4 flex-wrap">
     <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/signals?type='+this.value+'&days={{ current_days }}'">
         <option value="earnings_beat" {{ 'selected' if current_type=='earnings_beat' }}>超预期</option>
         <option value="profit_new_high" {{ 'selected' if current_type=='profit_new_high' }}>扣非新高</option>
-        <option value="pullback_buy" {{ 'selected' if current_type=='pullback_buy' }}>回调买入</option>
+        <option value="pullback_buy_daily" {{ 'selected' if current_type=='pullback_buy_daily' }}>回调买入</option>
     </select>
     <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/signals?type={{ current_type }}&days='+this.value">
         <option value="1" {{ 'selected' if current_days==1 }}>今日</option>
@@ -27,19 +27,23 @@
 <div class="signal-card">
     <div class="flex justify-between items-start">
         <div>
-            <span class="font-medium">{{ s.stock_name or s.stock_code }}</span>
+            <span class="font-medium">{{ s.stock_name }}</span>
+            {% if s.stock_name != s.stock_code %}
             <span class="text-gray-400 ml-1">{{ s.stock_code }}</span>
+            {% endif %}
             {% if s.industry %}<span class="text-gray-300 ml-2 text-xs">{{ s.industry }}</span>{% endif %}
+            <span class="ml-2 text-xs text-blue-500">{{ s.analysis_type_zh }}</span>
         </div>
         <div class="flex items-center gap-2">
             {% if s.score %}<span class="text-sm font-bold">{{ "%.0f"|format(s.score) }}</span>{% endif %}
-            {% if s.signal == 'buy' %}<span class="tag-buy">BUY</span>
-            {% elif s.signal == 'watch' %}<span class="tag-watch">WATCH</span>
-            {% elif s.signal == 'avoid' %}<span class="tag-avoid">AVOID</span>
-            {% else %}<span class="text-gray-400 text-xs">{{ s.signal }}</span>{% endif %}
+            {% if s.signal == 'buy' %}<span class="tag-buy">{{ s.signal_zh }}</span>
+            {% elif s.signal == 'watch' %}<span class="tag-watch">{{ s.signal_zh }}</span>
+            {% elif s.signal == 'avoid' %}<span class="tag-avoid">{{ s.signal_zh }}</span>
+            {% elif s.signal in ('S','A','B') %}<span class="tag-buy">{{ s.signal_zh }}</span>
+            {% else %}<span class="text-gray-400 text-xs">{{ s.signal_zh or s.signal }}</span>{% endif %}
         </div>
     </div>
-    {% if s.summary %}<div class="text-sm text-gray-500 mt-1">{{ s.summary }}</div>{% endif %}
+    {% if s.summary_text %}<div class="text-sm text-gray-500 mt-1">{{ s.summary_text }}</div>{% endif %}
     <div class="text-xs text-gray-400 mt-1">{{ s.created_at[:16] if s.created_at else '' }}</div>
 </div>
 {% endfor %}

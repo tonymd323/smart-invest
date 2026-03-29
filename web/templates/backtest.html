@@ -1,23 +1,26 @@
 {% extends "base.html" %}
 {% block title %}策略回测 — 投资系统 2.2{% endblock %}
+
 {% block content %}
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-gray-800">📊 策略回测</h2>
 </div>
 
+<!-- 策略胜率 -->
 {% if perf %}
-<div class="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-    <h3 class="font-semibold mb-3">策略胜率统计</h3>
+<div class="bg-white rounded-lg p-4 border border-gray-200 mb-6">
+    <h3 class="font-semibold mb-3">策略胜率</h3>
     <table class="data-table text-sm">
-        <thead><tr><th>策略</th><th>次数</th><th>平均收益</th><th>胜率</th></tr></thead>
+        <thead>
+            <tr><th>信号类型</th><th>出现次数</th><th>平均收益</th><th>胜率</th></tr>
+        </thead>
         <tbody>
         {% for p in perf %}
         <tr>
-            <td>{{ p.signal_type }}</td>
+            <td>{{ p.signal_type_zh }}</td>
             <td>{{ p.total }}</td>
-            <td class="{% if p.avg_return and p.avg_return>0 %}up{% elif p.avg_return and p.avg_return<0 %}down{% endif %}">
-                {{ "%.1f"|format(p.avg_return or 0) }}%</td>
-            <td>{{ "%.0f"|format((p.win_rate or 0)*100) }}%</td>
+            <td class="{{ 'up' if (p.avg_return or 0) > 0 else 'down' if (p.avg_return or 0) < 0 else '' }}">{{ "%+.2f"|format(p.avg_return) if p.avg_return is not none else '-' }}%</td>
+            <td>{{ "%.0f"|format((p.win_rate or 0) * 100) }}%</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -25,46 +28,57 @@
 </div>
 {% endif %}
 
-<div class="mb-4">
-    <h3 class="font-semibold mb-2">回测详情</h3>
-    <div class="flex gap-4 mb-2">
-        <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/backtest?type='+this.value">
-            <option value="">全部类型</option>
-            <option value="超预期" {{ 'selected' if current_type=='超预期' }}>超预期</option>
-            <option value="扣非新高" {{ 'selected' if current_type=='扣非新高' }}>扣非新高</option>
-        </select>
-        <span class="text-gray-500 text-sm self-center">{{ results|length }} 条</span>
-    </div>
+<!-- 回测结果 -->
+<div class="flex gap-4 mb-4 flex-wrap">
+    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/backtest?type='+this.value">
+        <option value="" {{ 'selected' if not current_type }}>全部类型</option>
+        <option value="超预期" {{ 'selected' if current_type=='超预期' }}>超预期</option>
+        <option value="历史新高" {{ 'selected' if current_type=='历史新高' }}>历史新高</option>
+        <option value="首次覆盖" {{ 'selected' if current_type=='首次覆盖' }}>首次覆盖</option>
+    </select>
+    <span class="text-gray-500 text-sm self-center">{{ results|length }} 条</span>
 </div>
 
 {% if results %}
-<div class="bg-white rounded-lg overflow-hidden border border-gray-200">
-<table class="data-table text-sm w-full">
+<div class="overflow-x-auto">
+<table class="data-table">
     <thead>
-        <tr><th>股票</th><th>类型</th><th>信号日</th><th>入场价</th><th>5日</th><th>10日</th><th>20日</th><th>60日</th><th>结果</th></tr>
+        <tr>
+            <th>股票</th>
+            <th>类型</th>
+            <th>日期</th>
+            <th>入场价</th>
+            <th>T+5</th>
+            <th>T+10</th>
+            <th>T+20</th>
+            <th>结果</th>
+        </tr>
     </thead>
     <tbody>
-    {% for r in results[:100] %}
+    {% for r in results %}
     <tr>
-        <td class="font-medium">{{ r.stock_name or r.stock_code }}</td>
-        <td class="text-gray-500">{{ r.event_type or '-' }}</td>
-        <td class="text-gray-400 text-xs">{{ r.event_date[:10] if r.event_date else '-' }}</td>
-        <td>{{ "%.2f"|format(r.entry_price) if r.entry_price else '-' }}</td>
-        <td class="{% if r.return_5d and r.return_5d>0 %}up{% elif r.return_5d and r.return_5d<0 %}down{% endif %}">
-            {% if r.return_5d != None %}{{ "%.1f"|format(r.return_5d) }}%{% else %}-{% endif %}</td>
-        <td class="{% if r.return_10d and r.return_10d>0 %}up{% elif r.return_10d and r.return_10d<0 %}down{% endif %}">
-            {% if r.return_10d != None %}{{ "%.1f"|format(r.return_10d) }}%{% else %}-{% endif %}</td>
-        <td class="{% if r.return_20d and r.return_20d>0 %}up{% elif r.return_20d and r.return_20d<0 %}down{% endif %}">
-            {% if r.return_20d != None %}{{ "%.1f"|format(r.return_20d) }}%{% else %}-{% endif %}</td>
-        <td class="{% if r.return_60d and r.return_60d>0 %}up{% elif r.return_60d and r.return_60d<0 %}down{% endif %}">
-            {% if r.return_60d != None %}{{ "%.1f"|format(r.return_60d) }}%{% else %}-{% endif %}</td>
-        <td>{% if r.is_win == 1 %}✅{% elif r.is_win == 0 %}❌{% else %}-{% endif %}</td>
+        <td>
+            <span class="font-medium">{{ r.stock_name }}</span>
+            {% if r.stock_name != r.stock_code %}
+            <span class="text-gray-400 text-xs">{{ r.stock_code }}</span>
+            {% endif %}
+        </td>
+        <td><span class="text-xs text-blue-600">{{ r.event_type_zh }}</span></td>
+        <td class="text-sm">{{ r.event_date or '' }}</td>
+        <td class="text-sm">{{ "%.2f"|format(r.entry_price) if r.entry_price else '-' }}</td>
+        <td class="text-sm {{ 'up' if (r.return_5d or 0) > 0 else 'down' if (r.return_5d or 0) < 0 else '' }}">{{ "%+.2f"|format(r.return_5d) if r.return_5d is not none else '-' }}%</td>
+        <td class="text-sm {{ 'up' if (r.return_10d or 0) > 0 else 'down' if (r.return_10d or 0) < 0 else '' }}">{{ "%+.2f"|format(r.return_10d) if r.return_10d is not none else '-' }}%</td>
+        <td class="text-sm {{ 'up' if (r.return_20d or 0) > 0 else 'down' if (r.return_20d or 0) < 0 else '' }}">{{ "%+.2f"|format(r.return_20d) if r.return_20d is not none else '-' }}%</td>
+        <td>{% if r.is_win == 1 %}<span class="tag-buy">胜</span>{% elif r.is_win == 0 %}<span class="tag-avoid">败</span>{% else %}<span class="text-gray-400">-</span>{% endif %}</td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
 </div>
 {% else %}
-<p class="text-gray-400">暂无回测数据</p>
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
+    <div class="text-4xl mb-3">📈</div>
+    <p class="text-gray-500">暂无回测数据</p>
+</div>
 {% endif %}
 {% endblock %}

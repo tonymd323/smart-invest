@@ -5,3 +5,4 @@ data/bitable_pending*.json
 data/v21_scan_result.json
 .env
 *.bak
+data/logs/

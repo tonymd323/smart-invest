@@ -1,49 +1,64 @@
 {% extends "base.html" %}
 {% block title %}T+N 跟踪 — 投资系统 2.2{% endblock %}
+
 {% block content %}
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-gray-800">📈 T+N 跟踪</h2>
 </div>
 
 <!-- 筛选 -->
-<div class="flex gap-4 mb-4">
+<div class="flex gap-4 mb-4 flex-wrap">
     <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/tracking?status='+this.value">
-        <option value="">全部状态</option>
-        <option value="pending" {{ 'selected' if current_status=='pending' }}>待观察</option>
+        <option value="" {{ 'selected' if not current_status }}>全部状态</option>
         <option value="active" {{ 'selected' if current_status=='active' }}>跟踪中</option>
-        <option value="closed" {{ 'selected' if current_status=='closed' }}>已结束</option>
+        <option value="completed" {{ 'selected' if current_status=='completed' }}>已完成</option>
+        <option value="expired" {{ 'selected' if current_status=='expired' }}>已过期</option>
     </select>
     <span class="text-gray-500 text-sm self-center">{{ tracking|length }} 条</span>
 </div>
 
 {% if tracking %}
-<div class="bg-white rounded-lg overflow-hidden border border-gray-200">
-<table class="data-table text-sm w-full">
+<div class="overflow-x-auto">
+<table class="data-table">
     <thead>
-        <tr><th>股票</th><th>类型</th><th>信号日</th><th>入场价</th><th>1日</th><th>5日</th><th>10日</th><th>20日</th><th>状态</th></tr>
+        <tr>
+            <th>股票</th>
+            <th>类型</th>
+            <th>入池日</th>
+            <th>入池价</th>
+            <th>T+1</th>
+            <th>T+5</th>
+            <th>T+10</th>
+            <th>T+20</th>
+            <th>状态</th>
+        </tr>
     </thead>
     <tbody>
     {% for t in tracking %}
     <tr>
-        <td class="font-medium">{{ t.stock_name or t.stock_code }}</td>
-        <td class="text-gray-500">{{ t.event_type or '-' }}</td>
-        <td class="text-gray-400 text-xs">{{ t.event_date[:10] if t.event_date else '-' }}</td>
-        <td>{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
-        <td class="{% if t.return_1d and t.return_1d>0 %}up{% elif t.return_1d and t.return_1d<0 %}down{% endif %}">
-            {% if t.return_1d != None %}{{ "%.1f"|format(t.return_1d) }}%{% else %}-{% endif %}</td>
-        <td class="{% if t.return_5d and t.return_5d>0 %}up{% elif t.return_5d and t.return_5d<0 %}down{% endif %}">
-            {% if t.return_5d != None %}{{ "%.1f"|format(t.return_5d) }}%{% else %}-{% endif %}</td>
-        <td class="{% if t.return_10d and t.return_10d>0 %}up{% elif t.return_10d and t.return_10d<0 %}down{% endif %}">
-            {% if t.return_10d != None %}{{ "%.1f"|format(t.return_10d) }}%{% else %}-{% endif %}</td>
-        <td class="{% if t.return_20d and t.return_20d>0 %}up{% elif t.return_20d and t.return_20d<0 %}down{% endif %}">
-            {% if t.return_20d != None %}{{ "%.1f"|format(t.return_20d) }}%{% else %}-{% endif %}</td>
-        <td><span class="tag-{{ t.tracking_status or 'pending' }}">{{ t.tracking_status or '-' }}</span></td>
+        <td>
+            <span class="font-medium">{{ t.stock_name }}</span>
+            {% if t.stock_name != t.stock_code %}
+            <span class="text-gray-400 text-xs">{{ t.stock_code }}</span>
+            {% endif %}
+        </td>
+        <td><span class="text-xs text-blue-600">{{ t.event_type_zh }}</span></td>
+        <td class="text-sm">{{ t.event_date or '' }}</td>
+        <td class="text-sm">{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
+        <td class="text-sm {{ 'up' if (t.return_1d or 0) > 0 else 'down' if (t.return_1d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_1d) if t.return_1d is not none else '-' }}%</td>
+        <td class="text-sm {{ 'up' if (t.return_5d or 0) > 0 else 'down' if (t.return_5d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_5d) if t.return_5d is not none else '-' }}%</td>
+        <td class="text-sm {{ 'up' if (t.return_10d or 0) > 0 else 'down' if (t.return_10d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_10d) if t.return_10d is not none else '-' }}%</td>
+        <td class="text-sm {{ 'up' if (t.return_20d or 0) > 0 else 'down' if (t.return_20d or 0) < 0 else '' }}">{{ "%+.2f"|format(t.return_20d) if t.return_20d is not none else '-' }}%</td>
+        <td><span class="text-xs">{{ t.tracking_status_zh }}</span></td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
 </div>
 {% else %}
-<p class="text-gray-400">暂无跟踪数据</p>
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
+    <div class="text-4xl mb-3">📊</div>
+    <p class="text-gray-500">暂无跟踪数据</p>
+</div>
 {% endif %}
 {% endblock %}

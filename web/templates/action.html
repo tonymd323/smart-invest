@@ -19,18 +19,20 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-gray-900">{{ act.stock_name }}</span>
+                        {% if act.stock_name != act.stock_code %}
                         <span class="text-gray-400 text-sm">{{ act.stock_code }}</span>
+                        {% endif %}
                         {% if act.signal == 'buy' %}
-                        <span class="tag-buy">BUY</span>
+                        <span class="tag-buy">买入</span>
                         {% elif act.signal == 'watch' %}
-                        <span class="tag-watch">WATCH</span>
+                        <span class="tag-watch">关注</span>
                         {% else %}
-                        <span class="tag-avoid">{{ act.signal }}</span>
+                        <span class="tag-avoid">{{ act.signal_zh or act.signal }}</span>
                         {% endif %}
                     </div>
                     <div class="text-sm text-gray-600 mt-1">{{ act.reason }}</div>
                     <div class="flex gap-4 mt-2 text-xs text-gray-500">
-                        {% if act.source %}<span>来源: {{ act.source }}</span>{% endif %}
+                        {% if act.source %}<span>来源: {{ act.source_zh or act.source }}</span>{% endif %}
                         {% if act.score %}<span>评分: {{ "%.0f"|format(act.score) }}</span>{% endif %}
                         {% if act.industry %}<span>行业: {{ act.industry }}</span>{% endif %}
                     </div>

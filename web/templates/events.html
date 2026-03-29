@@ -1,1 +1,61 @@
-{% extends "base.html" %} {% block title %}事件流 — 投资系统 2.2{% endblock %} {% block content %}<div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">📰 事件流</h2></div>{% if events %}{% for e in events %}<div class="signal-card mb-2"><div class="flex gap-3 text-sm"><span class="text-gray-400">{{ e.created_at[:16] }}</span><span class="font-medium">{{ e.stock_name }}</span><span class="text-gray-600">{{ e.event_type }}</span>{% if e.sentiment %}<span class="text-{% if e.sentiment=='positive' %}green{% elif e.sentiment=='negative' %}red{% endif %}-600">{{ e.sentiment }}</span>{% endif %}</div>{% if e.title %}<p class="text-sm text-gray-500 mt-1">{{ e.title }}</p>{% endif %}</div>{% endfor %}{% else %}<p class="text-gray-400">暂无事件</p>{% endif %}{% endblock %}
+{% extends "base.html" %}
+{% block title %}事件流 — 投资系统 2.2{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">📰 事件流</h2>
+</div>
+
+<!-- 筛选 -->
+<div class="flex gap-4 mb-4 flex-wrap">
+    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/events?days={{ days }}&event_type='+this.value">
+        <option value="" {{ 'selected' if not event_type }}>全部类型</option>
+        <option value="earnings_beat" {{ 'selected' if event_type=='earnings_beat' }}>超预期</option>
+        <option value="profit_new_high" {{ 'selected' if event_type=='profit_new_high' }}>扣非新高</option>
+    </select>
+    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/events?days='+this.value+'&event_type={{ event_type or "" }}'">
+        <option value="1" {{ 'selected' if days==1 }}>今日</option>
+        <option value="3" {{ 'selected' if days==3 }}>3天</option>
+        <option value="7" {{ 'selected' if days==7 }}>7天</option>
+        <option value="30" {{ 'selected' if days==30 }}>30天</option>
+    </select>
+    <span class="text-gray-500 text-sm self-center">{{ events|length }} 条</span>
+</div>
+
+{% if events %}
+<div class="space-y-2">
+    {% for e in events %}
+    <div class="signal-card">
+        <div class="flex items-start gap-3">
+            <span class="text-xs text-gray-400 whitespace-nowrap mt-0.5">{{ e.created_at[:16] if e.created_at else '' }}</span>
+            <div class="flex-1">
+                <div class="flex items-center gap-2">
+                    <span class="font-medium">{{ e.stock_name }}</span>
+                    <span class="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-600">{{ e.event_type_zh }}</span>
+                    {% if e.tracking_status %}
+                    <span class="text-xs text-gray-400">{{ e.tracking_status_zh }}</span>
+                    {% endif %}
+                </div>
+                {% if e.event_date %}
+                <div class="text-xs text-gray-400 mt-1">
+                    事件日期: {{ e.event_date }}
+                    {% if e.actual_yoy is not none %}
+                    | 实际增速: {{ "%+.1f"|format(e.actual_yoy) }}%
+                    {% endif %}
+                    {% if e.expected_yoy is not none %}
+                    | 预期增速: {{ "%+.1f"|format(e.expected_yoy) }}%
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
+    <div class="text-4xl mb-3">📭</div>
+    <p class="text-gray-500">暂无事件</p>
+</div>
+{% endif %}
+{% endblock %}
