@@ -11,7 +11,7 @@
 {% set fp = {"type":current_types,"disclosure_type":current_disclosure_types,"period":current_periods,"days":current_days} %}
 <div class="flex gap-3 mb-4 flex-wrap items-center">
     {{ multi_filter_select("type", [("earnings_beat_daily","超预期"),("profit_new_high","扣非新高"),("quarterly_profit_new_high_daily","季度新高"),("pullback_buy_daily","回调买入"),("pullback_score","回调评分")], current_types, base_url, "分析类型") }}
-    {{ multi_filter_select("disclosure_type", [("Q4","财报")], current_disclosure_types, base_url, "披露类型") }}
+    {{ multi_filter_select("disclosure_type", [("财报","财报"),("业绩预告","业绩预告"),("业绩快报","业绩快报")], current_disclosure_types, base_url, "披露类型") }}
     {{ multi_filter_select("period", [("2025-12-31","2025年报"),("2025-09-30","2025Q3"),("2025-06-30","2025中报"),("2025-03-31","2025Q1"),("2024-12-31","2024年报"),("2024-09-30","2024Q3"),("2024-06-30","2024中报"),("2024-03-31","2024Q1"),("2023-12-31","2023年报"),("2026-03-31","2026Q1")], current_periods, base_url, "报告期") }}
     {{ filter_select("days", [("1","今日"),("3","3天"),("7","7天"),("30","30天")], current_days|string, base_url) }}
     {{ search_box(search, "搜索代码/名称...", base_url, fp) }}

@@ -59,14 +59,19 @@ async def signals_page(
         sql += f" AND ar.analysis_type IN ({placeholders})"
         params.extend(type)
 
-    # 披露类型 + 报告期筛选（都 JOIN earnings 表）
+    # 披露类型 + 报告期筛选（JOIN earnings 表）
     if disclosure_type or period:
-        # 用 JOIN 而非子查询，性能更好
         sql += " AND EXISTS (SELECT 1 FROM earnings e WHERE e.stock_code = ar.stock_code"
         if disclosure_type:
-            placeholders = ','.join(['?'] * len(disclosure_type))
-            sql += f" AND e.report_type IN ({placeholders})"
-            params.extend(disclosure_type)
+            disc_conditions = []
+            for dt in disclosure_type:
+                if dt == '业绩预告':
+                    disc_conditions.append("e.is_forecast = 1")
+                elif dt == '财报':
+                    disc_conditions.append("(e.is_forecast = 0 OR e.is_forecast IS NULL)")
+                # 业绩快报暂无数据字段，后续扩展
+            if disc_conditions:
+                sql += f" AND ({' OR '.join(disc_conditions)})"
         if period:
             valid_periods = [p for p in period if p in VALID_PERIODS]
             if valid_periods:

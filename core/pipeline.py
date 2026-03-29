@@ -232,29 +232,29 @@ class Pipeline:
                 is_forecast = rec.get("is_forecast", 0)
                 report_type = rec.get("report_type", "Q4")
 
-                # 过滤未来报告期（东财 API 脏数据）
+                # 过滤未来报告期（东财 API 脏数据）— 预告数据豁免
                 report_date = rec.get("report_date", "")
-                if report_date and report_date > today:
+                if report_date and report_date > today and not is_forecast:
                     logger.debug(f"[Pipeline] {stock_code} 跳过未来报告期: {report_date}")
                     continue
-                
+
                 # 对于预告数据，检查是否已有实际财报，有的话跳过
                 if is_forecast:
                     existing = conn.execute("""
-                        SELECT id FROM earnings 
+                        SELECT id FROM earnings
                         WHERE stock_code=? AND report_date=? AND is_forecast=0
                     """, (rec.get("stock_code"), rec.get("report_date"))).fetchone()
                     if existing:
                         logger.debug(f"[Pipeline] {stock_code} {rec.get('report_date')} 已有实际财报，跳过预告")
                         continue
-                
+
                 conn.execute("""
-                    INSERT OR REPLACE INTO earnings 
+                    INSERT OR REPLACE INTO earnings
                     (stock_code, report_date, report_type, net_profit, net_profit_yoy,
                      revenue, revenue_yoy, roe, gross_margin, eps,
                      is_forecast, net_profit_yoy_lower, net_profit_yoy_upper, forecast_type,
                      koufei_yoy, profit_quality_risk)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     rec.get("stock_code"),
                     rec.get("report_date"),
