@@ -76,8 +76,8 @@ async def tracking_page(
         params.append(event_type)
 
     if report_period:
-        sql += " AND et.report_period = ?"
-        params.append(report_period)
+        sql += " AND REPLACE(et.report_period, '-', '') = ?"
+        params.append(report_period.replace('-', ''))
 
     search_cols = ['et.stock_code', 's.name'] if search else None
     rows, total, total_pages = paginate_query(
