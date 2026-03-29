@@ -13,7 +13,7 @@
 </div>
 
 <div class="flex gap-4 mb-4 flex-wrap items-center">
-    {{ filter_select("status", [("","全部"),("active","跟踪中"),("completed","已完成"),("expired","已过期")], status, base_url) }}
+    {{ filter_select("status", [("","全部"),("pending","待更新"),("tracking","跟踪中"),("active","已买入"),("completed","已完成")], status, base_url) }}
     {{ search_box(search, "搜索代码/名称...", base_url, {"status":status}) }}
 </div>
 

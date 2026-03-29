@@ -57,7 +57,7 @@ async def tracking_page(
                CAST(julianday('now') - julianday(et.event_date) AS INTEGER) as hold_days
         FROM event_tracking et
         LEFT JOIN stocks s ON et.stock_code = s.code
-        WHERE et.entry_price IS NOT NULL
+        WHERE 1=1
     """
     params = []
 

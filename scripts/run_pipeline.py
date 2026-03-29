@@ -42,7 +42,8 @@ def run(args):
     print(f'\n📊 Step 2: Pipeline 采集')
     t0 = time.time()
     from core.pipeline import Pipeline
-    pipeline = Pipeline(db_path=str(DB_PATH))
+    from core.data_provider import FinancialProvider
+    pipeline = Pipeline(db_path=str(DB_PATH), providers=[FinancialProvider()])
     run_result = pipeline.run(test_codes)
     pipe_ms = int((time.time() - t0) * 1000)
     fetched = run_result.get('stocks_fetched', 0) if isinstance(run_result, dict) else 0
