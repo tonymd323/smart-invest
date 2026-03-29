@@ -509,9 +509,18 @@ def test_t13_beat_expectation_na():
 
     assert found_na, f"未找到 {test_code} 的扫描结果"
 
-    # 验证 analysis_results 表中 N/A 状态正确写入
+    # v2.7: N/A 信号不再写入 analysis_results（避免噪音数据）
+    # 清除该股票旧的 analysis_results 后验证 N/A 确实未写入
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    # 先删旧记录
+    conn.execute("DELETE FROM analysis_results WHERE stock_code = ? AND analysis_type = 'earnings_beat'", (test_code,))
+    conn.commit()
+
+    # 重新跑一次扫描
+    analyzer2 = EarningsAnalyzer(db_path=DB_PATH)
+    analyzer2.scan_beat_expectation(stock_codes=[test_code])
+
     row = conn.execute("""
         SELECT signal, score
         FROM analysis_results
@@ -521,12 +530,11 @@ def test_t13_beat_expectation_na():
     """, (test_code,)).fetchone()
     conn.close()
 
-    assert row is not None, "analysis_results 中未写入"
-    assert row["signal"] == "N/A", \
-        f"analysis_results 中 signal={row['signal']}，应为 N/A"
+    assert row is None, \
+        f"N/A 信号不应写入 analysis_results，但找到: signal={row['signal'] if row else 'N/A'}"
 
     print(f"     {test_code}: signal=N/A, score=None ✅")
-    print(f"     analysis_results 写入正确: signal={row['signal']}, score={row['score']}")
+    print(f"     N/A 未写入 analysis_results（正确）")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

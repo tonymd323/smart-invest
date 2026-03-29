@@ -300,17 +300,29 @@ class EarningsAnalyzer:
         return results
 
     def _write_result(self, conn, result: Dict):
-        """写入 analysis_results 表（支持 N/A 状态）"""
+        """写入 analysis_results 表（每只股票每类型只保留最新1条）"""
+        import json as _json
+
+        # 跳过 N/A 信号（无一致预期的股票不写入）
+        if result.get("signal") == "N/A":
+            return
+
+        # 先删旧记录，避免重复（替代 INSERT OR REPLACE 的唯一约束失效问题）
+        conn.execute(
+            "DELETE FROM analysis_results WHERE stock_code = ? AND analysis_type = ?",
+            (result["stock_code"], result["analysis_type"])
+        )
+
         conn.execute("""
-            INSERT OR REPLACE INTO analysis_results
+            INSERT INTO analysis_results
             (stock_code, analysis_type, score, signal, summary, created_at)
             VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
         """, (
             result["stock_code"],
             result["analysis_type"],
-            result.get("score"),  # N/A 时为 None
-            result.get("signal", "N/A"),
-            str(result),
+            result.get("score"),
+            result.get("signal"),
+            _json.dumps(result, ensure_ascii=False),
         ))
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -514,11 +526,17 @@ class EarningsAnalyzer:
 
                 entry_price = price_row["close_price"] if price_row else None
 
+                # 查询公司名称
+                name_row = conn.execute(
+                    "SELECT name FROM stocks WHERE code = ?", (code,)
+                ).fetchone()
+                stock_name = name_row["name"] if name_row else None
+
                 conn.execute("""
                     INSERT INTO event_tracking
-                    (stock_code, event_type, event_date, entry_price, tracking_status)
-                    VALUES (?, ?, ?, ?, 'pending')
-                """, (code, event_type, today, entry_price))
+                    (stock_code, stock_name, event_type, event_date, entry_price, tracking_status)
+                    VALUES (?, ?, ?, ?, ?, 'pending')
+                """, (code, stock_name, event_type, today, entry_price))
 
                 logger.info(
                     f"[T+N] 创建跟踪: {code} event={event_type} "
@@ -775,8 +793,12 @@ class PullbackAnalyzer:
                 results.append(result)
 
                 # 写入 analysis_results
+                conn.execute(
+                    "DELETE FROM analysis_results WHERE stock_code = ? AND analysis_type = ?",
+                    (code, "pullback_score")
+                )
                 conn.execute("""
-                    INSERT OR REPLACE INTO analysis_results
+                    INSERT INTO analysis_results
                     (stock_code, analysis_type, score, signal, summary, detail, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
                 """, (
@@ -785,7 +807,7 @@ class PullbackAnalyzer:
                     score_result["score"],
                     result["signal"],
                     result["reason"],
-                    str(detail),
+                    json.dumps(detail, ensure_ascii=False),
                 ))
 
             except Exception as e:
@@ -1392,6 +1414,9 @@ class OversoldScanner:
             return
         try:
             conn = sqlite3.connect(self.db_path)
+            conn.execute(
+                "DELETE FROM analysis_results WHERE stock_code = 'MARKET' AND analysis_type = 'oversold_btiq'"
+            )
             conn.execute("""
                 INSERT INTO analysis_results
                 (stock_code, analysis_type, score, signal, summary, created_at)
