@@ -1,25 +1,26 @@
-"""事件流页面路由 — v2.10 列表增强"""
+"""事件流页面路由 — v2.10 新闻事件"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from typing import Optional
 
-from web.services import get_db_stats, get_conn, paginate_query, map_event_type, map_tracking_status
+from web.services import get_db_stats, get_conn, paginate_query, map_event_type
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
-SORT_WHITELIST = ['et.created_at', 'et.event_date', 'et.stock_code']
+SORT_WHITELIST = ['e.created_at', 'e.published_at', 'e.stock_code']
 
 
 @router.get("/events", response_class=HTMLResponse)
 async def events_page(
     request: Request,
     event_type: Optional[str] = None,
+    sentiment: Optional[str] = None,
     days: int = Query(7),
     search: Optional[str] = None,
-    sort: str = Query("et.created_at"),
+    sort: str = Query("e.created_at"),
     order: str = Query("desc"),
     page: int = Query(1, ge=1),
 ):
@@ -27,23 +28,25 @@ async def events_page(
     conn = get_conn()
 
     sql = """
-        SELECT et.id, et.stock_code, et.event_type, et.event_date,
-               et.report_period, et.actual_yoy, et.expected_yoy,
-               et.profit_diff, et.entry_price, et.return_1d, et.return_5d,
-               et.return_10d, et.return_20d, et.tracking_status,
-               et.last_updated, et.created_at,
-               COALESCE(s.name, et.stock_code) as stock_name
-        FROM event_tracking et
-        LEFT JOIN stocks s ON et.stock_code = s.code
-        WHERE et.created_at >= datetime('now', ?)
+        SELECT e.id, e.stock_code, e.event_type, e.title, e.content,
+               e.source, e.url, e.sentiment, e.sentiment_score,
+               e.severity, e.published_at, e.created_at,
+               COALESCE(s.name, e.stock_code) as stock_name
+        FROM events e
+        LEFT JOIN stocks s ON e.stock_code = s.code
+        WHERE e.created_at >= datetime('now', ?)
     """
     params = [f'-{days} days']
 
     if event_type:
-        sql += " AND et.event_type = ?"
+        sql += " AND e.event_type = ?"
         params.append(event_type)
 
-    search_cols = ['et.stock_code', 's.name'] if search else None
+    if sentiment:
+        sql += " AND e.sentiment = ?"
+        params.append(sentiment)
+
+    search_cols = ['e.stock_code', 's.name', 'e.title'] if search else None
     rows, total, total_pages = paginate_query(
         conn, sql, params, page, 20,
         search=search, search_cols=search_cols,
@@ -55,7 +58,6 @@ async def events_page(
     for r in rows:
         d = dict(r)
         d['event_type_zh'] = map_event_type(d.get('event_type'))
-        d['tracking_status_zh'] = map_tracking_status(d.get('tracking_status'))
         events.append(d)
 
     return templates.TemplateResponse("events.html", {
@@ -64,6 +66,7 @@ async def events_page(
         "events": events,
         "days": days,
         "event_type": event_type or "",
+        "sentiment": sentiment or "",
         "search": search,
         "sort": sort, "order": order,
         "page": page, "total_pages": total_pages, "total": total,

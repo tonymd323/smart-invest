@@ -8,40 +8,40 @@
 </div>
 
 <div class="flex gap-4 mb-4 flex-wrap items-center">
-    {{ filter_select("event_type", [("","全部类型"),("earnings_beat","超预期"),("profit_new_high","扣非新高")], event_type, base_url) }}
+    {{ filter_select("event_type", [("","全部类型"),("capital_buy","增持/回购"),("capital_sell","减持"),("major_contract","重大合同"),("finance_report","财报/经营"),("finance_dividend","分红派息"),("policy利好","政策利好"),("policy利空","政策利空"),("ops_production","投产/扩产"),("ops_restructure","重组/并购"),("risk_warning","风险警示")], event_type, base_url) }}
+    {{ filter_select("sentiment", [("","全部情感"),("positive","利好"),("negative","利空"),("neutral","中性")], sentiment, base_url) }}
     {{ filter_select("days", [("1","今日"),("3","3天"),("7","7天"),("30","30天")], days|string, base_url) }}
-    {{ search_box(search, "搜索代码/名称...", base_url, {"event_type":event_type,"days":days}) }}
+    {{ search_box(search, "搜索代码/名称/标题...", base_url, {"event_type":event_type,"sentiment":sentiment,"days":days}) }}
 </div>
 
 {% if events %}
-<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b">
-            <tr>
-                <th class="text-left px-4 py-2">{{ sort_header("时间", "created_at", sort, order, base_url, {"event_type":event_type,"days":days,"search":search or ""}) }}</th>
-                <th class="text-left px-4 py-2 text-gray-500">股票</th>
-                <th class="text-left px-4 py-2 text-gray-500">类型</th>
-                <th class="text-right px-4 py-2 text-gray-500">实际增速</th>
-                <th class="text-right px-4 py-2 text-gray-500">预期增速</th>
-                <th class="text-left px-4 py-2 text-gray-500">状态</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for e in events %}
-            <tr class="border-b hover:bg-gray-50">
-                <td class="px-4 py-2 text-gray-400 text-xs">{{ e.created_at[:16] if e.created_at else '' }}</td>
-                <td class="px-4 py-2"><span class="font-medium">{{ e.stock_name }}</span></td>
-                <td class="px-4 py-2 text-blue-500 text-xs">{{ e.event_type_zh }}</td>
-                <td class="text-right px-4 py-2 font-mono text-xs">{{ "%+.1f"|format(e.actual_yoy) if e.actual_yoy is not none else '-' }}%</td>
-                <td class="text-right px-4 py-2 font-mono text-xs">{{ "%+.1f"|format(e.expected_yoy) if e.expected_yoy is not none else '-' }}%</td>
-                <td class="px-4 py-2 text-gray-400 text-xs">{{ e.tracking_status_zh }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="space-y-3">
+    {% for e in events %}
+    <div class="bg-white rounded-lg border {% if e.sentiment == 'positive' %}border-green-200{% elif e.sentiment == 'negative' %}border-red-200{% else %}border-gray-200{% endif %} p-4">
+        <div class="flex items-start justify-between mb-1">
+            <div class="flex items-center gap-2">
+                {% if e.sentiment == 'positive' %}<span class="text-green-600">📈</span>
+                {% elif e.sentiment == 'negative' %}<span class="text-red-600">📉</span>
+                {% else %}<span class="text-gray-400">📊</span>{% endif %}
+                <span class="font-medium text-gray-900">{{ e.stock_name }}</span>
+                <span class="text-gray-400 text-xs">{{ e.stock_code }}</span>
+                <span class="text-xs px-2 py-0.5 rounded
+                    {% if e.sentiment == 'positive' %}bg-green-50 text-green-600
+                    {% elif e.sentiment == 'negative' %}bg-red-50 text-red-600
+                    {% else %}bg-gray-50 text-gray-500{% endif %}">
+                    {{ e.event_type_zh }}
+                </span>
+                {% if e.severity == 'high' %}<span class="text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-600">重要</span>{% endif %}
+            </div>
+            <span class="text-xs text-gray-400">{{ e.created_at[:16] if e.created_at else '' }}</span>
+        </div>
+        <div class="text-sm text-gray-700 ml-7">{{ e.title }}</div>
+        {% if e.source %}<div class="text-xs text-gray-400 ml-7 mt-1">来源: {{ e.source }}</div>{% endif %}
+    </div>
+    {% endfor %}
 </div>
-{{ pagination(page, total_pages, base_url, {"event_type":event_type,"days":days,"search":search or "","sort":sort,"order":order}) }}
+{{ pagination(page, total_pages, base_url, {"event_type":event_type,"sentiment":sentiment,"days":days,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
-<div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">📭 暂无事件</div>
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">📭 暂无事件（晚间扫描后自动生成）</div>
 {% endif %}
 {% endblock %}
