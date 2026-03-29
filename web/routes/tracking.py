@@ -60,11 +60,9 @@ async def tracking_page(
                CAST(julianday('now') - julianday(et.event_date) AS INTEGER) as hold_days
         FROM event_tracking et
         LEFT JOIN stocks s ON et.stock_code = s.code
-        LEFT JOIN (
-            SELECT stock_code, report_date, koufei_yoy, profit_quality_risk
-            FROM earnings
-            WHERE is_forecast = 1 OR report_date IS NOT NULL
-        ) e ON et.stock_code = e.stock_code AND et.report_period = e.report_date
+        LEFT JOIN earnings e ON et.stock_code = e.stock_code 
+            AND REPLACE(et.report_period, '-', '') = REPLACE(e.report_date, '-', '')
+            AND e.is_forecast = 1
         WHERE 1=1
     """
     params = []
