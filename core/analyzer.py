@@ -440,6 +440,15 @@ class EarningsAnalyzer:
         """将单只股票写入 discovery_pool 表"""
         import json as _json
 
+        # 过滤 B 股和新股
+        code = stock_code.split('.')[0]
+        if code.startswith(('900', '200')):
+            logger.debug(f"[DiscoverPool] 跳过 B 股: {stock_code}")
+            return None
+        if code.startswith('A25') or (len(code) > 6 and not code.isdigit()):
+            logger.debug(f"[DiscoverPool] 跳过新股/异常: {stock_code}")
+            return None
+
         # P1#6: 从 stocks 表查询公司名称 + 行业
         industry = None
         if not stock_name:
