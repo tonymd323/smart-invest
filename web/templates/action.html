@@ -10,7 +10,8 @@
 {% if actions %}
 <div class="space-y-4">
     {% for act in actions %}
-    <div class="bg-white rounded-lg border {% if act.priority == 'sell' %}border-red-300{% elif act.priority == 'buy' %}border-red-200{% elif act.priority == 'adjust' %}border-yellow-200{% elif act.priority == 'wait' %}border-blue-200{% else %}border-gray-200{% endif %} p-4">
+    <div class="bg-white rounded-lg border {% if act.priority == 'sell' %}border-red-300{% elif act.priority == 'buy' %}border-red-200{% elif act.priority == 'adjust' %}border-yellow-200{% elif act.priority == 'wait' %}border-blue-200{% else %}border-gray-200{% endif %} p-4"
+         x-data="{ loading: false, success: false, showConfirm: false }">
 
         <!-- 头部：优先级 + 股票名 + 价格 -->
         <div class="flex items-start justify-between mb-3">
@@ -61,39 +62,87 @@
 
         <!-- 决策按钮 -->
         {% if act.priority in ('buy', 'adjust', 'sell') %}
-        <div class="flex gap-2" id="decision-{{ act.stock_code | replace('.', '-') }}">
-            {% if act.is_holding %}
-            <!-- 持仓股：卖出/持有 -->
-            <button class="px-3 py-1.5 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 decision-btn"
-                    data-code="{{ act.stock_code }}" data-action="sold"
-                    data-name="{{ act.stock_name }}" data-price="{{ act.current_price or 0 }}"
-                    data-reason="{{ act.action_text }}">
-                💰 已卖出
-            </button>
-            <button class="px-3 py-1.5 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200 decision-btn"
-                    data-code="{{ act.stock_code }}" data-action="hold"
-                    data-reason="{{ act.action_text }}">
-                📌 继续持有
-            </button>
-            {% else %}
-            <!-- 非持仓：买入/跳过/观望 -->
-            <button class="px-3 py-1.5 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 decision-btn"
-                    data-code="{{ act.stock_code }}" data-action="bought"
-                    data-name="{{ act.stock_name }}" data-price="{{ act.current_price or 0 }}"
-                    data-reason="{{ act.action_text }}">
-                ✅ 已买入
-            </button>
-            <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200 decision-btn"
-                    data-code="{{ act.stock_code }}" data-action="skip"
-                    data-reason="{{ act.action_text }}">
-                ❌ 跳过
-            </button>
-            <button class="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200 decision-btn"
-                    data-code="{{ act.stock_code }}" data-action="watch"
-                    data-reason="">
-                👀 观望
-            </button>
-            {% endif %}
+        <div class="flex gap-2 items-center flex-wrap">
+            <!-- 成功提示 -->
+            <template x-if="success">
+                <span class="text-sm text-green-600 font-medium animate-pulse">✅ 已记录</span>
+            </template>
+
+            <!-- 加载中 -->
+            <template x-if="loading">
+                <span class="flex items-center gap-2 text-sm text-gray-500">
+                    <svg class="animate-spin h-4 w-4 text-blue-500" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    提交中…
+                </span>
+            </template>
+
+            <!-- 按钮组 -->
+            <template x-if="!loading && !success">
+                <div class="flex gap-2 flex-wrap">
+                    {% if act.is_holding %}
+                    {% if act.priority == 'sell' %}
+                    <!-- 卖出确认弹窗按钮 -->
+                    <button class="px-3 py-1.5 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition-colors"
+                            @click="showConfirm = true">
+                        💰 已卖出
+                    </button>
+                    {% else %}
+                    <button class="px-3 py-1.5 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition-colors"
+                            @click="loading = true; fetch('/api/decision', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code:'{{ act.stock_code }}', action:'sold', name:'{{ act.stock_name }}', price:{{ act.current_price or 0 }}, reason:`{{ act.action_text }}`})}).then(()=>{loading=false; success=true; setTimeout(()=>success=false, 1500)}).catch(()=>loading=false)">
+                        💰 已卖出
+                    </button>
+                    {% endif %}
+                    <button class="px-3 py-1.5 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200 transition-colors"
+                            @click="loading = true; fetch('/api/decision', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code:'{{ act.stock_code }}', action:'hold', reason:`{{ act.action_text }}`})}).then(()=>{loading=false; success=true; setTimeout(()=>success=false, 1500)}).catch(()=>loading=false)">
+                        📌 继续持有
+                    </button>
+                    {% else %}
+                    <button class="px-3 py-1.5 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 transition-colors"
+                            @click="loading = true; fetch('/api/decision', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code:'{{ act.stock_code }}', action:'bought', name:'{{ act.stock_name }}', price:{{ act.current_price or 0 }}, reason:`{{ act.action_text }}`})}).then(()=>{loading=false; success=true; setTimeout(()=>success=false, 1500)}).catch(()=>loading=false)">
+                        ✅ 已买入
+                    </button>
+                    <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200 transition-colors"
+                            @click="loading = true; fetch('/api/decision', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code:'{{ act.stock_code }}', action:'skip', reason:`{{ act.action_text }}`})}).then(()=>{loading=false; success=true; setTimeout(()=>success=false, 1500)}).catch(()=>loading=false)">
+                        ❌ 跳过
+                    </button>
+                    <button class="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200 transition-colors"
+                            @click="loading = true; fetch('/api/decision', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code:'{{ act.stock_code }}', action:'watch', reason:''})}).then(()=>{loading=false; success=true; setTimeout(()=>success=false, 1500)}).catch(()=>loading=false)">
+                        👀 观望
+                    </button>
+                    {% endif %}
+                </div>
+            </template>
+
+            <!-- 卖出确认弹窗 -->
+            <template x-if="showConfirm">
+                <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="showConfirm = false">
+                    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4">
+                        <div class="text-lg font-bold text-gray-900 mb-2">确认卖出？</div>
+                        <div class="text-sm text-gray-600 mb-1">
+                            <span class="font-medium">{{ act.stock_name }}</span>
+                            <span class="text-gray-400 ml-1">{{ act.stock_code }}</span>
+                        </div>
+                        {% if act.current_price and act.current_price > 0 %}
+                        <div class="text-2xl font-mono font-bold text-red-600 mb-4">¥{{ "%.2f"|format(act.current_price) }}</div>
+                        {% else %}
+                        <div class="text-sm text-gray-400 mb-4">价格待更新</div>
+                        {% endif %}
+                        <div class="flex gap-3">
+                            <button class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                                    @click="showConfirm = false">
+                                取消
+                            </button>
+                            <button class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
+                                    @click="showConfirm = false; loading = true; fetch('/api/decision', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code:'{{ act.stock_code }}', action:'sold', name:'{{ act.stock_name }}', price:{{ act.current_price or 0 }}, reason:`{{ act.action_text }}`})}).then(()=>{loading=false; success=true; setTimeout(()=>success=false, 1500)}).catch(()=>loading=false)">
+                                确认卖出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
         {% endif %}
 
@@ -109,32 +158,4 @@
     <p class="text-gray-400 text-sm mt-2">去 <a href="/signals" class="text-blue-600">信号看板</a> 浏览原始信号</p>
 </div>
 {% endif %}
-
-<script>
-document.querySelectorAll('.decision-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const container = this.parentElement;
-        const code = this.dataset.code;
-        const action = this.dataset.action;
-        const reason = this.dataset.reason;
-        const name = this.dataset.name || code;
-        const price = this.dataset.price || 0;
-
-        // 禁用所有按钮
-        container.querySelectorAll('.decision-btn').forEach(b => b.disabled = true);
-
-        fetch('/api/decision', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({code, action, reason, name, price})
-        })
-        .then(r => r.text())
-        .then(html => { container.innerHTML = html; })
-        .catch(() => {
-            container.innerHTML = '<span class="text-xs text-red-400">提交失败</span>';
-            container.querySelectorAll('.decision-btn').forEach(b => b.disabled = false);
-        });
-    });
-});
-</script>
 {% endblock %}

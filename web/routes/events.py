@@ -99,10 +99,20 @@ async def events_page(
     start = (page - 1) * page_size
     events = all_events[start:start + page_size]
 
+    # 按日期分组（时间线用）
+    from collections import OrderedDict
+    grouped = OrderedDict()
+    for ev in all_events:
+        date_str = (ev.get('created_at') or '')[:10] or '未知日期'
+        if date_str not in grouped:
+            grouped[date_str] = []
+        grouped[date_str].append(ev)
+
     return templates.TemplateResponse("events.html", {
         "request": request, "active": "events",
         "db_stats": db_stats,
-        "events": events,
+        "events": events,        # 保留分页后的列表（备用）
+        "grouped_events": grouped,# 按日期分组的完整列表
         "days": days,
         "event_type": event_type or "",
         "sentiment": sentiment or "",

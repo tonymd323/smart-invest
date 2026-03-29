@@ -10,40 +10,65 @@
 <div class="flex gap-4 mb-4 flex-wrap items-center">
     {{ filter_select("signal", [("","全部"),("buy","买入"),("watch","关注"),("avoid","回避")], current_signal, base_url) }}
     {{ search_box(search, "搜索代码/名称...", base_url, {"signal": current_signal}) }}
+    <div class="flex gap-1 ml-auto text-xs">
+        {{ sort_header("评分", "score", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}
+        {{ sort_header("发现时间", "discovered_at", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}
+    </div>
 </div>
 
 {% if pool %}
-<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b">
-            <tr>
-                <th class="text-left px-4 py-2">{{ sort_header("股票", "stock_code", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}</th>
-                <th class="text-left px-4 py-2 text-gray-500">来源</th>
-                <th class="text-right px-4 py-2">{{ sort_header("评分", "score", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}</th>
-                <th class="text-center px-4 py-2 text-gray-500">信号</th>
-                <th class="text-left px-4 py-2">{{ sort_header("发现时间", "discovered_at", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in pool %}
-            <tr class="border-b hover:bg-gray-50">
-                <td class="px-4 py-2">
-                    <span class="font-medium">{{ p.stock_name }}</span>
-                    {% if p.stock_name != p.stock_code %}<span class="text-gray-400 ml-1">{{ p.stock_code }}</span>{% endif %}
-                    {% if p.industry %}<span class="text-gray-300 ml-2 text-xs">{{ p.industry }}</span>{% endif %}
-                </td>
-                <td class="px-4 py-2 text-gray-500 text-xs">{{ p.source_zh }}</td>
-                <td class="text-right px-4 py-2 font-mono">{{ "%.0f"|format(p.score) if p.score else '-' }}</td>
-                <td class="text-center px-4 py-2">
-                    {% if p.signal == 'buy' %}<span class="text-xs px-2 py-0.5 rounded bg-red-50 text-red-600">{{ p.signal_zh }}</span>
-                    {% elif p.signal == 'watch' %}<span class="text-xs px-2 py-0.5 rounded bg-yellow-50 text-yellow-600">{{ p.signal_zh }}</span>
-                    {% else %}<span class="text-gray-400 text-xs">{{ p.signal_zh }}</span>{% endif %}
-                </td>
-                <td class="px-4 py-2 text-gray-400 text-xs">{{ p.discovered_at[:16] if p.discovered_at else '' }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for p in pool %}
+    {% set score_val = p.score if p.score else 0 %}
+    <div class="discovery-card group">
+        <!-- 头部：名称 + 代码 -->
+        <div class="flex items-start justify-between mb-2">
+            <div>
+                <span class="font-bold text-gray-900">{{ p.stock_name }}</span>
+                {% if p.stock_name != p.stock_code %}
+                <span class="text-gray-400 text-sm ml-1">{{ p.stock_code }}</span>
+                {% endif %}
+            </div>
+            {% if p.signal == 'buy' %}
+            <span class="discovery-signal discovery-signal-buy">买入</span>
+            {% elif p.signal == 'watch' %}
+            <span class="discovery-signal discovery-signal-watch">关注</span>
+            {% elif p.signal == 'hold' %}
+            <span class="discovery-signal discovery-signal-hold">持有</span>
+            {% elif p.signal == 'avoid' %}
+            <span class="discovery-signal discovery-signal-avoid">回避</span>
+            {% endif %}
+        </div>
+
+        <!-- 评分条 -->
+        <div class="discovery-score-track mb-2">
+            <div class="discovery-score-fill {% if score_val >= 70 %}score-high{% elif score_val >= 40 %}score-mid{% else %}score-low{% endif %}"
+                 style="width: {{ score_val }}%"></div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+            <span>评分</span>
+            <span class="font-mono font-bold text-sm {% if score_val >= 70 %}text-green-600{% elif score_val >= 40 %}text-yellow-600{% else %}text-gray-400{% endif %}">
+                {{ "%.0f"|format(score_val) }}
+            </span>
+        </div>
+
+        <!-- 元信息 -->
+        <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-400">
+            {% if p.source_zh %}<span>📎 {{ p.source_zh }}</span>{% endif %}
+            {% if p.industry %}<span>🏭 {{ p.industry }}</span>{% endif %}
+            {% if p.discovered_at %}<span>🕐 {{ p.discovered_at[:10] }}</span>{% endif %}
+        </div>
+
+        <!-- 升级按钮（hover 显示） -->
+        {% if p.signal == 'watch' %}
+        <div class="mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <a href="/action?code={{ p.stock_code }}" class="text-xs px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 inline-block">
+                ⬆️ 升级为买入
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
 </div>
 {{ pagination(page, total_pages, base_url, {"signal":current_signal,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
