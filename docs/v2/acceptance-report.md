@@ -2,7 +2,8 @@
 
 **验收日期：** 2026-03-28  
 **验收人：** JARVIS（自动验收流程）  
-**系统版本：** v2.0 (pipeline.py + analyzer.py + pusher.py)
+**系统版本：** v2.5 (pipeline.py + analyzer.py + pusher.py + web/ 前端脚手架)  
+**当前状态：** 后端验收通过 ✅ | 前端待完善 ⏳
 
 ---
 
