@@ -59,26 +59,23 @@ async def signals_page(
         sql += f" AND ar.analysis_type IN ({placeholders})"
         params.extend(type)
 
-    # 披露类型 + 报告期筛选（JOIN earnings 表）
-    if disclosure_type or period:
-        sql += " AND EXISTS (SELECT 1 FROM earnings e WHERE e.stock_code = ar.stock_code"
-        if disclosure_type:
-            disc_conditions = []
-            for dt in disclosure_type:
-                if dt == '业绩预告':
-                    disc_conditions.append("e.is_forecast = 1")
-                elif dt == '财报':
-                    disc_conditions.append("(e.is_forecast = 0 OR e.is_forecast IS NULL)")
-                # 业绩快报暂无数据字段，后续扩展
-            if disc_conditions:
-                sql += f" AND ({' OR '.join(disc_conditions)})"
-        if period:
-            valid_periods = [p for p in period if p in VALID_PERIODS]
-            if valid_periods:
-                placeholders = ','.join(['?'] * len(valid_periods))
-                sql += f" AND e.report_date IN ({placeholders})"
-                params.extend(valid_periods)
-        sql += ")"
+    # 披露类型筛选（从 summary JSON 提取 disclosure_type）
+    if disclosure_type:
+        disc_conditions = []
+        for dt in disclosure_type:
+            disc_conditions.append("ar.summary LIKE ?")
+            params.append(f'%"disclosure_type": "{dt}"%')
+        sql += f" AND ({' OR '.join(disc_conditions)})"
+
+    # 报告期筛选（JOIN earnings 表，按 report_date）
+    if period:
+        valid_periods = [p for p in period if p in VALID_PERIODS]
+        if valid_periods:
+            placeholders = ','.join(['?'] * len(valid_periods))
+            sql += f""" AND ar.stock_code IN (
+                SELECT DISTINCT stock_code FROM earnings WHERE report_date IN ({placeholders})
+            )"""
+            params.extend(valid_periods)
 
     search_cols = ['ar.stock_code', 's.name'] if search else None
     rows, total, total_pages = paginate_query(

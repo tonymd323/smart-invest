@@ -52,11 +52,11 @@ async def discovery_page(
                dp.source, dp.score, dp.signal,
                dp.status, dp.discovered_at, dp.expires_at,
                e.report_type, e.report_date,
-               e.net_profit_yoy
+               e.net_profit_yoy, e.profit_quality_risk
         FROM discovery_pool dp
         LEFT JOIN stocks s ON dp.stock_code = s.code
         LEFT JOIN (
-            SELECT stock_code, report_type, report_date, net_profit_yoy,
+            SELECT stock_code, report_type, report_date, net_profit_yoy, profit_quality_risk,
                    ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY report_date DESC) as rn
             FROM earnings
         ) e ON dp.stock_code = e.stock_code AND e.rn = 1

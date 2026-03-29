@@ -32,6 +32,7 @@
                 <th class="text-left px-4 py-2">{{ sort_header("入池时间", "event_date", sort, order, base_url, filter_params) }}</th>
                 <th class="text-right px-4 py-2 text-gray-500">持有天数</th>
                 <th class="text-right px-4 py-2 text-gray-500">实际增速</th>
+                <th class="text-right px-4 py-2 text-gray-500">扣非增速</th>
                 <th class="text-right px-4 py-2 text-gray-500">预期增速</th>
                 <th class="text-right px-4 py-2 text-gray-500">入场价</th>
                 <th class="text-right px-4 py-2">{{ sort_header("1日", "return_1d", sort, order, base_url, filter_params) }}</th>
@@ -49,7 +50,8 @@
                 <td class="px-4 py-2 text-xs">{{ t.period_zh }}</td>
                 <td class="px-4 py-2 text-xs text-gray-500">{{ t.pool_date }}</td>
                 <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-orange-600 font-semibold' if t.hold_days and t.hold_days >= 10 else 'text-gray-600' }}">{{ t.hold_days if t.hold_days is not none else '-' }}天</td>
-                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.actual_yoy and t.actual_yoy>0 else 'text-green-500' if t.actual_yoy and t.actual_yoy<0 else '' }}">{{ "%+.1f"|format(t.actual_yoy) if t.actual_yoy is not none else '-' }}%</td>
+                <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.actual_yoy and t.actual_yoy>0 else 'text-green-500' if t.actual_yoy and t.actual_yoy<0 else '' }}">{{ "%+.1f"|format(t.actual_yoy) if t.actual_yoy is not none else '-' }}%{% if t.profit_quality_risk %} <span class="text-orange-500" title="归母与扣非差异>20%，盈利质量存疑">⚠️</span>{% endif %}</td>
+                <td class="text-right px-4 py-2 font-mono text-xs text-gray-400">{{ "%+.1f"|format(t.koufei_yoy) if t.koufei_yoy is not none else '-' }}%</td>
                 <td class="text-right px-4 py-2 font-mono text-xs text-gray-400">{{ "%+.1f"|format(t.expected_yoy) if t.expected_yoy is not none else '-' }}%</td>
                 <td class="text-right px-4 py-2 font-mono">{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
                 <td class="text-right px-4 py-2 font-mono text-xs {{ 'text-red-500' if t.return_1d and t.return_1d>0 else 'text-green-500' if t.return_1d and t.return_1d<0 else '' }}">{{ "%+.1f"|format(t.return_1d) if t.return_1d is not none else '-' }}%</td>

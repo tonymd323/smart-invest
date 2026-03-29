@@ -280,11 +280,12 @@ async def add_cron(request: Request):
     if not schedule or not command:
         return JSONResponse({"ok": False, "error": "schedule 和 command 必填"}, status_code=400)
 
+    SHELL_HEADER = "SHELL=/bin/bash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
     entry = f"{schedule} {command}  # name:{name}"
 
     try:
-        # 先尝试 crontab 命令，失败则直接写文件
         crontab_file = "/app/data/crontab.txt"
+        # 读取当前 crontab 内容
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
         if result.returncode == 0:
             existing = result.stdout
@@ -292,16 +293,21 @@ async def add_cron(request: Request):
             with open(crontab_file) as f:
                 existing = f.read()
         else:
-            existing = ""
+            existing = SHELL_HEADER
+
         new_content = existing.rstrip() + "\n" + entry + "\n"
-        
-        # 尝试写入 crontab
-        proc = subprocess.run(["crontab", "-"], input=new_content, capture_output=True, text=True)
-        if proc.returncode != 0:
-            # 直接写文件
-            with open(crontab_file, "w") as f:
-                f.write(new_content)
-        
+
+        # 写入系统 crontab（只取 cron 行，跳过 SHELL/PATH）
+        cron_lines = "\n".join(
+            l for l in new_content.splitlines()
+            if l.strip() and not l.startswith("SHELL") and not l.startswith("PATH")
+        ) + "\n"
+        proc = subprocess.run(["crontab", "-"], input=cron_lines, capture_output=True, text=True)
+
+        # 同时备份到文件（保留完整格式）
+        with open(crontab_file, "w") as f:
+            f.write(new_content)
+
         return JSONResponse({"ok": True, "entries": _get_crontab_entries()})
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
@@ -315,6 +321,8 @@ async def delete_cron(request: Request):
     name = body.get("name", "")
     if not name:
         return JSONResponse({"ok": False, "error": "name 必填"}, status_code=400)
+
+    SHELL_HEADER = "SHELL=/bin/bash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
 
     try:
         crontab_file = "/app/data/crontab.txt"
@@ -340,11 +348,18 @@ async def delete_cron(request: Request):
             return JSONResponse({"ok": False, "error": f"未找到任务: {name}"}, status_code=404)
 
         new_content = "\n".join(new_lines) + "\n"
-        proc = subprocess.run(["crontab", "-"], input=new_content, capture_output=True, text=True)
-        if proc.returncode != 0:
-            # 直接写文件
-            with open(crontab_file, "w") as f:
-                f.write(new_content)
+
+        # 写入系统 crontab
+        cron_lines = "\n".join(
+            l for l in new_lines
+            if l.strip() and not l.startswith("SHELL") and not l.startswith("PATH")
+        ) + "\n"
+        proc = subprocess.run(["crontab", "-"], input=cron_lines, capture_output=True, text=True)
+
+        # 同时备份到文件
+        with open(crontab_file, "w") as f:
+            f.write(new_content)
+
         return JSONResponse({"ok": True, "entries": _get_crontab_entries()})
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)

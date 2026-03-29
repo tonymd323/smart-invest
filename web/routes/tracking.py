@@ -54,6 +54,7 @@ async def tracking_page(
                et.event_type, et.event_date, et.entry_price,
                et.return_1d, et.return_5d, et.return_10d, et.return_20d,
                et.report_period, et.actual_yoy, et.expected_yoy, et.profit_diff,
+               et.koufei_yoy, et.profit_quality_risk,
                et.tracking_status, et.last_updated,
                et.event_date as pool_date,
                CAST(julianday('now') - julianday(et.event_date) AS INTEGER) as hold_days

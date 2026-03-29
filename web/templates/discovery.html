@@ -73,6 +73,7 @@
             <span class="font-mono {{ 'text-green-600' if p.net_profit_yoy > 0 else 'text-red-500' if p.net_profit_yoy < 0 else 'text-gray-400' }}">
                 净利 {{ "%+.1f"|format(p.net_profit_yoy) }}%
             </span>
+            {% if p.profit_quality_risk %}<span class="text-orange-500" title="归母与扣非差异>20%，盈利质量存疑">⚠️</span>{% endif %}
             {% endif %}
         </div>
         {% endif %}
