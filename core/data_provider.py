@@ -1059,6 +1059,11 @@ class NewsProvider(BaseProvider):
         3. 东方财富公告列表 API
         4. RSS 文章缓存关键词匹配
         """
+        # 北交所暂不支持新闻，直接跳过
+        code = stock_code.split('.')[0]
+        if code.startswith(('43', '83', '87', '920')):
+            return []
+
         NewsData = _get_news_data_class()
 
         # 优先使用预注入数据
