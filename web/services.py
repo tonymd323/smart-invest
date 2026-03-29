@@ -672,7 +672,30 @@ def get_today_actions():
     except Exception:
         pass
 
-    # 5. 合成行动建议（只处理有信号或有持仓的股票）
+    # 5. 决策流转过滤 — v2.10
+    # skip: 3天内不再出现
+    # watch: 有新信号时才出现（信号时间 > 决策时间）
+    # bought: 已在持仓中，正常处理
+    skip_codes = set()
+    watch_decisions = {}
+    try:
+        # 最近3天的 skip 决策
+        rows = conn.execute("""
+            SELECT stock_code FROM decision_log
+            WHERE action = 'skip' AND created_at >= datetime('now', '-3 days')
+        """).fetchall()
+        skip_codes = {r[0] for r in rows}
+
+        # 所有 watch 决策（取每个股票最新一次）
+        rows = conn.execute("""
+            SELECT stock_code, MAX(created_at) FROM decision_log
+            WHERE action = 'watch' GROUP BY stock_code
+        """).fetchall()
+        watch_decisions = {r[0]: r[1] for r in rows}
+    except Exception:
+        pass
+
+    # 6. 合成行动建议（只处理有信号或有持仓的股票）
     action_codes = set(signal_codes) | set(pos_codes)
     actions = []
 
@@ -685,6 +708,26 @@ def get_today_actions():
         pass
 
     for code in action_codes:
+        # 决策流转过滤
+        is_holding_stock = code in pos_codes
+
+        # skip: 3天内不显示（除非是持仓股）
+        if code in skip_codes and not is_holding_stock:
+            continue
+
+        # watch: 没有新信号时不显示（除非是持仓股）
+        if code in watch_decisions and not is_holding_stock:
+            watch_time = watch_decisions[code]
+            # 检查是否有比 watch 决策更新的信号
+            has_new_signal = False
+            for sig in code_signals.get(code, []):
+                sig_time = sig.get('created_at', '')
+                if sig_time and sig_time > watch_time:
+                    has_new_signal = True
+                    break
+            if not has_new_signal:
+                continue
+
         pos = pos_map.get(code, {})
         code_sigs = code_signals.get(code, [])
         in_pool = code in pool_map

@@ -64,6 +64,7 @@
         <div class="flex gap-2" id="decision-{{ act.stock_code | replace('.', '-') }}">
             <button class="px-3 py-1.5 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 decision-btn"
                     data-code="{{ act.stock_code }}" data-action="bought"
+                    data-name="{{ act.stock_name }}" data-price="{{ act.current_price or 0 }}"
                     data-reason="{{ act.action_text }}">
                 ✅ 已买入
             </button>
@@ -100,7 +101,8 @@ document.querySelectorAll('.decision-btn').forEach(btn => {
         const code = this.dataset.code;
         const action = this.dataset.action;
         const reason = this.dataset.reason;
-        const btn = this;
+        const name = this.dataset.name || code;
+        const price = this.dataset.price || 0;
 
         // 禁用所有按钮
         container.querySelectorAll('.decision-btn').forEach(b => b.disabled = true);
@@ -108,7 +110,7 @@ document.querySelectorAll('.decision-btn').forEach(btn => {
         fetch('/api/decision', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({code, action, reason})
+            body: JSON.stringify({code, action, reason, name, price})
         })
         .then(r => r.text())
         .then(html => { container.innerHTML = html; })
