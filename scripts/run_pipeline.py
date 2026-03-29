@@ -78,10 +78,45 @@ def run(args):
         from core.analyzer import EventAnalyzer
         eva = EventAnalyzer(db_path=str(DB_PATH))
         events = eva.detect_from_pipeline(beats=beats, new_highs=highs)
-        print(f'   └─ 事件: {len(events)} 条')
+        print(f'   └─ 事件(pipeline): {len(events)} 条')
     except Exception as e:
-        print(f'   └─ 事件: 跳过 ({e})')
+        print(f'   └─ 事件(pipeline): 跳过 ({e})')
         events = []
+
+    # Step 3b: 新闻事件采集（持仓+发现池+有信号的股票）
+    print(f'\n📰 Step 3b: 新闻事件采集')
+    t0_news = time.time()
+    try:
+        # 收集需要扫描新闻的股票代码
+        conn = sqlite3.connect(str(DB_PATH))
+        news_codes = set(test_codes)  # 本次扫描的股票
+
+        # 加入持仓股
+        config_path = PROJECT_ROOT / "config" / "stocks.json"
+        if config_path.exists():
+            with open(config_path) as f:
+                config = json.load(f)
+            for s in config.get('stocks', []):
+                if s.get('holding'):
+                    news_codes.add(s['code'])
+
+        # 加入发现池（最近7天的）
+        pool_rows = conn.execute(
+            "SELECT DISTINCT stock_code FROM discovery_pool WHERE status = 'active'"
+        ).fetchall()
+        for r in pool_rows:
+            news_codes.add(r[0])
+
+        conn.close()
+
+        news_codes = list(news_codes)[:30]  # 限制30只
+        news_events = eva.detect_from_codes(news_codes, limit=5)
+        news_ms = int((time.time() - t0_news) * 1000)
+        results['news_events'] = {'codes': len(news_codes), 'events': len(news_events), 'ms': news_ms}
+        print(f'   ✅ {len(news_codes)} 只股票扫描，{len(news_events)} 条新闻事件 ({news_ms}ms)')
+    except Exception as e:
+        print(f'   ⚠️ 新闻事件采集失败: {e}')
+        results['news_events'] = {'error': str(e)}
 
     ana_ms = int((time.time() - t0) * 1000)
     results['analyzer'] = {

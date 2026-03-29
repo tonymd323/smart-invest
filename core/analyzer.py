@@ -876,16 +876,35 @@ class EventAnalyzer:
         'industry_down',
         'major_contract',
         'risk_warning',
+        'capital_buy',
+        'capital_sell',
+        'ops_production',
+        'ops_restructure',
+        'finance_report',
+        'finance_dividend',
     ]
 
     # 关键词字典（内置）
     KEYWORDS = {
-        'policy利好': ['政策', '补贴', '扶持', '鼓励', '减税', '利好', '国务院'],
-        'policy利空': ['监管', '处罚', '限制', '禁止', '罚款', '收紧'],
-        'major_contract': ['中标', '合同', '签约', '订单', '合作协议'],
-        'risk_warning': ['ST', '退市', '风险警示', '违规', '立案'],
-        'industry_up': ['景气', '涨价', '供不应求', '扩产', '需求旺盛'],
-        'industry_down': ['产能过剩', '降价', '需求萎缩', '亏损', '裁员'],
+        # 政策类
+        'policy利好': ['政策', '补贴', '扶持', '鼓励', '减税', '利好', '国务院', '鼓励', '专项资金', '产业政策'],
+        'policy利空': ['监管', '处罚', '限制', '禁止', '罚款', '收紧', '严查', '约谈', '立案调查'],
+        # 合同类
+        'major_contract': ['中标', '合同', '签约', '订单', '合作协议', '框架协议', '重大合同', '重大协议'],
+        # 风险类
+        'risk_warning': ['ST', '退市', '风险警示', '违规', '立案', '诉讼', '仲裁', '处罚', '谴责'],
+        # 行业类
+        'industry_up': ['景气', '涨价', '供不应求', '扩产', '需求旺盛', '量价齐升'],
+        'industry_down': ['产能过剩', '降价', '需求萎缩', '亏损', '裁员', '减产'],
+        # 资本类（新增 — 公告高频）
+        'capital_buy': ['增持', '回购', '员工持股', '股权激励', '回购股份'],
+        'capital_sell': ['减持', '减持计划', '减持股份'],
+        # 运营类（新增 — 公告高频）
+        'ops_production': ['投产', '扩产', '项目投产', '生产基地', '产线', '产能释放'],
+        'ops_restructure': ['重组', '并购', '收购', '合并', '分拆', '资产注入', '股权转让'],
+        # 财务类（新增）
+        'finance_report': ['年报', '季报', '业绩预告', '业绩快报', '经营数据', '营收'],
+        'finance_dividend': ['分红', '派息', '送股', '转增'],
     }
 
     # 事件类型 → 情感映射
@@ -896,16 +915,28 @@ class EventAnalyzer:
         'risk_warning': 'negative',
         'industry_up': 'positive',
         'industry_down': 'negative',
+        'capital_buy': 'positive',
+        'capital_sell': 'negative',
+        'ops_production': 'positive',
+        'ops_restructure': 'neutral',
+        'finance_report': 'neutral',
+        'finance_dividend': 'positive',
     }
 
-    # 事件类型 → 严重程度映射
+    # 事件类型 → 严重程度
     SEVERITY_MAP = {
-        'policy利好': 'high',
+        'policy利好': 'medium',
         'policy利空': 'high',
         'major_contract': 'medium',
         'risk_warning': 'high',
         'industry_up': 'medium',
         'industry_down': 'medium',
+        'capital_buy': 'medium',
+        'capital_sell': 'medium',
+        'ops_production': 'medium',
+        'ops_restructure': 'high',
+        'finance_report': 'low',
+        'finance_dividend': 'low',
     }
 
     def __init__(self, db_path: str):

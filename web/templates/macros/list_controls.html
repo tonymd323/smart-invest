@@ -1,0 +1,81 @@
+{# 通用列表控件宏：搜索 + 排序表头 + 分页导航 #}
+
+{# 搜索框 #}
+{% macro search_box(search_value, placeholder="搜索代码/名称...", base_url="/", params={}) %}
+<form method="get" action="{{ base_url }}" class="flex gap-2 items-center">
+    {% for k, v in params.items() %}
+    <input type="hidden" name="{{ k }}" value="{{ v }}">
+    {% endfor %}
+    <input type="text" name="search" value="{{ search_value or '' }}"
+           placeholder="{{ placeholder }}"
+           class="border rounded px-3 py-1.5 text-sm w-48" />
+    <button type="submit" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-sm hover:bg-gray-200">搜索</button>
+    {% if search_value %}
+    <a href="{{ base_url }}{% if params %}?{% for k,v in params.items() %}{{ k }}={{ v }}&{% endfor %}{% endif %}"
+       class="text-xs text-gray-400 hover:text-gray-600">清除</a>
+    {% endif %}
+</form>
+{% endmacro %}
+
+{# 排序表头 #}
+{% macro sort_header(label, field, current_sort, current_order, base_url, params={}) %}
+{% set new_order = 'asc' if (current_sort == field and current_order == 'asc') else 'desc' %}
+{% set arrow = ' ↑' if (current_sort == field and current_order == 'asc') else ' ↓' if (current_sort == field) else '' %}
+{% set url_params = {} %}
+{% for k,v in params.items() %}{% if url_params.update({k:v}) %}{% endif %}{% endfor %}
+{% if url_params.update({'sort': field, 'order': new_order}) %}{% endif %}
+<a href="{{ base_url }}?{% for k,v in url_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+   class="text-gray-500 hover:text-gray-700{{ ' font-semibold' if current_sort == field }}">
+    {{ label }}{{ arrow }}
+</a>
+{% endmacro %}
+
+{# 分页导航 #}
+{% macro pagination(page, total_pages, base_url, params={}) %}
+{% if total_pages > 1 %}
+<div class="flex items-center justify-between mt-4 text-sm text-gray-500">
+    <span>第 {{ page }} / {{ total_pages }} 页</span>
+    <div class="flex gap-1">
+        {% if page > 1 %}
+        {% set prev_params = {} %}
+        {% for k,v in params.items() %}{% if prev_params.update({k:v}) %}{% endif %}{% endfor %}
+        {% if prev_params.update({'page': page - 1}) %}{% endif %}
+        <a href="{{ base_url }}?{% for k,v in prev_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+           class="px-3 py-1 rounded border hover:bg-gray-50">上一页</a>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+            {% set page_params = {} %}
+            {% for k,v in params.items() %}{% if page_params.update({k:v}) %}{% endif %}{% endfor %}
+            {% if page_params.update({'page': p}) %}{% endif %}
+            <a href="{{ base_url }}?{% for k,v in page_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+               class="px-3 py-1 rounded border {{ 'bg-blue-50 border-blue-200 text-blue-600' if p == page else 'hover:bg-gray-50' }}">
+                {{ p }}
+            </a>
+            {% elif p == page - 3 or p == page + 3 %}
+            <span class="px-2 py-1 text-gray-300">...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if page < total_pages %}
+        {% set next_params = {} %}
+        {% for k,v in params.items() %}{% if next_params.update({k:v}) %}{% endif %}{% endfor %}
+        {% if next_params.update({'page': page + 1}) %}{% endif %}
+        <a href="{{ base_url }}?{% for k,v in next_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+           class="px-3 py-1 rounded border hover:bg-gray-50">下一页</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endmacro %}
+
+{# 筛选下拉框 #}
+{% macro filter_select(name, options, current_value, base_url, params={}) %}
+<select class="border rounded px-3 py-1.5 text-sm"
+        onchange="var p=new URLSearchParams(location.search);p.set('{{ name }}',this.value);p.set('page','1');location.href='{{ base_url }}?'+p.toString()">
+    {% for value, label in options %}
+    <option value="{{ value }}" {{ 'selected' if current_value == value }}>{{ label }}</option>
+    {% endfor %}
+</select>
+{% endmacro %}

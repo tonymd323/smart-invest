@@ -41,6 +41,19 @@ SOURCE_MAP = {
     'profit_new_high': '扣非新高',
     'pullback': '回调买入',
     'oversold': '超跌',
+    # 事件类型
+    'policy利好': '政策利好',
+    'policy利空': '政策利空',
+    'major_contract': '重大合同',
+    'risk_warning': '风险警示',
+    'industry_up': '行业景气',
+    'industry_down': '行业下行',
+    'capital_buy': '增持/回购',
+    'capital_sell': '减持',
+    'ops_production': '投产/扩产',
+    'ops_restructure': '重组/并购',
+    'finance_report': '财报/经营',
+    'finance_dividend': '分红派息',
 }
 
 EVENT_TYPE_MAP = {
@@ -243,6 +256,54 @@ def get_conn():
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def paginate_query(conn, sql, params, page, page_size, search=None, search_cols=None,
+                   sort=None, order='desc', sort_whitelist=None):
+    """
+    通用分页查询封装
+
+    Args:
+        conn: SQLite 连接
+        sql: 基础 SQL（不含 WHERE/ORDER/LIMIT）
+        params: SQL 参数列表
+        page: 当前页（1-indexed）
+        page_size: 每页条数
+        search: 搜索关键词
+        search_cols: 可搜索的列名列表（如 ['stock_code', 'stock_name']）
+        sort: 排序字段
+        order: 排序方向（asc/desc）
+        sort_whitelist: 允许排序的字段白名单
+
+    Returns:
+        (rows, total, total_pages)
+    """
+    # 添加搜索条件
+    if search and search_cols:
+        search_clauses = []
+        for col in search_cols:
+            search_clauses.append(f"{col} LIKE ?")
+            params.append(f"%{search}%")
+        sql += " AND (" + " OR ".join(search_clauses) + ")"
+
+    # COUNT 查询
+    count_sql = f"SELECT COUNT(*) FROM ({sql})"
+    total = conn.execute(count_sql, params).fetchone()[0]
+
+    # 排序
+    if sort and sort_whitelist and sort in sort_whitelist:
+        order_dir = 'DESC' if order == 'desc' else 'ASC'
+        sql += f" ORDER BY {sort} {order_dir}"
+
+    # 分页
+    offset = (page - 1) * page_size
+    sql += f" LIMIT ? OFFSET ?"
+    params.extend([page_size, offset])
+
+    rows = conn.execute(sql, params).fetchall()
+    total_pages = max(1, (total + page_size - 1) // page_size)
+
+    return rows, total, total_pages
 
 
 def get_db_stats():

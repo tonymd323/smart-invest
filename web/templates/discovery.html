@@ -1,58 +1,52 @@
 {% extends "base.html" %}
+{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select %}
 {% block title %}发现池 — 投资系统 2.2{% endblock %}
-
 {% block content %}
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-gray-800">🔍 发现池</h2>
+    <p class="text-gray-500 text-sm mt-1">{{ total }} 只候选</p>
 </div>
 
-<!-- 筛选 -->
-<div class="flex gap-4 mb-4 flex-wrap">
-    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/discovery?signal='+this.value+'&source={{ current_source or '' }}'">
-        <option value="" {{ 'selected' if not current_signal }}>全部信号</option>
-        <option value="buy" {{ 'selected' if current_signal=='buy' }}>买入</option>
-        <option value="watch" {{ 'selected' if current_signal=='watch' }}>关注</option>
-    </select>
-    <select class="border rounded px-3 py-1 text-sm" onchange="location.href='/discovery?signal={{ current_signal or '' }}&source='+this.value">
-        <option value="" {{ 'selected' if not current_source }}>全部来源</option>
-        <option value="earnings_beat" {{ 'selected' if current_source=='earnings_beat' }}>超预期</option>
-        <option value="profit_new_high" {{ 'selected' if current_source=='profit_new_high' }}>扣非新高</option>
-    </select>
-    <span class="text-gray-500 text-sm self-center">{{ pool|length }} 只</span>
+<div class="flex gap-4 mb-4 flex-wrap items-center">
+    {{ filter_select("signal", [("","全部"),("buy","买入"),("watch","关注"),("avoid","回避")], current_signal, base_url) }}
+    {{ search_box(search, "搜索代码/名称...", base_url, {"signal": current_signal}) }}
 </div>
 
 {% if pool %}
-<div class="space-y-2">
-    {% for p in pool %}
-    <div class="signal-card">
-        <div class="flex justify-between items-start">
-            <div>
-                <span class="font-medium">{{ p.stock_name }}</span>
-                {% if p.stock_name != p.stock_code %}
-                <span class="text-gray-400 ml-1">{{ p.stock_code }}</span>
-                {% endif %}
-                {% if p.industry %}<span class="text-gray-300 ml-2 text-xs">{{ p.industry }}</span>{% endif %}
-            </div>
-            <div class="flex items-center gap-2">
-                {% if p.score %}<span class="text-sm font-bold">{{ "%.0f"|format(p.score) }}</span>{% endif %}
-                {% if p.signal == 'buy' %}<span class="tag-buy">{{ p.signal_zh }}</span>
-                {% elif p.signal == 'watch' %}<span class="tag-watch">{{ p.signal_zh }}</span>
-                {% else %}<span class="text-gray-400 text-xs">{{ p.signal_zh }}</span>{% endif %}
-            </div>
-        </div>
-        <div class="flex gap-4 mt-2 text-xs text-gray-400">
-            <span>来源: {{ p.source_zh }}</span>
-            <span>入池: {{ p.discovered_at[:10] if p.discovered_at else '' }}</span>
-            {% if p.expires_at %}<span>到期: {{ p.expires_at[:10] }}</span>{% endif %}
-        </div>
-    </div>
-    {% endfor %}
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b">
+            <tr>
+                <th class="text-left px-4 py-2">{{ sort_header("股票", "stock_code", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2 text-gray-500">来源</th>
+                <th class="text-right px-4 py-2">{{ sort_header("评分", "score", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}</th>
+                <th class="text-center px-4 py-2 text-gray-500">信号</th>
+                <th class="text-left px-4 py-2">{{ sort_header("发现时间", "discovered_at", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in pool %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2">
+                    <span class="font-medium">{{ p.stock_name }}</span>
+                    {% if p.stock_name != p.stock_code %}<span class="text-gray-400 ml-1">{{ p.stock_code }}</span>{% endif %}
+                    {% if p.industry %}<span class="text-gray-300 ml-2 text-xs">{{ p.industry }}</span>{% endif %}
+                </td>
+                <td class="px-4 py-2 text-gray-500 text-xs">{{ p.source_zh }}</td>
+                <td class="text-right px-4 py-2 font-mono">{{ "%.0f"|format(p.score) if p.score else '-' }}</td>
+                <td class="text-center px-4 py-2">
+                    {% if p.signal == 'buy' %}<span class="text-xs px-2 py-0.5 rounded bg-red-50 text-red-600">{{ p.signal_zh }}</span>
+                    {% elif p.signal == 'watch' %}<span class="text-xs px-2 py-0.5 rounded bg-yellow-50 text-yellow-600">{{ p.signal_zh }}</span>
+                    {% else %}<span class="text-gray-400 text-xs">{{ p.signal_zh }}</span>{% endif %}
+                </td>
+                <td class="px-4 py-2 text-gray-400 text-xs">{{ p.discovered_at[:16] if p.discovered_at else '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+{{ pagination(page, total_pages, base_url, {"signal":current_signal,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
-<div class="bg-white rounded-lg p-8 border border-gray-200 text-center">
-    <div class="text-4xl mb-3">🔭</div>
-    <p class="text-gray-500">发现池为空</p>
-    <p class="text-gray-400 text-sm mt-1">运行 Pipeline 后自动发现候选股</p>
-</div>
+<div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无候选</div>
 {% endif %}
 {% endblock %}
