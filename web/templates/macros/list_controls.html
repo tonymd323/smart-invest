@@ -92,8 +92,8 @@
 
 {# 多选筛选下拉（Alpine.js checkbox dropdown） #}
 {% macro multi_filter_select(name, options, current_values, base_url, label_text="筛选") %}
-{# 多选暂时降级为单选，Alpine.js 组件初始化有兼容问题 #}
-<div class="relative">
+{# 单选下拉筛选，带清除按钮 #}
+<div class="relative inline-flex items-center gap-1">
     <select onchange="var p=new URLSearchParams(location.search);p.delete('{{ name }}');p.set('page','1');if(this.value)p.append('{{ name }}',this.value);location.href='{{ base_url }}?'+p.toString()"
             class="border rounded px-3 py-1.5 text-sm bg-white hover:bg-gray-50 min-w-[100px]">
         <option value="">{{ label_text }}</option>
@@ -101,5 +101,9 @@
         <option value="{{ value }}" {% if value in current_values %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
+    {% if current_values %}
+    <button type="button" onclick="var p=new URLSearchParams(location.search);p.delete('{{ name }}');p.set('page','1');location.href='{{ base_url }}?'+p.toString()"
+            class="text-xs text-gray-400 hover:text-gray-600 whitespace-nowrap">✕</button>
+    {% endif %}
 </div>
 {% endmacro %}
