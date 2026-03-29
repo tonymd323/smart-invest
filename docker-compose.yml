@@ -11,4 +11,5 @@ services:
       - ./config:/app/config   # stocks.json
     environment:
       - PYTHONUNBUFFERED=1
+      - TUSHARE_TOKEN=54c6afc7620641d1611663eb05a9538c6a5b1b4cbd9e0151afdacbd2
     restart: unless-stopped

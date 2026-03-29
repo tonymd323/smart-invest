@@ -78,11 +78,14 @@ def backfill(days=5):
         except Exception as e:
             print(f"  {date}: Error: {e}")
 
-    # 保存
+    # 保存 JSON
     history.sort(key=lambda x: x['time'])
     os.makedirs(DATA_DIR, exist_ok=True)
     with open(HISTORY_FILE, 'w') as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
+
+    # 同步写入数据库（market_snapshots 表）
+    _sync_to_db(history)
 
     print(f"\n回填完成，新增 {added} 条，总计 {len(history)} 条")
 
@@ -96,6 +99,55 @@ def backfill(days=5):
         values = [daily_last[d] for d in days_sorted]
         ma5 = round(sum(values) / len(values), 2)
         print(f"MA5 = {ma5}% {'🔴 < 30 买入信号!' if ma5 < 30 else ''}")
+
+
+def _sync_to_db(history):
+    """将 JSON 数据同步到 market_snapshots 表"""
+    import sqlite3
+
+    db_path = os.path.expanduser("~/.openclaw/workspace/smart-invest/data/smart_invest.db")
+    if not os.path.exists(db_path):
+        print("  数据库不存在，跳过同步")
+        return
+
+    conn = sqlite3.connect(db_path)
+
+    # 获取已有时间
+    existing = set(r[0] for r in conn.execute(
+        "SELECT snapshot_time FROM market_snapshots WHERE source='backfill'"
+    ).fetchall())
+
+    btiq_values = []
+    added = 0
+    for entry in history:
+        if entry['time'] in existing:
+            btiq_values.append(entry['btiq'])
+            continue
+
+        btiq_values.append(entry['btiq'])
+        ma5 = round(sum(btiq_values[-5:]) / len(btiq_values[-5:]), 2) if btiq_values else None
+
+        signal = None
+        if entry['btiq'] < 15:
+            signal = 'buy'
+        elif entry['btiq'] < 25:
+            signal = 'warn'
+        elif entry['btiq'] > 80:
+            signal = 'hot'
+
+        conn.execute('''
+            INSERT INTO market_snapshots (snapshot_time, btiq, up_count, down_count, flat_count, total_count, ma5, signal, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'backfill')
+        ''', (
+            entry['time'], entry['btiq'], entry['up'], entry['down'],
+            entry['flat'], entry['total'], ma5, signal
+        ))
+        added += 1
+
+    conn.commit()
+    conn.close()
+    if added:
+        print(f"  数据库同步: +{added} 条")
 
 
 if __name__ == '__main__':
