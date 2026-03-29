@@ -45,16 +45,17 @@ async def run_pipeline(request: Request, body: dict = None):
     window = body.get("window", "12h")
     as_of = body.get("as_of", "")
     dry_run = body.get("dry_run", False)
+    max_stocks = body.get("max_stocks", 5000)
     
     # 生成任务 ID
     import uuid
     task_id = str(uuid.uuid4())[:8]
     
-    return {"task_id": task_id, "window": window, "as_of": as_of, "dry_run": dry_run}
+    return {"task_id": task_id, "window": window, "as_of": as_of, "dry_run": dry_run, "max_stocks": max_stocks}
 
 
 @router.get("/api/pipeline/stream/{task_id}")
-async def pipeline_sse(task_id: str, window: str = "12h", as_of: str = "", dry_run: bool = False):
+async def pipeline_sse(task_id: str, window: str = "12h", as_of: str = "", dry_run: bool = False, max_stocks: int = 5000):
     """SSE 实时日志流"""
     
     async def generate():
@@ -64,7 +65,7 @@ async def pipeline_sse(task_id: str, window: str = "12h", as_of: str = "", dry_r
             cmd.extend(["--as-of", as_of])
         if dry_run:
             cmd.append("--dry-run")
-        cmd.extend(["--max-stocks", "10"])
+        cmd.extend(["--max-stocks", str(max_stocks)])
         
         yield f"data: {json.dumps({'type': 'info', 'msg': f'🚀 启动 Pipeline (window={window})'})}\n\n"
         
