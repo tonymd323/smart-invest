@@ -80,10 +80,11 @@ EVENT_TYPE_MAP = {
 }
 
 TRACKING_STATUS_MAP = {
-    'active': '跟踪中',
+    'pending': '待处理',
+    'tracking': '跟踪中',
+    'active': '已买入',
     'expired': '已过期',
     'completed': '已完成',
-    'pending': '待处理',
 }
 
 DISCLOSURE_TYPE_MAP = {
