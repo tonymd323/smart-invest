@@ -37,6 +37,7 @@
     </div>
 </div>
 
+
 <!-- Cron 管理 -->
 <div class="bg-white rounded-lg p-6 border border-gray-200 mt-6" x-data="cronManager()">
     <h3 class="font-semibold mb-4">⏰ 定时任务管理</h3>
@@ -45,9 +46,8 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b">
                 <tr>
-                    <th class="text-left px-3 py-2 text-gray-500">名称</th>
-                    <th class="text-left px-3 py-2 text-gray-500">调度</th>
-                    <th class="text-left px-3 py-2 text-gray-500">命令</th>
+                    <th class="text-left px-3 py-2 text-gray-500">任务</th>
+                    <th class="text-left px-3 py-2 text-gray-500">执行时间</th>
                     <th class="text-right px-3 py-2 text-gray-500">操作</th>
                 </tr>
             </thead>
@@ -55,8 +55,10 @@
                 <template x-for="(e, i) in entries" :key="i">
                     <tr class="border-b hover:bg-gray-50">
                         <td class="px-3 py-2 font-medium" x-text="e.name"></td>
-                        <td class="px-3 py-2 font-mono text-xs" x-text="e.schedule"></td>
-                        <td class="px-3 py-2 text-xs text-gray-500 truncate max-w-xs" x-text="e.command"></td>
+                        <td class="px-3 py-2 text-gray-600">
+                            <span x-text="e.readable" class="mr-2"></span>
+                            <span class="text-xs text-gray-400 font-mono" x-text="e.schedule"></span>
+                        </td>
                         <td class="px-3 py-2 text-right">
                             <button @click="deleteEntry(e.name)" class="text-red-500 text-xs hover:underline">删除</button>
                         </td>
@@ -70,22 +72,46 @@
 
     <!-- 添加表单 -->
     <div class="border-t pt-4 mt-4">
-        <p class="text-sm font-medium mb-2">添加定时任务</p>
-        <div class="flex gap-3 flex-wrap items-end">
+        <p class="text-sm font-medium mb-3">添加定时任务</p>
+        <div class="flex gap-4 flex-wrap items-end">
+            <!-- 任务选择 -->
             <div>
-                <label class="text-xs text-gray-500">名称</label>
-                <input x-model="form.name" class="border rounded px-2 py-1.5 text-sm w-36" placeholder="如 daily-report">
+                <label class="text-xs text-gray-500 block mb-1">任务</label>
+                <select x-model="form.task_key" class="border rounded px-3 py-1.5 text-sm bg-white min-w-[160px]">
+                    <option value="">选择任务...</option>
+                    <template x-for="p in presets" :key="p.key">
+                        <option :value="p.key" x-text="p.name"></option>
+                    </template>
+                </select>
             </div>
+            <!-- 执行时间 -->
             <div>
-                <label class="text-xs text-gray-500">调度表达式</label>
-                <input x-model="form.schedule" class="border rounded px-2 py-1.5 text-sm font-mono w-40" placeholder="0 8 * * *">
+                <label class="text-xs text-gray-500 block mb-1">执行时间</label>
+                <div class="flex items-center gap-1">
+                    <input type="number" x-model.number="form.hour" min="0" max="23" class="border rounded px-2 py-1.5 text-sm w-14 text-center">
+                    <span class="text-gray-400">:</span>
+                    <input type="number" x-model.number="form.minute" min="0" max="59" class="border rounded px-2 py-1.5 text-sm w-14 text-center">
+                </div>
             </div>
-            <div class="flex-1 min-w-[200px]">
-                <label class="text-xs text-gray-500">命令</label>
-                <input x-model="form.command" class="border rounded px-2 py-1.5 text-sm w-full" placeholder="cd /path && python3 run.py">
+            <!-- 执行日 -->
+            <div>
+                <label class="text-xs text-gray-500 block mb-1">执行日</label>
+                <select x-model="form.days" class="border rounded px-3 py-1.5 text-sm bg-white">
+                    <option value="1-5">工作日 (周一至周五)</option>
+                    <option value="0">每周日</option>
+                    <option value="6">每周六</option>
+                    <option value="0,6">周末 (周六日)</option>
+                    <option value="*">每天</option>
+                    <option value="1">每周一</option>
+                    <option value="2">每周二</option>
+                    <option value="3">每周三</option>
+                    <option value="4">每周四</option>
+                    <option value="5">每周五</option>
+                </select>
             </div>
+            <!-- 添加按钮 -->
             <button @click="addEntry()" class="bg-green-600 text-white px-4 py-1.5 rounded text-sm hover:bg-green-700"
-                    :disabled="!form.name || !form.schedule || !form.command">
+                    :disabled="!form.task_key">
                 + 添加
             </button>
         </div>
@@ -94,6 +120,7 @@
 </div>
 {% endblock %}
 
+{% block scripts %}
 {% block scripts %}
 <script>
 let eventSource = null;
@@ -149,11 +176,17 @@ async function startPipeline() {
 function cronManager() {
     return {
         entries: [],
+        presets: [],
         loading: true,
-        form: { name: '', schedule: '', command: '' },
+        form: { task_key: '', hour: 15, minute: 35, days: '1-5' },
         msg: '',
         msgOk: true,
         async init() {
+            // 加载预定义任务
+            try {
+                const r = await fetch('/api/cron/presets');
+                this.presets = await r.json();
+            } catch(e) { this.presets = []; }
             await this.load();
         },
         async load() {
@@ -165,7 +198,7 @@ function cronManager() {
             this.loading = false;
         },
         async addEntry() {
-            if (!this.form.name || !this.form.schedule || !this.form.command) return;
+            if (!this.form.task_key) return;
             try {
                 const r = await fetch('/api/cron/add', {
                     method: 'POST',
@@ -177,7 +210,7 @@ function cronManager() {
                     this.entries = data.entries;
                     this.msg = '✅ 添加成功';
                     this.msgOk = true;
-                    this.form = { name: '', schedule: '', command: '' };
+                    this.form.task_key = '';
                 } else {
                     this.msg = '❌ ' + (data.error || '添加失败');
                     this.msgOk = false;
