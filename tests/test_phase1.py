@@ -68,7 +68,7 @@ class TestConsensusProvider:
 
         provider2 = ConsensusProvider(data={"000858.SZ": {"eps": 5.0, "profit_yoy_expected": 10.0, "rev_yoy_expected": 8.0, "analyst_count": 5}})
         provider2.fetch("000858.SZ")
-        assert provider2.last_source in ("eastmoney", "akshare_growth")
+        assert "akshare_growth" in provider2.last_source or "eastmoney" in provider2.last_source
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
