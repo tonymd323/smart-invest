@@ -398,19 +398,32 @@ class FinancialProvider(BaseProvider):
                 return []
 
             results = []
+            # 先收集所有预告，按报告期分组
+            forecasts_by_date = {}
             for item in data['result']['data']:
-                # 只要归母净利润相关的预告（CODE=004），跳过扣非净利润（CODE=005）
                 finance_code = item.get('PREDICT_FINANCE_CODE', '')
-                if finance_code != '004':  # 只要归母净利润
+                if finance_code not in ('004', '005'):
                     continue
 
                 report_date = (item.get('REPORT_DATE') or '')[:10]
                 if not report_date:
                     continue
 
-                lower = item.get('ADD_AMP_LOWER')
-                upper = item.get('ADD_AMP_UPPER')
-                # 计算中值
+                if report_date not in forecasts_by_date:
+                    forecasts_by_date[report_date] = {}
+                forecasts_by_date[report_date][finance_code] = item
+
+            # 处理每个报告期的预告
+            for report_date, items in forecasts_by_date.items():
+                guimu_item = items.get('004')  # 归母净利润
+                koufei_item = items.get('005')  # 扣非净利润
+
+                # 必须有归母净利润数据
+                if not guimu_item:
+                    continue
+
+                lower = guimu_item.get('ADD_AMP_LOWER')
+                upper = guimu_item.get('ADD_AMP_UPPER')
                 if lower is not None and upper is not None:
                     mid = (lower + upper) / 2
                 elif lower is not None:
@@ -420,22 +433,43 @@ class FinancialProvider(BaseProvider):
                 else:
                     mid = None
 
-                amt_lower = item.get('PREDICT_AMT_LOWER')
-                amt_upper = item.get('PREDICT_AMT_UPPER')
+                amt_lower = guimu_item.get('PREDICT_AMT_LOWER')
+                amt_upper = guimu_item.get('PREDICT_AMT_UPPER')
                 net_profit = None
                 if amt_lower is not None and amt_upper is not None:
-                    net_profit = (amt_lower + amt_upper) / 2 / 1e8  # 转亿元
+                    net_profit = (amt_lower + amt_upper) / 2 / 1e8
+
+                # 计算扣非和归母的差异
+                koufei_yoy = None
+                profit_quality_risk = False
+                if koufei_item:
+                    kf_lower = koufei_item.get('ADD_AMP_LOWER')
+                    kf_upper = koufei_item.get('ADD_AMP_UPPER')
+                    if kf_lower is not None and kf_upper is not None:
+                        koufei_yoy = (kf_lower + kf_upper) / 2
+                    elif kf_lower is not None:
+                        koufei_yoy = kf_lower
+                    elif kf_upper is not None:
+                        koufei_yoy = kf_upper
+
+                    # 差异 >20% 标记风险
+                    if mid is not None and koufei_yoy is not None:
+                        diff = abs(mid - koufei_yoy)
+                        if diff > 20:
+                            profit_quality_risk = True
 
                 results.append({
                     'stock_code': stock_code,
                     'report_date': report_date,
                     'report_type': 'Q1' if '03-31' in report_date else 'Q3' if '09-30' in report_date else 'forecast',
-                    'forecast_type': item.get('PREDICT_TYPE', ''),
+                    'forecast_type': guimu_item.get('PREDICT_TYPE', ''),
                     'net_profit_yoy': mid,
                     'net_profit_yoy_lower': lower,
                     'net_profit_yoy_upper': upper,
                     'net_profit': net_profit,
-                    'content': item.get('PREDICT_CONTENT', ''),
+                    'koufei_yoy': koufei_yoy,  # 扣非净利润增速
+                    'profit_quality_risk': profit_quality_risk,  # 盈利质量风险
+                    'content': guimu_item.get('PREDICT_CONTENT', ''),
                     'is_forecast': 1,
                 })
 

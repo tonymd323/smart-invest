@@ -245,7 +245,8 @@ class Pipeline:
                     INSERT OR REPLACE INTO earnings 
                     (stock_code, report_date, report_type, net_profit, net_profit_yoy,
                      revenue, revenue_yoy, roe, gross_margin, eps,
-                     is_forecast, net_profit_yoy_lower, net_profit_yoy_upper, forecast_type)
+                     is_forecast, net_profit_yoy_lower, net_profit_yoy_upper, forecast_type,
+                     koufei_yoy, profit_quality_risk)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     rec.get("stock_code"),
@@ -262,6 +263,8 @@ class Pipeline:
                     rec.get("net_profit_yoy_lower"),
                     rec.get("net_profit_yoy_upper"),
                     rec.get("forecast_type"),
+                    rec.get("koufei_yoy"),
+                    1 if rec.get("profit_quality_risk") else 0,
                 ))
                 written += 1
 

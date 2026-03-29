@@ -12,15 +12,12 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templa
 
 SORT_WHITELIST = ['ar.created_at', 'ar.score', 'ar.stock_code']
 
-# 报告期标签 → SQL 条件映射
-PERIOD_MAP = {
-    '2025年报': "e.report_date = '2025-12-31'",
-    '2025Q3': "e.report_date = '2025-09-30'",
-    '2025中报': "e.report_date = '2025-06-30'",
-    '2025Q1': "e.report_date = '2025-03-31'",
-    '2024年报': "e.report_date = '2024-12-31'",
-    '2026Q1预告': "e.report_date = '2026-03-31'",
-}
+# 报告期：直接用日期值匹配
+VALID_PERIODS = [
+    '2026-03-31', '2025-12-31', '2025-09-30', '2025-06-30', '2025-03-31',
+    '2024-12-31', '2024-09-30', '2024-06-30', '2024-03-31',
+    '2023-12-31', '2023-09-30', '2023-06-30', '2023-03-31',
+]
 
 # 披露类型中文名
 DISCLOSURE_LABELS = {
@@ -71,12 +68,11 @@ async def signals_page(
             sql += f" AND e.report_type IN ({placeholders})"
             params.extend(disclosure_type)
         if period:
-            period_conditions = []
-            for p in period:
-                if p in PERIOD_MAP:
-                    period_conditions.append(PERIOD_MAP[p])
-            if period_conditions:
-                sql += f" AND ({' OR '.join(period_conditions)})"
+            valid_periods = [p for p in period if p in VALID_PERIODS]
+            if valid_periods:
+                placeholders = ','.join(['?'] * len(valid_periods))
+                sql += f" AND e.report_date IN ({placeholders})"
+                params.extend(valid_periods)
         sql += ")"
 
     search_cols = ['ar.stock_code', 's.name'] if search else None
