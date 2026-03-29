@@ -62,14 +62,12 @@ def fetch_market_stocks(fs):
 def get_suffix(code):
     """根据代码判断后缀"""
     code = str(code)
-    if code.startswith('6'):
+    # 北交所：43/83/87/920 开头
+    if code.startswith(('43', '83', '87', '920')):
+        return '.BJ'
+    if code.startswith('6') or code.startswith('9'):
         return '.SH'
-    elif code.startswith(('0', '3')):
-        return '.SZ'
-    elif code.startswith(('8', '4')):
-        return '.BJ'  # 北交所用 .BJ 后缀
-    else:
-        return '.SZ'
+    return '.SZ'
 
 
 def main():
@@ -109,14 +107,22 @@ def main():
             # 加后缀
             ts_code = code + get_suffix(code)
 
-            # 检查是否存在
-            existing = conn.execute("SELECT name FROM stocks WHERE code=?", (ts_code,)).fetchone()
-
+            # 检查是否存在（兼容 .SZ 和 .BJ 后缀）
+            existing = None
+            for suffix in ['.SZ', '.BJ']:
+                existing = conn.execute("SELECT name FROM stocks WHERE code=?", (code + suffix,)).fetchone()
+                if existing:
+                    ts_code = code + suffix  # 使用已存在的后缀
+                    break
+            
             if existing:
-                # 更新名称（如果以前是北交所XXXX）
-                if existing[0].startswith('北交所') and not name.startswith('北交所'):
+                # 更新名称（如果以前是北交所XXXX 或名称不一致）
+                if existing[0].startswith('北交所') or existing[0] != name:
                     conn.execute("UPDATE stocks SET name=?, industry=?, updated_at=datetime('now','localtime') WHERE code=?",
                                (name, industry, ts_code))
+                    # 同步更新 event_tracking
+                    conn.execute("UPDATE event_tracking SET stock_name=? WHERE stock_code=? AND stock_name LIKE '北交所%'",
+                               (name, ts_code))
                     total_updated += 1
             else:
                 conn.execute("INSERT OR IGNORE INTO stocks (code, name, industry) VALUES (?, ?, ?)",

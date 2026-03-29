@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./data:/app/data      # SQLite DB + 配置数据
+      - ./data:/app/data      # SQLite DB + 配置数据 + crontab
       - ./config:/app/config   # stocks.json
     environment:
       - PYTHONUNBUFFERED=1

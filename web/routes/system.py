@@ -221,13 +221,22 @@ def _get_crontab_entries():
     """读取当前 crontab，解析 smart-invest 相关条目"""
     import re
     try:
+        # 先尝试 crontab -l，如果失败则从 data 目录读取
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+        if result.returncode != 0:
+            # Docker 环境：从 data 目录读取
+            crontab_file = "/app/data/crontab.txt"
+            try:
+                with open(crontab_file) as f:
+                    result = type('Result', (), {'stdout': f.read(), 'returncode': 0})()
+            except FileNotFoundError:
+                return []
         if result.returncode != 0:
             return []
         entries = []
         for line in result.stdout.splitlines():
             line = line.strip()
-            if not line or line.startswith('#'):
+            if not line or line.startswith('#') or line.startswith('SHELL') or line.startswith('PATH'):
                 continue
             # 匹配: minute hour dom mon dow command
             m = re.match(r'^(\S+\s+\S+\s+\S+\s+\S+\s+\S+)\s+(.+)$', line)
@@ -236,10 +245,15 @@ def _get_crontab_entries():
                 command = m.group(2)
                 # 从注释提取名称，格式: # name:xxx
                 name_match = re.search(r'#\s*name:(\S+)', line)
+                if not name_match:
+                    # 从 # 注释提取友好名称
+                    name_match = re.search(r'#\s*(.+?)(?:\s*\(|$)', command)
                 name = name_match.group(1) if name_match else command[:40]
                 entries.append({"name": name, "schedule": schedule, "command": command})
         return entries
-    except Exception:
+    except Exception as e:
+        import logging
+        logging.getLogger('system').error(f"_get_crontab_entries error: {e}")
         return []
 
 
@@ -265,13 +279,25 @@ async def add_cron(request: Request):
     entry = f"{schedule} {command}  # name:{name}"
 
     try:
-        # 读取现有 crontab
+        # 先尝试 crontab 命令，失败则直接写文件
+        crontab_file = "/app/data/crontab.txt"
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
-        existing = result.stdout if result.returncode == 0 else ""
+        if result.returncode == 0:
+            existing = result.stdout
+        elif os.path.exists(crontab_file):
+            with open(crontab_file) as f:
+                existing = f.read()
+        else:
+            existing = ""
         new_content = existing.rstrip() + "\n" + entry + "\n"
+        
+        # 尝试写入 crontab
         proc = subprocess.run(["crontab", "-"], input=new_content, capture_output=True, text=True)
         if proc.returncode != 0:
-            return JSONResponse({"ok": False, "error": proc.stderr}, status_code=500)
+            # 直接写文件
+            with open(crontab_file, "w") as f:
+                f.write(new_content)
+        
         return JSONResponse({"ok": True, "entries": _get_crontab_entries()})
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
@@ -287,11 +313,17 @@ async def delete_cron(request: Request):
         return JSONResponse({"ok": False, "error": "name 必填"}, status_code=400)
 
     try:
+        crontab_file = "/app/data/crontab.txt"
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
-        if result.returncode != 0:
+        if result.returncode == 0:
+            existing = result.stdout
+        elif os.path.exists(crontab_file):
+            with open(crontab_file) as f:
+                existing = f.read()
+        else:
             return JSONResponse({"ok": False, "error": "无 crontab"}, status_code=404)
 
-        lines = result.stdout.splitlines()
+        lines = existing.splitlines()
         new_lines = []
         deleted = False
         for line in lines:
@@ -306,7 +338,9 @@ async def delete_cron(request: Request):
         new_content = "\n".join(new_lines) + "\n"
         proc = subprocess.run(["crontab", "-"], input=new_content, capture_output=True, text=True)
         if proc.returncode != 0:
-            return JSONResponse({"ok": False, "error": proc.stderr}, status_code=500)
+            # 直接写文件
+            with open(crontab_file, "w") as f:
+                f.write(new_content)
         return JSONResponse({"ok": True, "entries": _get_crontab_entries()})
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)

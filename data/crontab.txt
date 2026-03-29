@@ -1,0 +1,12 @@
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# 投资系统 Pipeline（盘后全量扫描）
+35 15 * * 1-5 cd /root/.openclaw/workspace/smart-invest && /usr/bin/python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> data/logs/pipeline_eod.log 2>&1
+# 投资系统 Pipeline（晚间扫描）
+30 20 * * 1-5 cd /root/.openclaw/workspace/smart-invest && /usr/bin/python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1
+# 投资系统回调扫描（盘后回调买入信号）
+15 15 * * 1-5 cd /root/.openclaw/workspace/smart-invest && /usr/bin/python3 -c "from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()" >> data/logs/pullback_cron.log 2>&1
+# 投资系统 Web 服务（每日重启）
+0 6 * * * kill \$(lsof -t -i:8080) 2>/dev/null; sleep 2; cd /root/.openclaw/workspace/smart-invest && nohup python3 web/main.py >> data/logs/web.log 2>&1 &
+# 投资系统回测回填（每周日）
+0 10 * * 0 cd /root/.openclaw/workspace/smart-invest && /usr/bin/python3 scripts/btiq_backfill.py >> data/logs/backtest_cron.log 2>&1
