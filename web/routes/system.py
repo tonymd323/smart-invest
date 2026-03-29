@@ -224,32 +224,35 @@ def _get_crontab_entries():
         # 先尝试 crontab -l，如果失败则从 data 目录读取
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
         if result.returncode != 0:
-            # Docker 环境：从 data 目录读取
             crontab_file = "/app/data/crontab.txt"
             try:
                 with open(crontab_file) as f:
-                    result = type('Result', (), {'stdout': f.read(), 'returncode': 0})()
+                    content = f.read()
             except FileNotFoundError:
                 return []
-        if result.returncode != 0:
-            return []
+        else:
+            content = result.stdout
+        
         entries = []
-        for line in result.stdout.splitlines():
+        last_comment = None
+        for line in content.splitlines():
             line = line.strip()
-            if not line or line.startswith('#') or line.startswith('SHELL') or line.startswith('PATH'):
+            if not line:
+                last_comment = None
                 continue
-            # 匹配: minute hour dom mon dow command
+            if line.startswith('SHELL') or line.startswith('PATH'):
+                continue
+            if line.startswith('#'):
+                last_comment = line.lstrip('#').strip()
+                continue
+            # 匹配 cron 行
             m = re.match(r'^(\S+\s+\S+\s+\S+\s+\S+\s+\S+)\s+(.+)$', line)
             if m:
                 schedule = m.group(1)
                 command = m.group(2)
-                # 从注释提取名称，格式: # name:xxx
-                name_match = re.search(r'#\s*name:(\S+)', line)
-                if not name_match:
-                    # 从 # 注释提取友好名称
-                    name_match = re.search(r'#\s*(.+?)(?:\s*\(|$)', command)
-                name = name_match.group(1) if name_match else command[:40]
+                name = last_comment if last_comment else command[:40]
                 entries.append({"name": name, "schedule": schedule, "command": command})
+                last_comment = None
         return entries
     except Exception as e:
         import logging
