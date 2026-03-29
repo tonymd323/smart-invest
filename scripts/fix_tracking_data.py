@@ -11,7 +11,7 @@ DB_PATH = "/app/data/smart_invest.db"
 
 
 def fix_bj_names(conn):
-    """补填北交所股票名称（从东方财富 API 查）"""
+    """补填北交所股票名称（东方财富 API + Tushare 兜底）"""
     print("=== 补填北交所名称 ===")
     
     rows = conn.execute("""
@@ -20,23 +20,44 @@ def fix_bj_names(conn):
     """).fetchall()
     
     fixed = 0
+    failed_codes = []
+    
     for (code,) in rows:
         num = code.split('.')[0]
+        name = None
+        
+        # 1. 东方财富 API
         try:
             url = f'https://push2.eastmoney.com/api/qt/stock/get?secid=0.{num}&fields=f58'
             resp = requests.get(url, timeout=5)
             data = resp.json()
             name = data.get('data', {}).get('f58', '')
-            if name:
-                conn.execute("UPDATE event_tracking SET stock_name=? WHERE stock_code=?", (name, code))
-                conn.execute("UPDATE discovery_pool SET stock_name=? WHERE stock_code=?", (name, code))
-                fixed += 1
-                print(f"  {code} → {name}")
-        except Exception as e:
-            print(f"  {code}: {e}")
+        except Exception:
+            pass
+        
+        # 2. Tushare 兜底
+        if not name:
+            try:
+                import tushare as ts
+                pro = ts.pro_api()
+                df = pro.stock_basic(ts_code=code, fields='ts_code,name')
+                if df is not None and not df.empty:
+                    name = df.iloc[0]['name']
+            except Exception:
+                pass
+        
+        if name:
+            conn.execute("UPDATE event_tracking SET stock_name=? WHERE stock_code=?", (name, code))
+            conn.execute("UPDATE discovery_pool SET stock_name=? WHERE stock_code=?", (name, code))
+            fixed += 1
+            print(f"  {code} → {name}")
+        else:
+            failed_codes.append(code)
+            print(f"  {code}: 未找到")
     
     conn.commit()
-    print(f"  修复: {fixed} 只")
+    print(f"  修复: {fixed} 只, 失败: {len(failed_codes)} 只")
+    return failed_codes
 
 
 def fill_financial_data(conn):
