@@ -452,6 +452,12 @@ class EarningsAnalyzer:
         # 过期时间：7 天后
         expires_at = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
 
+        # 过滤旧报告：只保留最近2个季度的报告
+        report_date = detail_data.get("report_date", "")
+        if report_date and report_date < "2025-10-01":
+            logger.debug(f"[DiscoverPool] 跳过旧报告: {stock_code} report_date={report_date}")
+            return None
+
         try:
             conn.execute("""
                 INSERT OR REPLACE INTO discovery_pool
