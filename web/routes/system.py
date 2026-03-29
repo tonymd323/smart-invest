@@ -131,4 +131,4 @@ async def record_decision(request: Request):
     finally:
         conn.close()
     
-    return f'<span class="text-xs text-gray-400">已记录: {action}</span>'
+    return HTMLResponse(f'<span class="text-xs text-gray-400">已记录: {action}</span>')
