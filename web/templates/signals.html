@@ -9,8 +9,8 @@
 
 <!-- 筛选 + 搜索 -->
 <div class="flex gap-3 mb-4 flex-wrap items-center">
-    {{ multi_filter_select("type", [("earnings_beat","超预期"),("profit_new_high","扣非新高"),("pullback_buy_daily","回调买入"),("pullback_score","回调评分")], current_types, base_url, "分析类型") }}
-    {{ multi_filter_select("report_type", [("年报","年报"),("季报","季报"),("业绩预告","业绩预告"),("业绩快报","业绩快报")], current_report_types, base_url, "公告类型") }}
+    {{ multi_filter_select("type", [("earnings_beat_daily","超预期"),("profit_new_high","扣非新高"),("quarterly_profit_new_high_daily","季度新高"),("pullback_buy_daily","回调买入"),("pullback_score","回调评分")], current_types, base_url, "分析类型") }}
+    {{ multi_filter_select("report_type", [("Q4","年报"),("Q1","Q1季报"),("Q2","Q2季报"),("Q3","Q3季报"),("业绩预告","业绩预告"),("业绩快报","业绩快报")], current_report_types, base_url, "公告类型") }}
     {{ filter_select("days", [("1","今日"),("3","3天"),("7","7天"),("30","30天")], current_days|string, base_url) }}
     {{ search_box(search, "搜索代码/名称...", base_url, {"type":current_types,"report_type":current_report_types,"days":current_days}) }}
 </div>
