@@ -49,7 +49,8 @@ async def portfolio_page(request: Request):
         "db_stats": db_stats,
         "holdings": stocks.get("holdings", []),
         "watchlist": stocks.get("watchlist", []),
-        "pool_candidates": pool_candidates[:10],
+        "pool_candidates": pool_candidates,
+        "pool_total": len(pool_candidates),
         "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     })
 

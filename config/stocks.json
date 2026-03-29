@@ -1,17 +1,48 @@
 {
   "version": "1.0",
-  "updated_at": "2026-03-27",
-  "updated_by": "JARVIS",
+  "updated_at": "2026-03-29 10:33",
+  "updated_by": "web",
   "holdings": [
-    {"code": "600660.SH", "name": "福耀玻璃", "shares": 1700, "cost": 66.59},
-    {"code": "600938.SH", "name": "中国海油", "shares": 800, "cost": 30.93},
-    {"code": "600875.SH", "name": "东方电气", "shares": 200, "cost": 42.58}
+    {
+      "code": "600660.SH",
+      "name": "福耀玻璃",
+      "shares": 1700,
+      "cost": 66.59
+    },
+    {
+      "code": "600938.SH",
+      "name": "中国海油",
+      "shares": 800,
+      "cost": 30.93
+    },
+    {
+      "code": "600875.SH",
+      "name": "东方电气",
+      "shares": 200,
+      "cost": 42.58
+    }
   ],
   "watchlist": [
-    {"code": "600989.SH", "name": "宝丰能源", "sector": "煤化工"},
-    {"code": "002545.SZ", "name": "东方铁塔", "sector": "电力设备"},
-    {"code": "300054.SZ", "name": "鼎龙股份", "sector": "半导体材料"},
-    {"code": "300750.SZ", "name": "宁德时代", "sector": "锂电"}
+    {
+      "code": "600989.SH",
+      "name": "宝丰能源",
+      "sector": "煤化工"
+    },
+    {
+      "code": "002545.SZ",
+      "name": "东方铁塔",
+      "sector": "电力设备"
+    },
+    {
+      "code": "300054.SZ",
+      "name": "鼎龙股份",
+      "sector": "半导体材料"
+    },
+    {
+      "code": "300750.SZ",
+      "name": "宁德时代",
+      "sector": "锂电"
+    }
   ],
   "_rules": "改这里=全局生效。任何agent修改持仓/备选，必须同步此文件。"
 }

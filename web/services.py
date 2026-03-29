@@ -444,7 +444,7 @@ def get_position_snapshot():
             config = json.load(f)
         from core.data_provider import QuoteProvider
         qp = QuoteProvider()
-        for stock in config.get('stocks', []):
+        for stock in config.get('holdings', []):
             code = stock.get('code', '')
             try:
                 records = qp.fetch(code)
@@ -507,7 +507,7 @@ def _load_positions():
         return []
     with open(config_path) as f:
         config = json.load(f)
-    return config.get('stocks', [])
+    return config.get('holdings', [])
 
 
 def _get_current_prices(codes: list) -> dict:
@@ -621,8 +621,8 @@ def get_today_actions():
         pb = pullback_scores.get(code, {})
         target = pos.get('target')
         stop_loss = pos.get('stop_loss')
-        is_holding = pos.get('holding', False)
-        entry_price = pos.get('entry')
+        is_holding = code in pos_codes  # 在持仓列表中即为持有
+        entry_price = pos.get('cost') or pos.get('entry')  # cost=stocks.json字段名
 
         reasons = []
         signals_detail = []
