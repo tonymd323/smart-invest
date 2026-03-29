@@ -47,6 +47,12 @@ Cron 前端管理 ████████████████████ 1
 | 3 | Cron API 返回空（Docker 无 crontab） | ✅ Dockerfile 加 cron |
 | 4 | Cron API 名称解析（注释格式不匹配） | ✅ 重写解析逻辑 |
 | 5 | Docker 挂载覆盖 host crontab 成目录 | ✅ 改用 data/crontab.txt |
+| 6 | 信号看板分析类型选项值不匹配 DB | ✅ earnings_beat→earnings_beat_daily |
+| 7 | 信号看板报告期选项值不匹配 DB | ✅ 年报→Q4, 季报→Q1/Q2/Q3 |
+| 8 | 事件流报告期选项值不匹配 DB | ✅ 2025Q4→20251231 |
+| 9 | 跟踪页状态选项值不匹配 DB | ✅ tracking/pending/active/completed |
+| 10 | 跟踪页硬编码 entry_price IS NOT NULL | ✅ 移除 WHERE 条件 |
+| 11 | stocks表30条脏数据+搜索失败 | ✅ 清洗+添加镜像条目 |
 
 ## 待开发（v2.19）
 
