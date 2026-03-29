@@ -560,25 +560,25 @@ def _load_positions():
 
 
 def _get_current_prices(codes: list) -> dict:
-    """批量获取实时行情"""
+    """批量获取实时行情 — 使用 fetch_batch 一次查全部"""
     if not codes:
         return {}
     try:
         from core.data_provider import QuoteProvider
         qp = QuoteProvider()
+        # 用 fetch_batch 批量查询，腾讯 API 支持逗号分隔数百只
+        result_map = qp.fetch_batch(codes)
         prices = {}
-        for code in codes:
-            records = qp.fetch(code)
-            if records:
-                q = records[0].to_dict()
-                prices[code] = {
-                    'price': q.get('price', 0),
-                    'change_pct': q.get('change_pct', 0),
-                    'high': q.get('high', 0),
-                    'low': q.get('low', 0),
-                }
+        for code, q in result_map.items():
+            prices[code] = {
+                'price': q.price if hasattr(q, 'price') else 0,
+                'change_pct': q.change_pct if hasattr(q, 'change_pct') else 0,
+                'high': q.high if hasattr(q, 'high') else 0,
+                'low': q.low if hasattr(q, 'low') else 0,
+            }
         return prices
-    except Exception:
+    except Exception as e:
+        logger.warning(f"[get_current_prices] 批量获取行情失败: {e}")
         return {}
 
 
@@ -586,8 +586,8 @@ def _get_action_data(codes, pos_codes):
     """获取今日行动所需的全部数据：价格、回调评分、发现池、名称映射"""
     conn = get_conn()
 
-    # 只查价格的范围：持仓股 + 有信号的股票（最多20只）
-    all_codes = list(set(pos_codes) | set(codes))[:20]
+    # 只查价格的范围：持仓股 + 有信号的股票
+    all_codes = list(set(pos_codes) | set(codes))
 
     # 发现池状态
     pool = get_discovery_pool()
