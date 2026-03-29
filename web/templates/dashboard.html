@@ -94,20 +94,23 @@
 </div>
 
 <script src="/static/plotly.min.js"></script>
+<script src="/static/chart-config.js"></script>
 <script>
 fetch('/api/chart/signal_trend').then(r=>r.json()).then(data=>{
+    const el=document.getElementById('signal-trend-chart');
     if(data.length){
-        Plotly.newPlot('signal-trend-chart', data.map(s=>({
-            x:s.x, y:s.y, name:s.name, type:'scatter', fill:'tozeroy',
-            mode:'lines', line:{width:1.5}
-        })), {
-            title:'近30天信号趋势',
-            xaxis:{title:'日期'}, yaxis:{title:'信号数'},
-            legend:{orientation:'h',y:-0.2}, margin:{t:40,r:20}
-        }, {responsive:true});
-    } else {
-        document.getElementById('signal-trend-chart').innerHTML='<div class="text-center text-gray-400 py-16">暂无信号数据</div>';
-    }
+        const traces=data.map((s,i)=>CHART.scatter(s.name,s.x,s.y,{
+            fill:'tozeroy', mode:'lines', width:1.5,
+            color:CHART.colors[i%CHART.colors.length],
+            markerSize:0, hover:'%{y} 个<extra>'+s.name+'</extra>'
+        }));
+        Plotly.newPlot(el,traces,{
+            ...CHART.layout,
+            title:{text:'近30天信号趋势',font:{size:14,color:'#334155'},x:0.02},
+            xaxis:{...CHART.layout.xaxis,title:{text:'日期',standoff:12}},
+            yaxis:{...CHART.layout.yaxis,title:{text:'信号数',standoff:8},rangemode:'tozero'},
+        },CHART.config);
+    } else { el.innerHTML='<div class="text-center text-gray-400 py-16">暂无信号数据</div>'; }
 });
 </script>
 {% endblock %}

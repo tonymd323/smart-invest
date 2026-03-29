@@ -54,20 +54,23 @@
 {% endif %}
 
 <script src="/static/plotly.min.js"></script>
+<script src="/static/chart-config.js"></script>
 <script>
 fetch('/api/chart/tn_returns').then(r=>r.json()).then(data=>{
+    const el=document.getElementById('tn-chart');
     if(data.length){
-        Plotly.newPlot('tn-chart', data.map(t=>({
-            x:t.x, y:t.y, name:t.name, type:'scatter', mode:'lines+markers',
-            line:{width:2}, marker:{size:6}
-        })), {
-            title:'T+N 收益曲线（活跃跟踪）',
-            xaxis:{title:'持有天数'}, yaxis:{title:'收益率(%)',ticksuffix:'%'},
-            legend:{orientation:'h',y:-0.2}, margin:{t:40,r:20}
-        }, {responsive:true});
-    } else {
-        document.getElementById('tn-chart').innerHTML='<div class="text-center text-gray-400 py-20">暂无活跃跟踪数据</div>';
-    }
+        const traces=data.map((t,i)=>CHART.scatter(t.name,t.x,t.y,{
+            mode:'lines+markers', width:2, markerSize:7,
+            color:CHART.colors[i%CHART.colors.length],
+            hover:'%{y:.2f}%<extra>'+t.name+'</extra>'
+        }));
+        Plotly.newPlot(el,traces,{
+            ...CHART.layout,
+            title:{text:'T+N 收益曲线（活跃跟踪）',font:{size:14,color:'#334155'},x:0.02},
+            xaxis:{...CHART.layout.xaxis,title:{text:'持有天数',standoff:12},dtick:5},
+            yaxis:{...CHART.layout.yaxis,title:{text:'收益率',standoff:8},ticksuffix:'%',zeroline:true,zerolinecolor:'#e2e8f0'},
+        },CHART.config);
+    } else { el.innerHTML='<div class="text-center text-gray-400 py-20">暂无活跃跟踪数据</div>'; }
 });
 </script>
 {% endblock %}

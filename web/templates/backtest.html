@@ -67,23 +67,29 @@
 {% endif %}
 
 <script src="/static/plotly.min.js"></script>
+<script src="/static/chart-config.js"></script>
 <script>
 fetch('/api/chart/backtest_winrate').then(r=>r.json()).then(d=>{
     if(d.labels.length){
-        Plotly.newPlot('winrate-chart', [{
-            x:d.labels, y:d.win_rates, type:'bar', name:'胜率',
-            text:d.win_rates.map(v=>v+'%'), textposition:'outside',
-            marker:{color:d.win_rates.map(v=>v>=50?'#22c55e':'#ef4444')}
-        },{
-            x:d.labels, y:d.avg_returns, type:'scatter', mode:'lines+markers',
-            name:'平均收益(%)', yaxis:'y2',
-            line:{color:'#3b82f6',width:2}
-        }], {
-            title:'策略胜率 & 平均收益',
-            yaxis:{title:'胜率(%)',range:[0,100],ticksuffix:'%'},
-            yaxis2:{title:'平均收益(%)',overlaying:'y',side:'right',ticksuffix:'%'},
-            legend:{orientation:'h',y:-0.2}, margin:{t:40,r:50}
-        }, {responsive:true});
+        Plotly.newPlot('winrate-chart',[
+            CHART.bar('胜率',d.labels,d.win_rates,{
+                color:d.win_rates.map(v=>v>=50?'#22c55e':'#ef4444'),
+                text:d.win_rates.map(v=>v+'%'),
+                hover:'%{y:.1f}%<extra>胜率</extra>'
+            }),
+            CHART.scatter('平均收益',d.labels,d.avg_returns,{
+                mode:'lines+markers', width:2, markerSize:7,
+                color:'#3b82f6',
+                hover:'%{y:.2f}%<extra>平均收益</extra>'
+            })
+        ],{
+            ...CHART.layout,
+            title:{text:'策略胜率 & 平均收益',font:{size:14,color:'#334155'},x:0.02},
+            yaxis:{...CHART.layout.yaxis,title:{text:'胜率',standoff:8},range:[0,100],ticksuffix:'%'},
+            yaxis2:{title:{text:'平均收益',standoff:8},overlaying:'y',side:'right',ticksuffix:'%',
+                    gridcolor:'transparent',linecolor:'#e2e8f0',tickfont:{size:11}},
+            showlegend:true,
+        },CHART.config);
     }
 });
 </script>
