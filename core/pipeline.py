@@ -227,9 +227,16 @@ class Pipeline:
 
         try:
             # Step 1: 写入基础数据
+            today = datetime.now().strftime('%Y-%m-%d')
             for rec in records:
                 is_forecast = rec.get("is_forecast", 0)
                 report_type = rec.get("report_type", "Q4")
+
+                # 过滤未来报告期（东财 API 脏数据）
+                report_date = rec.get("report_date", "")
+                if report_date and report_date > today:
+                    logger.debug(f"[Pipeline] {stock_code} 跳过未来报告期: {report_date}")
+                    continue
                 
                 # 对于预告数据，检查是否已有实际财报，有的话跳过
                 if is_forecast:
