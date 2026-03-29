@@ -38,6 +38,8 @@ SORT_WHITELIST = ['event_date', 'return_1d', 'return_5d', 'return_10d', 'return_
 async def tracking_page(
     request: Request,
     status: Optional[str] = None,
+    event_type: Optional[str] = None,
+    report_period: Optional[str] = None,
     search: Optional[str] = None,
     sort: str = Query("event_date"),
     order: str = Query("desc"),
@@ -65,6 +67,14 @@ async def tracking_page(
         sql += " AND et.tracking_status = ?"
         params.append(status)
 
+    if event_type:
+        sql += " AND et.event_type = ?"
+        params.append(event_type)
+
+    if report_period:
+        sql += " AND et.report_period = ?"
+        params.append(report_period)
+
     search_cols = ['et.stock_code', 's.name'] if search else None
     rows, total, total_pages = paginate_query(
         conn, sql, params, page, 20,
@@ -86,6 +96,8 @@ async def tracking_page(
         "db_stats": db_stats,
         "tracking": results,
         "status": status or "",
+        "event_type": event_type or "",
+        "report_period": report_period or "",
         "search": search,
         "sort": sort, "order": order,
         "page": page, "total_pages": total_pages, "total": total,

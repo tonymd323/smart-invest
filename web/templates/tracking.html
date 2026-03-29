@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select %}
+{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select, multi_filter_select %}
 {% block title %}T+N 跟踪 — 投资系统 2.2{% endblock %}
 {% block content %}
 <div class="mb-6">
@@ -12,9 +12,13 @@
     <div id="tn-chart" style="height: 350px;"></div>
 </div>
 
-<div class="flex gap-4 mb-4 flex-wrap items-center">
-    {{ filter_select("status", [("","全部"),("pending","待更新"),("tracking","跟踪中"),("active","已买入"),("completed","已完成")], status, base_url) }}
-    {{ search_box(search, "搜索代码/名称...", base_url, {"status":status}) }}
+{% set filter_params = {"status":status,"event_type":event_type,"report_period":report_period} %}
+
+<div class="flex gap-3 mb-4 flex-wrap items-center">
+    {{ filter_select("status", [("","全部状态"),("pending","待更新"),("tracking","跟踪中"),("active","已买入"),("completed","已完成")], status, base_url) }}
+    {{ filter_select("event_type", [("","全部类型"),("earnings_beat","超预期"),("profit_new_high","扣非新高")], event_type, base_url) }}
+    {{ filter_select("report_period", [("","全部报告期"),("20251231","2025年报"),("20260331","2026Q1预告")], report_period, base_url) }}
+    {{ search_box(search, "搜索代码/名称...", base_url, filter_params) }}
 </div>
 
 {% if tracking %}
@@ -25,15 +29,15 @@
                 <th class="text-left px-4 py-2 text-gray-500">股票</th>
                 <th class="text-left px-4 py-2 text-gray-500">类型</th>
                 <th class="text-left px-4 py-2 text-gray-500">报告期</th>
-                <th class="text-left px-4 py-2">{{ sort_header("入池时间", "event_date", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2">{{ sort_header("入池时间", "event_date", sort, order, base_url, filter_params) }}</th>
                 <th class="text-right px-4 py-2 text-gray-500">持有天数</th>
                 <th class="text-right px-4 py-2 text-gray-500">实际增速</th>
                 <th class="text-right px-4 py-2 text-gray-500">预期增速</th>
                 <th class="text-right px-4 py-2 text-gray-500">入场价</th>
-                <th class="text-right px-4 py-2">{{ sort_header("1日", "return_1d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
-                <th class="text-right px-4 py-2">{{ sort_header("5日", "return_5d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
-                <th class="text-right px-4 py-2">{{ sort_header("10日", "return_10d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
-                <th class="text-right px-4 py-2">{{ sort_header("20日", "return_20d", sort, order, base_url, {"status":status,"search":search or ""}) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("1日", "return_1d", sort, order, base_url, filter_params) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("5日", "return_5d", sort, order, base_url, filter_params) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("10日", "return_10d", sort, order, base_url, filter_params) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("20日", "return_20d", sort, order, base_url, filter_params) }}</th>
                 <th class="text-left px-4 py-2 text-gray-500">状态</th>
             </tr>
         </thead>
@@ -58,7 +62,7 @@
         </tbody>
     </table>
 </div>
-{{ pagination(page, total_pages, base_url, {"status":status,"search":search or "","sort":sort,"order":order}) }}
+{{ pagination(page, total_pages, base_url, {"status":status,"event_type":event_type,"report_period":report_period,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无跟踪记录</div>
 {% endif %}
