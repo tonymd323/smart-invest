@@ -606,6 +606,204 @@ def _get_current_prices(codes: list) -> dict:
         return {}
 
 
+def _get_action_data(codes, pos_codes):
+    """获取今日行动所需的全部数据：价格、回调评分、发现池、名称映射"""
+    conn = get_conn()
+
+    # 只查价格的范围：持仓股 + 有信号的股票（最多20只）
+    all_codes = list(set(pos_codes) | set(codes))[:20]
+
+    # 发现池状态
+    pool = get_discovery_pool()
+    pool_map = {p['stock_code']: p for p in pool}
+
+    # 实时行情
+    prices = _get_current_prices(all_codes)
+
+    # 回调评分
+    pullback_scores = {}
+    try:
+        if codes:
+            placeholders = ','.join(['?'] * len(codes))
+            rows = conn.execute(f"""
+                SELECT stock_code, score, signal, summary
+                FROM analysis_results WHERE analysis_type = 'pullback_score'
+                AND stock_code IN ({placeholders})
+                ORDER BY created_at DESC
+            """, list(codes)).fetchall()
+            for r in rows:
+                code = r[0]
+                if code not in pullback_scores:
+                    pullback_scores[code] = {'score': r[1], 'signal': r[2]}
+    except Exception:
+        pass
+
+    # 股票名称
+    name_map = {}
+    try:
+        rows = conn.execute("SELECT code, name FROM stocks").fetchall()
+        name_map = {r[0]: r[1] for r in rows if r[1]}
+    except Exception:
+        pass
+
+    conn.close()
+    return pool_map, prices, pullback_scores, name_map
+
+
+def _get_decision_filter():
+    """获取决策流转过滤规则：skip 3天隐藏，watch 需新信号"""
+    conn = get_conn()
+    skip_codes = set()
+    watch_decisions = {}
+    try:
+        rows = conn.execute("""
+            SELECT stock_code FROM decision_log
+            WHERE action = 'skip' AND created_at >= datetime('now', '-3 days')
+        """).fetchall()
+        skip_codes = {r[0] for r in rows}
+        rows = conn.execute("""
+            SELECT stock_code, MAX(created_at) FROM decision_log
+            WHERE action = 'watch' GROUP BY stock_code
+        """).fetchall()
+        watch_decisions = {r[0]: r[1] for r in rows}
+    except Exception:
+        pass
+    conn.close()
+    return skip_codes, watch_decisions
+
+
+def _should_show_stock(code, is_holding, skip_codes, watch_decisions, code_signals):
+    """判断股票是否应显示在今日行动页"""
+    if is_holding:
+        return True  # 持仓股始终显示
+    if code in skip_codes:
+        return False  # skip 3天内隐藏
+    if code in watch_decisions:
+        watch_time = watch_decisions[code]
+        for sig in code_signals.get(code, []):
+            if sig.get('created_at', '') > watch_time:
+                return True  # 有新信号
+        return False  # 无新信号
+    return True
+
+
+def _generate_stock_action(code, code_sigs, is_holding, pos, pool_map, prices,
+                           pullback_scores, name_map):
+    """为单只股票生成行动建议"""
+    in_pool = code in pool_map
+    price_info = prices.get(code, {})
+    current_price = price_info.get('price', 0)
+    change_pct = price_info.get('change_pct', 0)
+    pb = pullback_scores.get(code, {})
+    target = pos.get('target')
+    stop_loss = pos.get('stop_loss')
+    entry_price = pos.get('cost') or pos.get('entry')
+
+    reasons = []
+    priority = 'none'
+    action_text = ''
+
+    # 分析信号
+    has_beat = False
+    beat_diff = 0
+    has_new_high = False
+    for sig in code_sigs:
+        atype = sig.get('analysis_type', '')
+        if 'earnings_beat' in atype:
+            has_beat = True
+            st = sig.get('summary_text', '')
+            reasons.append(st.split('|')[0].strip() if st else '超预期')
+            try:
+                if '超预期差' in st:
+                    diff_str = st.split('超预期差:')[1].split('pp')[0].strip().replace('+', '').replace('📈', '').replace('🔥', '').strip()
+                    beat_diff = float(diff_str)
+            except:
+                pass
+        elif 'profit_new_high' in atype:
+            has_new_high = True
+            reasons.append('扣非新高')
+
+    if in_pool:
+        reasons.append('发现池内')
+    pb_score = pb.get('score', 0)
+    if pb_score and pb_score >= 60:
+        reasons.append(f'回调评分 {pb_score:.0f}')
+
+    # === 超预期 ===
+    if has_beat and beat_diff > 0:
+        if is_holding:
+            if beat_diff > 20:
+                priority = 'buy'
+                p = current_price
+                action_text = f'超预期强劲，可加仓 ¥{p*0.99:.2f}-{p*1.01:.2f}' if p > 0 else '超预期强劲，可考虑加仓'
+                if target: action_text += f'，目标 ¥{target:.2f}'
+            else:
+                priority = 'wait'
+                action_text = '超预期但幅度有限，持有观望'
+        else:
+            if pb_score >= 60 and current_price > 0:
+                priority = 'buy'
+                action_text = f'超预期+回调到位，建议买入 ¥{current_price*0.98:.2f}-{current_price*1.01:.2f}'
+            elif in_pool and current_price > 0:
+                priority = 'buy'
+                action_text = f'超预期+发现池内，建议买入 ¥{current_price*0.98:.2f}-{current_price*1.01:.2f}'
+            elif in_pool:
+                priority = 'buy'
+                action_text = '超预期+发现池内，建议关注'
+            else:
+                priority = 'wait'
+                action_text = '超预期信号，先加入关注，等回调再买'
+            if target: action_text += f'，目标 ¥{target:.2f}'
+            if stop_loss and priority == 'buy': action_text += f'，止损 ¥{stop_loss:.2f}'
+
+    # === 扣非新高 ===
+    elif has_new_high:
+        if pb_score >= 60:
+            priority = 'buy'
+            action_text = f'扣非新高+回调到位，可考虑买入 ¥{current_price*0.98:.2f}-{current_price*1.01:.2f}'
+        else:
+            priority = 'wait'
+            action_text = '扣非新高但未回调到位，等回调至支撑位再考虑'
+
+    # === 持仓风险检查 ===
+    elif is_holding:
+        has_avoid = any(s.get('signal') == 'avoid' for s in code_sigs)
+        if stop_loss and current_price > 0 and current_price < stop_loss:
+            priority = 'sell'
+            action_text = f'⚠️ 跌破止损 ¥{stop_loss:.2f}，建议卖出'
+            reasons.append(f'当前价 ¥{current_price:.2f} < 止损 ¥{stop_loss:.2f}')
+        elif target and current_price > 0 and current_price >= target:
+            priority = 'sell'
+            action_text = f'🎯 达到目标价 ¥{target:.2f}，可考虑获利了结'
+            reasons.append(f'当前价 ¥{current_price:.2f} ≥ 目标 ¥{target:.2f}')
+        elif has_avoid:
+            priority = 'adjust'
+            action_text = f'信号偏弱，考虑减仓'
+            if stop_loss: action_text += f'，止损 ¥{stop_loss:.2f}'
+            reasons = [r for r in reasons if '超预期' not in r] + ['低于预期']
+
+    # 无行动
+    if priority == 'none':
+        return None
+
+    emoji_map = {'buy': '🔥', 'sell': '💰', 'wait': '⏳', 'adjust': '⚠️', 'none': '☕'}
+    return {
+        'priority': priority,
+        'emoji': emoji_map.get(priority, '☕'),
+        'stock_code': code,
+        'stock_name': name_map.get(code) or pos.get('name', code),
+        'current_price': current_price,
+        'change_pct': change_pct,
+        'reasons': reasons,
+        'action_text': action_text,
+        'suggestion': priority,
+        'target': target,
+        'stop_loss': stop_loss,
+        'is_holding': is_holding,
+        'entry_price': entry_price,
+    }
+
+
 def get_today_actions():
     """
     今日行动 — 从信号推导出具体操作建议
@@ -627,259 +825,42 @@ def get_today_actions():
         ...
     ]
     """
-    conn = get_conn()
     positions = _load_positions()
     pos_map = {p['code']: p for p in positions}
     pos_codes = [p['code'] for p in positions]
 
-    # 1. 获取今日及近3天的信号（只看持仓股+发现池）
+    # 1. 收集信号
     signals_3d = get_scan_results(days=3)
     code_signals = {}
     signal_codes = set()
     for s in signals_3d:
         code = s['stock_code']
-        if code not in code_signals:
-            code_signals[code] = []
-        code_signals[code].append(s)
+        code_signals.setdefault(code, []).append(s)
         signal_codes.add(code)
 
-    # 只查价格的范围：持仓股 + 有信号的股票（最多20只）
-    all_codes = list(set(pos_codes) | signal_codes)[:20]
+    # 2. 获取辅助数据
+    pool_map, prices, pullback_scores, name_map = _get_action_data(signal_codes, pos_codes)
 
-    # 2. 获取发现池状态
-    pool = get_discovery_pool()
-    pool_map = {p['stock_code']: p for p in pool}
+    # 3. 决策流转过滤
+    skip_codes, watch_decisions = _get_decision_filter()
 
-    # 3. 获取实时行情
-    prices = _get_current_prices(all_codes)
-
-    # 4. 获取回调评分（只查有信号的股票）
-    pullback_scores = {}
-    try:
-        if signal_codes:
-            placeholders = ','.join(['?'] * len(signal_codes))
-            rows = conn.execute(f"""
-                SELECT stock_code, score, signal, summary
-                FROM analysis_results
-                WHERE analysis_type = 'pullback_score'
-                AND stock_code IN ({placeholders})
-                ORDER BY created_at DESC
-            """, list(signal_codes)).fetchall()
-            for r in rows:
-                code = r[0]
-                if code not in pullback_scores:
-                    pullback_scores[code] = {'score': r[1], 'signal': r[2]}
-    except Exception:
-        pass
-
-    # 5. 决策流转过滤 — v2.10
-    # skip: 3天内不再出现
-    # watch: 有新信号时才出现（信号时间 > 决策时间）
-    # bought: 已在持仓中，正常处理
-    skip_codes = set()
-    watch_decisions = {}
-    try:
-        # 最近3天的 skip 决策
-        rows = conn.execute("""
-            SELECT stock_code FROM decision_log
-            WHERE action = 'skip' AND created_at >= datetime('now', '-3 days')
-        """).fetchall()
-        skip_codes = {r[0] for r in rows}
-
-        # 所有 watch 决策（取每个股票最新一次）
-        rows = conn.execute("""
-            SELECT stock_code, MAX(created_at) FROM decision_log
-            WHERE action = 'watch' GROUP BY stock_code
-        """).fetchall()
-        watch_decisions = {r[0]: r[1] for r in rows}
-    except Exception:
-        pass
-
-    # 6. 合成行动建议（只处理有信号或有持仓的股票）
+    # 4. 合成行动建议
     action_codes = set(signal_codes) | set(pos_codes)
     actions = []
-
-    # 从 DB 查股票名称
-    name_map = {}
-    try:
-        rows = conn.execute("SELECT code, name FROM stocks").fetchall()
-        name_map = {r[0]: r[1] for r in rows if r[1]}
-    except Exception:
-        pass
-
     for code in action_codes:
-        # 决策流转过滤
-        is_holding_stock = code in pos_codes
-
-        # skip: 3天内不显示（除非是持仓股）
-        if code in skip_codes and not is_holding_stock:
+        is_holding = code in pos_codes
+        if not _should_show_stock(code, is_holding, skip_codes, watch_decisions, code_signals):
             continue
 
-        # watch: 没有新信号时不显示（除非是持仓股）
-        if code in watch_decisions and not is_holding_stock:
-            watch_time = watch_decisions[code]
-            # 检查是否有比 watch 决策更新的信号
-            has_new_signal = False
-            for sig in code_signals.get(code, []):
-                sig_time = sig.get('created_at', '')
-                if sig_time and sig_time > watch_time:
-                    has_new_signal = True
-                    break
-            if not has_new_signal:
-                continue
-
-        pos = pos_map.get(code, {})
-        code_sigs = code_signals.get(code, [])
-        in_pool = code in pool_map
-        price_info = prices.get(code, {})
-        current_price = price_info.get('price', 0)
-        change_pct = price_info.get('change_pct', 0)
-        pb = pullback_scores.get(code, {})
-        target = pos.get('target')
-        stop_loss = pos.get('stop_loss')
-        is_holding = code in pos_codes  # 在持仓列表中即为持有
-        entry_price = pos.get('cost') or pos.get('entry')  # cost=stocks.json字段名
-
-        reasons = []
-        signals_detail = []
-        priority = 'none'
-        action_text = ''
-
-        # 分析信号
-        has_beat = False
-        has_new_high = False
-        beat_diff = 0
-        for sig in code_sigs:
-            atype = sig.get('analysis_type', '')
-            if 'earnings_beat' in atype:
-                has_beat = True
-                signals_detail.append(sig)
-                st = sig.get('summary_text', '')
-                reasons.append(st.split('|')[0].strip() if st else '超预期')
-                # 提取 beat_diff
-                try:
-                    if '超预期差' in st:
-                        diff_str = st.split('超预期差:')[1].split('pp')[0].strip().replace('+', '').replace('📈', '').replace('🔥', '').strip()
-                        beat_diff = float(diff_str)
-                except:
-                    pass
-            elif 'profit_new_high' in atype:
-                has_new_high = True
-                signals_detail.append(sig)
-                reasons.append('扣非新高')
-
-        # 发现池状态
-        if in_pool:
-            reasons.append('发现池内')
-
-        # 回调评分
-        pb_score = pb.get('score', 0)
-        if pb_score and pb_score >= 60:
-            reasons.append(f'回调评分 {pb_score:.0f}')
-
-        # === 生成行动建议 ===
-
-        if has_beat and beat_diff > 0:
-            # 超预期信号
-            if is_holding:
-                # 已持仓
-                if beat_diff > 20:
-                    priority = 'buy'
-                    if current_price > 0:
-                        entry_low = current_price * 0.99
-                        entry_high = current_price * 1.01
-                        action_text = f'超预期强劲，可加仓 ¥{entry_low:.2f}-{entry_high:.2f}'
-                    else:
-                        action_text = '超预期强劲，可考虑加仓'
-                    if target:
-                        action_text += f'，目标 ¥{target:.2f}'
-                else:
-                    priority = 'wait'
-                    action_text = '超预期但幅度有限，持有观望'
-            else:
-                # 未持仓
-                if pb_score and pb_score >= 60 and current_price > 0:
-                    priority = 'buy'
-                    entry_low = current_price * 0.98
-                    entry_high = current_price * 1.01
-                    action_text = f'超预期+回调到位，建议买入 ¥{entry_low:.2f}-{entry_high:.2f}'
-                    if target:
-                        action_text += f'，目标 ¥{target:.2f}'
-                    if stop_loss:
-                        action_text += f'，止损 ¥{stop_loss:.2f}'
-                elif in_pool and current_price > 0:
-                    priority = 'buy'
-                    entry_low = current_price * 0.98
-                    entry_high = current_price * 1.01
-                    action_text = f'超预期+发现池内，建议买入 ¥{entry_low:.2f}-{entry_high:.2f}'
-                    if target:
-                        action_text += f'，目标 ¥{target:.2f}'
-                elif in_pool:
-                    priority = 'buy'
-                    action_text = f'超预期+发现池内，建议关注'
-                else:
-                    priority = 'wait'
-                    action_text = f'超预期信号，先加入关注，等回调再买'
-
-        elif has_new_high:
-            # 扣非新高
-            if pb_score and pb_score >= 60:
-                priority = 'buy'
-                action_text = f'扣非新高+回调到位，可考虑买入 ¥{current_price*0.98:.2f}-{current_price*1.01:.2f}'
-            else:
-                priority = 'wait'
-                action_text = f'扣非新高但未回调到位，等回调至支撑位再考虑'
-
-        elif is_holding and code in pos_map:
-            # 已持仓但无新信号 — 检查风险
-            hold_sigs = code_signals.get(code, [])
-            has_avoid = any(s.get('signal') == 'avoid' for s in hold_sigs)
-
-            # 跌破止损价 → 卖出建议
-            if stop_loss and current_price > 0 and current_price < stop_loss:
-                priority = 'sell'
-                action_text = f'⚠️ 跌破止损 ¥{stop_loss:.2f}，建议卖出'
-                reasons.append(f'当前价 ¥{current_price:.2f} < 止损 ¥{stop_loss:.2f}')
-
-            # 达到目标价 → 获利了结
-            elif target and current_price > 0 and current_price >= target:
-                priority = 'sell'
-                action_text = f'🎯 达到目标价 ¥{target:.2f}，可考虑获利了结'
-                reasons.append(f'当前价 ¥{current_price:.2f} ≥ 目标 ¥{target:.2f}')
-
-            elif has_avoid:
-                priority = 'adjust'
-                action_text = f'信号偏弱，考虑减仓'
-                if stop_loss:
-                    action_text += f'，止损 ¥{stop_loss:.2f}'
-                reasons = [r for r in reasons if '超预期' not in r] + ['低于预期']
-            else:
-                # 持有中无特殊信号
-                pass
-
-        # 生成最终行动项
-        if priority != 'none':
-            emoji_map = {'buy': '🔥', 'sell': '💰', 'wait': '⏳', 'adjust': '⚠️', 'none': '☕'}
-            action = {
-                'priority': priority,
-                'emoji': emoji_map.get(priority, '☕'),
-                'stock_code': code,
-                'stock_name': name_map.get(code) or pos.get('name', code),
-                'current_price': current_price,
-                'change_pct': change_pct,
-                'reasons': reasons,
-                'action_text': action_text,
-                'suggestion': priority,
-                'target': target,
-                'stop_loss': stop_loss,
-                'is_holding': is_holding,
-                'entry_price': entry_price,
-            }
+        action = _generate_stock_action(
+            code, code_signals.get(code, []), is_holding,
+            pos_map.get(code, {}), pool_map, prices, pullback_scores, name_map
+        )
+        if action:
             actions.append(action)
 
-    # 排序: buy > adjust > wait > none
+    # 排序: sell > buy > adjust > wait > none
     priority_order = {'sell': 0, 'buy': 1, 'adjust': 2, 'wait': 3, 'none': 4}
     actions.sort(key=lambda x: (priority_order.get(x['priority'], 9), -x.get('current_price', 0)))
 
-    conn.close()
     return actions
