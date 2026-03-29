@@ -575,7 +575,8 @@ class EarningsAnalyzer:
                 if pool_row and pool_row["detail"]:
                     import json as _json
                     detail = _json.loads(pool_row["detail"])
-                    report_date = detail.get("report_date", "")
+                    # profit_new_high 用 report_period，earnings_beat 用 report_date
+                    report_date = detail.get("report_date") or detail.get("report_period", "")
                     if report_date:
                         report_period = report_date.replace("-", "")
                     actual_yoy = detail.get("actual_yoy")
