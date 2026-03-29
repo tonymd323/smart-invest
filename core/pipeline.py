@@ -229,15 +229,28 @@ class Pipeline:
             # Step 1: 写入基础数据
             for rec in records:
                 is_forecast = rec.get("is_forecast", 0)
+                report_type = rec.get("report_type", "Q4")
+                
+                # 对于预告数据，检查是否已有实际财报，有的话跳过
+                if is_forecast:
+                    existing = conn.execute("""
+                        SELECT id FROM earnings 
+                        WHERE stock_code=? AND report_date=? AND is_forecast=0
+                    """, (rec.get("stock_code"), rec.get("report_date"))).fetchone()
+                    if existing:
+                        logger.debug(f"[Pipeline] {stock_code} {rec.get('report_date')} 已有实际财报，跳过预告")
+                        continue
+                
                 conn.execute("""
                     INSERT OR REPLACE INTO earnings 
-                    (stock_code, report_date, net_profit, net_profit_yoy,
+                    (stock_code, report_date, report_type, net_profit, net_profit_yoy,
                      revenue, revenue_yoy, roe, gross_margin, eps,
                      is_forecast, net_profit_yoy_lower, net_profit_yoy_upper, forecast_type)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     rec.get("stock_code"),
                     rec.get("report_date"),
+                    report_type,
                     rec.get("net_profit"),
                     rec.get("net_profit_yoy"),
                     rec.get("revenue"),

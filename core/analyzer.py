@@ -67,7 +67,7 @@ class EarningsAnalyzer:
             stock_filter = f"AND stock_code IN ({placeholders})"
             params = stock_codes
 
-        # 获取每只股票最新一期数据
+        # 获取每只股票最新一期数据（优先实际财报，其次预告）
         rows = conn.execute(f"""
             SELECT e.*
             FROM earnings e
@@ -78,7 +78,7 @@ class EarningsAnalyzer:
             ) latest ON e.stock_code = latest.sc
                      AND e.report_date = latest.max_date
             WHERE 1=1 {stock_filter}
-            ORDER BY e.stock_code
+            ORDER BY e.is_forecast ASC, e.stock_code
         """, params).fetchall()
 
         for row in rows:
