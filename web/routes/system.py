@@ -109,8 +109,14 @@ async def record_decision(request: Request):
     - bought: 写入 stocks.json 持仓 + T+N 跟踪
     - skip: 记录决策, 3天内今日行动页不再出现
     - watch: 记录决策, 有新信号时再出现
+    - sold: 从 stocks.json 移除 + 标记 T+N 完成
     """
-    body = await request.json()
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        body = await request.json()
+    else:
+        form = await request.form()
+        body = dict(form)
     code = body.get("code", "")
     action = body.get("action", "")
     reason = body.get("reason", "")
@@ -194,9 +200,16 @@ async def record_decision(request: Request):
     finally:
         conn.close()
 
-    # 返回 HTMX 替换内容
+    # 返回结果
     action_labels = {"bought": "✅ 已买入", "sold": "💰 已卖出", "skip": "⏭️ 已跳过", "watch": "👀 观望中"}
     label = action_labels.get(action, action)
+
+    # 表单提交 → 重定向回来源页
+    if "application/json" not in content_type:
+        from fastapi.responses import RedirectResponse
+        referer = request.headers.get("referer", "/portfolio")
+        return RedirectResponse(url=referer, status_code=303)
+
     return HTMLResponse(f'<span class="text-xs text-gray-400">{label}</span>')
 
 

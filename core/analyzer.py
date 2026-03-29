@@ -532,15 +532,38 @@ class EarningsAnalyzer:
                 ).fetchone()
                 stock_name = name_row["name"] if name_row else None
 
+                # 从 discovery_pool 读取报告期和财务数据
+                pool_row = conn.execute("""
+                    SELECT detail FROM discovery_pool
+                    WHERE stock_code = ? AND status = 'active'
+                    ORDER BY discovered_at DESC LIMIT 1
+                """, (code,)).fetchone()
+                
+                report_period = None
+                actual_yoy = None
+                expected_yoy = None
+                profit_diff = None
+                if pool_row and pool_row["detail"]:
+                    import json as _json
+                    detail = _json.loads(pool_row["detail"])
+                    report_date = detail.get("report_date", "")
+                    if report_date:
+                        report_period = report_date.replace("-", "")
+                    actual_yoy = detail.get("actual_yoy")
+                    expected_yoy = detail.get("expected_yoy")
+                    profit_diff = detail.get("beat_diff")
+
                 conn.execute("""
                     INSERT INTO event_tracking
-                    (stock_code, stock_name, event_type, event_date, entry_price, tracking_status)
-                    VALUES (?, ?, ?, ?, ?, 'pending')
-                """, (code, stock_name, event_type, today, entry_price))
+                    (stock_code, stock_name, event_type, event_date, entry_price, 
+                     report_period, actual_yoy, expected_yoy, profit_diff, tracking_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+                """, (code, stock_name, event_type, today, entry_price,
+                      report_period, actual_yoy, expected_yoy, profit_diff))
 
                 logger.info(
                     f"[T+N] 创建跟踪: {code} event={event_type} "
-                    f"date={today} price={entry_price}"
+                    f"date={today} price={entry_price} period={report_period}"
                 )
 
             conn.commit()
