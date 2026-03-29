@@ -30,7 +30,7 @@ class DataQualityChecker:
 
     RULES = {
         "net_profit": {"min": -1000, "max": 10000},    # 亿元，范围合理
-        "net_profit_yoy": {"min": -200, "max": 500},    # %，同比范围
+        "net_profit_yoy": {"min": -200, "max": 2000},    # %，同比范围（低基数可极高）
         "revenue": {"min": -100, "max": 50000},          # 亿元
         "roe": {"min": -100, "max": 200},                # %
         "gross_margin": {"min": -50, "max": 100},        # %

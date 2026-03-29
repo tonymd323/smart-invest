@@ -50,6 +50,14 @@ def run(args):
     results['pipeline'] = {'collected': fetched, 'ms': pipe_ms}
     print(f'   ✅ {fetched}/{len(test_codes)} 采集成功 ({pipe_ms}ms)')
 
+    # Step 2b: 获取一致预期
+    print(f'\n📊 Step 2b: 一致预期采集')
+    t0 = time.time()
+    from core.pipeline import fetch_and_apply_consensus
+    consensus_result = fetch_and_apply_consensus(str(DB_PATH), test_codes)
+    consensus_ms = int((time.time() - t0) * 1000)
+    print(f'   ✅ fetched={consensus_result.get("fetched",0)} updated={consensus_result.get("updated",0)} skipped={consensus_result.get("skipped",0)} ({consensus_ms}ms)')
+
     # Step 3: Analyzer
     print(f'\n🔍 Step 3: Analyzer')
     t0 = time.time()
