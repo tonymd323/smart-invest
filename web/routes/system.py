@@ -166,6 +166,70 @@ async def system_page(request: Request):
 # ============================================================
 from fastapi.responses import JSONResponse
 
+# ============================================================
+# Pipeline API
+# ============================================================
+@router.post("/api/pipeline/run")
+async def run_pipeline(request: Request, body: dict = None):
+    """触发 Pipeline 运行，返回 SSE 任务 ID"""
+    body = body or {}
+    window = body.get("window", "12h")
+    as_of = body.get("as_of", "")
+    dry_run = body.get("dry_run", False)
+    import uuid
+    task_id = str(uuid.uuid4())[:8]
+    return {"task_id": task_id, "window": window, "as_of": as_of, "dry_run": dry_run}
+
+
+@router.get("/api/pipeline/stream/{task_id}")
+async def pipeline_sse(task_id: str, window: str = "12h", as_of: str = "", dry_run: bool = False):
+    """SSE 实时日志流"""
+    import asyncio
+    async def generate():
+        cmd = ["python3", str(PROJECT_ROOT / "scripts" / "run_pipeline.py"), "--window", window]
+        if as_of:
+            cmd.extend(["--as-of", as_of])
+        if dry_run:
+            cmd.append("--dry-run")
+        cmd.extend(["--max-stocks", "10"])
+
+        yield f"data: {json.dumps({'type': 'info', 'msg': f'🚀 启动 Pipeline (window={window})'})}\n\n"
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.STDOUT,
+                cwd=str(PROJECT_ROOT),
+            )
+            while True:
+                line = await proc.stdout.readline()
+                if not line:
+                    break
+                text = line.decode('utf-8', errors='replace').rstrip()
+                if text:
+                    if '✅' in text or 'SUCCESS' in text:
+                        log_type = 'success'
+                    elif '⚠️' in text or 'WARN' in text:
+                        log_type = 'warn'
+                    elif '❌' in text or 'ERROR' in text:
+                        log_type = 'error'
+                    else:
+                        log_type = 'info'
+                    yield f"data: {json.dumps({'type': log_type, 'msg': text})}\n\n"
+
+            await proc.wait()
+            yield f"data: {json.dumps({'type': 'done', 'code': proc.returncode})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'msg': str(e)})}\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+# ============================================================
+# Cron API
+# ============================================================
+
 @router.get("/api/cron")
 async def get_cron():
     return JSONResponse(_get_crontab_entries())
