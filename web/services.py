@@ -65,6 +65,18 @@ EVENT_TYPE_MAP = {
     'merger': '并购',
     'policy': '政策',
     'risk': '风险',
+    'policy利好': '政策利好',
+    'policy利空': '政策利空',
+    'major_contract': '重大合同',
+    'risk_warning': '风险警示',
+    'industry_up': '行业景气',
+    'industry_down': '行业下行',
+    'capital_buy': '增持/回购',
+    'capital_sell': '减持',
+    'ops_production': '投产/扩产',
+    'ops_restructure': '重组/并购',
+    'finance_report': '财报/经营',
+    'finance_dividend': '分红派息',
 }
 
 TRACKING_STATUS_MAP = {

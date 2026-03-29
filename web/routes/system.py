@@ -104,31 +104,81 @@ async def pipeline_sse(task_id: str, window: str = "12h", as_of: str = "", dry_r
 
 @router.post("/api/decision")
 async def record_decision(request: Request):
-    """记录决策"""
+    """决策流转 — v2.10: 决策即行动
+    
+    - bought: 写入 stocks.json 持仓 + T+N 跟踪
+    - skip: 记录决策, 3天内今日行动页不再出现
+    - watch: 记录决策, 有新信号时再出现
+    """
     body = await request.json()
     code = body.get("code", "")
     action = body.get("action", "")
     reason = body.get("reason", "")
-    
-    # 写入 SQLite
+    name = body.get("name", code)
+    price = body.get("price", 0)
+
     import sqlite3
-    conn = sqlite3.connect(str(PROJECT_ROOT / "data" / "smart_invest.db"))
+    import json
+    from pathlib import Path
+    from datetime import datetime
+
+    db_path = str(PROJECT_ROOT / "data" / "smart_invest.db")
+    stocks_json = PROJECT_ROOT / "config" / "stocks.json"
+
+    conn = sqlite3.connect(db_path)
     try:
+        # 确保 decision_log 表存在
         conn.execute("""
             CREATE TABLE IF NOT EXISTS decision_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                stock_code TEXT,
-                action TEXT,
+                stock_code TEXT NOT NULL,
+                action TEXT NOT NULL,
                 reason TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                signal_type TEXT,
+                created_at TIMESTAMP DEFAULT (datetime('now', 'localtime'))
             )
         """)
-        conn.execute("INSERT INTO decision_log (stock_code, action, reason) VALUES (?, ?, ?)",
-                     (code, action, reason))
+        conn.execute(
+            "INSERT INTO decision_log (stock_code, action, reason) VALUES (?, ?, ?)",
+            (code, action, reason)
+        )
         conn.commit()
-    except Exception:
-        pass
+
+        # === 已买入: 写入 stocks.json 持仓 ===
+        if action == "bought" and stocks_json.exists():
+            with open(stocks_json) as f:
+                config = json.load(f)
+
+            # 检查是否已在持仓
+            existing = next((h for h in config.get("holdings", []) if h["code"] == code), None)
+            if not existing:
+                # 从关注池移除（如果有）
+                config["watchlist"] = [w for w in config.get("watchlist", []) if w["code"] != code]
+                # 添加到持仓
+                config.setdefault("holdings", []).append({
+                    "code": code,
+                    "name": name,
+                    "shares": 0,
+                    "cost": float(price) if price else 0,
+                })
+                config["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                config["updated_by"] = "web:decision"
+                with open(stocks_json, "w") as f:
+                    json.dump(config, f, ensure_ascii=False, indent=2)
+
+            # 创建 T+N 跟踪（如果 event_tracking 表有对应信号）
+            conn.execute("""
+                UPDATE event_tracking SET tracking_status = 'active', last_updated = datetime('now','localtime')
+                WHERE stock_code = ? AND tracking_status = 'pending'
+            """, (code,))
+            conn.commit()
+
+    except Exception as e:
+        return HTMLResponse(f'<span class="text-xs text-red-400">记录失败: {e}</span>')
     finally:
         conn.close()
-    
-    return HTMLResponse(f'<span class="text-xs text-gray-400">已记录: {action}</span>')
+
+    # 返回 HTMX 替换内容
+    action_labels = {"bought": "✅ 已买入", "skip": "⏭️ 已跳过", "watch": "👀 观望中"}
+    label = action_labels.get(action, action)
+    return HTMLResponse(f'<span class="text-xs text-gray-400">{label}</span>')
