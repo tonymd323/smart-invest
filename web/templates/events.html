@@ -55,7 +55,13 @@
                 </div>
 
                 {% if not is_signal %}
-                <div class="text-sm text-gray-700 mt-1">{{ e.title }}</div>
+                <div class="text-sm text-gray-700 mt-1">
+                    {% if e.url %}
+                    <a href="{{ e.url }}" target="_blank" rel="noopener" class="hover:text-blue-600 hover:underline cursor-pointer">{{ e.title }}</a>
+                    {% else %}
+                    {{ e.title }}
+                    {% endif %}
+                </div>
                 {% if e.source %}<div class="text-xs text-gray-400 mt-1">{{ e.source }}</div>{% endif %}
                 {% else %}
                 <div class="text-sm text-gray-600 mt-1">

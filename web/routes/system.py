@@ -327,3 +327,56 @@ async def delete_cron(request: Request):
         return JSONResponse({"ok": True, "entries": _get_crontab_entries()})
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
+
+# ============================================================
+# 系统日志 API
+# ============================================================
+
+@router.get("/api/logs")
+async def get_logs_api(limit: int = 50, module: str = None, status: str = None):
+    """获取系统运行日志"""
+    from fastapi.responses import JSONResponse
+    from core.system_logger import SystemLogger
+    db = str(PROJECT_ROOT / "data" / "smart_invest.db")
+    logger = SystemLogger(db_path=db)
+    logs = logger.get_logs(limit=limit, module=module, status=status)
+    return JSONResponse(logs)
+
+
+@router.get("/logs", response_class=HTMLResponse)
+async def logs_page(request: Request, module: str = None, status: str = None):
+    """系统日志页面"""
+    from core.system_logger import SystemLogger
+    db = str(PROJECT_ROOT / "data" / "smart_invest.db")
+    logger = SystemLogger(db_path=db)
+    logs = logger.get_logs(limit=100, module=module, status=status)
+
+    # 模块列表（用于过滤）
+    import sqlite3
+    conn = sqlite3.connect(db)
+    modules = [r[0] for r in conn.execute("SELECT DISTINCT module FROM system_log ORDER BY module").fetchall()]
+    conn.close()
+
+    db_stats = get_db_stats()
+    return templates.TemplateResponse("logs.html", {
+        "request": request,
+        "active": "logs",
+        "db_stats": db_stats,
+        "logs": logs,
+        "modules": modules,
+        "current_module": module or "",
+        "current_status": status or "",
+        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    })
+
+
+@router.post("/api/logs/cleanup")
+async def cleanup_logs_api(keep_days: int = 30):
+    """清理旧日志"""
+    from fastapi.responses import JSONResponse
+    from core.system_logger import SystemLogger
+    db = str(PROJECT_ROOT / "data" / "smart_invest.db")
+    logger = SystemLogger(db_path=db)
+    deleted = logger.cleanup(keep_days=keep_days)
+    return JSONResponse({"ok": True, "deleted": deleted})

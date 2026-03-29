@@ -1,14 +1,19 @@
 """
 飞书消息推送核心模块
 ====================
-通过 OpenClaw 的 message 工具发送飞书消息。
+支持两种发送模式：
+  1. OpenClaw CLI（宿主机部署时使用）
+  2. 飞书 HTTP API 直发（容器化部署时使用，推荐）
 
-设计说明：
-- 本模块不直接调用飞书 API，而是通过 OpenClaw CLI 发送消息
-- 消息内容由 CardGenerator 生成
-- 支持重试机制和推送日志
+优先级：HTTP API → CLI → 日志降级
 
-使用方式（由 OpenClaw Agent 调用）：
+环境变量：
+  FEISHU_APP_ID       — 飞书应用 App ID
+  FEISHU_APP_SECRET   — 飞书应用 App Secret
+  SI_FEISHU_DAILY_TARGET — 每日研报推送目标（chat_id 或 open_id）
+  SI_FEISHU_ALERT_TARGET — 预警推送目标
+
+使用方式（由 OpenClaw Agent 或 cron 调用）：
     from smart_invest.notifiers.feishu_pusher import FeishuPusher
     
     pusher = FeishuPusher()

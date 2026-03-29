@@ -719,6 +719,19 @@ class EarningsAnalyzer:
 #  PullbackAnalyzer — 回调买入评分 (A-04)
 # ═══════════════════════════════════════════════════════════════════════════════
 
+def _to_native(obj):
+    """递归转换 numpy 类型为 Python 原生类型（用于 JSON 序列化）"""
+    import numpy as np
+    if isinstance(obj, (np.bool_, np.integer)):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, dict):
+        return {k: _to_native(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_to_native(v) for v in obj]
+    return obj
+
 class PullbackAnalyzer:
     """
     回调买入评分 Analyzer
@@ -819,7 +832,7 @@ class PullbackAnalyzer:
                     "score": score_result["score"],
                     "grade": score_result["grade"],
                     "signal": self._score_to_signal(score_result),
-                    "passed": score_result["passed"],
+                    "passed": bool(score_result["passed"]),
                     "reason": score_result.get("reason", ""),
                     "analyzed_at": dt.now().isoformat(),
                 }
@@ -860,7 +873,7 @@ class PullbackAnalyzer:
                     score_result["score"],
                     result["signal"],
                     result["reason"],
-                    json.dumps(detail, ensure_ascii=False),
+                    json.dumps(detail, default=_to_native, ensure_ascii=False),
                 ))
 
             except Exception as e:
@@ -1201,19 +1214,30 @@ class EventAnalyzer:
         return events
 
     def _write_events(self, events: List[Dict]):
-        """将事件写入 events 表"""
+        """将事件写入 events 表（按 title+stock_code 去重）"""
         conn = sqlite3.connect(self.db_path)
         try:
+            written = 0
             for event in events:
+                title = event.get("title", "")
+                stock_code = event.get("stock_code", "")
+                # 去重：相同标题+股票不重复写入
+                existing = conn.execute(
+                    "SELECT id FROM events WHERE title = ? AND stock_code = ?",
+                    (title, stock_code)
+                ).fetchone()
+                if existing:
+                    continue
+
                 conn.execute("""
                     INSERT INTO events
                     (stock_code, event_type, title, content, source, url,
                      sentiment, sentiment_score, severity, published_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    event.get("stock_code"),
+                    stock_code,
                     event.get("event_type"),
-                    event.get("title", ""),
+                    title,
                     event.get("content", ""),
                     event.get("source", ""),
                     event.get("url", ""),
@@ -1222,7 +1246,10 @@ class EventAnalyzer:
                     event.get("severity", "normal"),
                     event.get("published_at", ""),
                 ))
+                written += 1
             conn.commit()
+            if written:
+                logger.info(f"[EventAnalyzer] 写入 {written}/{len(events)} 条事件（去重后）")
         except Exception as e:
             logger.error(f"[EventAnalyzer] 写入 events 失败: {e}")
             conn.rollback()
