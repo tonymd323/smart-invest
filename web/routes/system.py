@@ -214,6 +214,105 @@ async def record_decision(request: Request):
 
 
 # ============================================================
+# Cron 管理 API
+# ============================================================
+
+def _get_crontab_entries():
+    """读取当前 crontab，解析 smart-invest 相关条目"""
+    import re
+    try:
+        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+        if result.returncode != 0:
+            return []
+        entries = []
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            # 匹配: minute hour dom mon dow command
+            m = re.match(r'^(\S+\s+\S+\s+\S+\s+\S+\s+\S+)\s+(.+)$', line)
+            if m:
+                schedule = m.group(1)
+                command = m.group(2)
+                # 从注释提取名称，格式: # name:xxx
+                name_match = re.search(r'#\s*name:(\S+)', line)
+                name = name_match.group(1) if name_match else command[:40]
+                entries.append({"name": name, "schedule": schedule, "command": command})
+        return entries
+    except Exception:
+        return []
+
+
+@router.get("/api/cron")
+async def get_cron():
+    """获取当前 crontab 列表"""
+    from fastapi.responses import JSONResponse
+    return JSONResponse(_get_crontab_entries())
+
+
+@router.post("/api/cron/add")
+async def add_cron(request: Request):
+    """添加 cron 任务"""
+    from fastapi.responses import JSONResponse
+    body = await request.json()
+    name = body.get("name", "task")
+    schedule = body.get("schedule", "")
+    command = body.get("command", "")
+
+    if not schedule or not command:
+        return JSONResponse({"ok": False, "error": "schedule 和 command 必填"}, status_code=400)
+
+    entry = f"{schedule} {command}  # name:{name}"
+
+    try:
+        # 读取现有 crontab
+        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+        existing = result.stdout if result.returncode == 0 else ""
+        new_content = existing.rstrip() + "\n" + entry + "\n"
+        proc = subprocess.run(["crontab", "-"], input=new_content, capture_output=True, text=True)
+        if proc.returncode != 0:
+            return JSONResponse({"ok": False, "error": proc.stderr}, status_code=500)
+        return JSONResponse({"ok": True, "entries": _get_crontab_entries()})
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
+
+@router.post("/api/cron/delete")
+async def delete_cron(request: Request):
+    """删除 cron 任务（按名称匹配）"""
+    from fastapi.responses import JSONResponse
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse({"ok": False, "error": "name 必填"}, status_code=400)
+
+    try:
+        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+        if result.returncode != 0:
+            return JSONResponse({"ok": False, "error": "无 crontab"}, status_code=404)
+
+        lines = result.stdout.splitlines()
+        new_lines = []
+        deleted = False
+        for line in lines:
+            if not deleted and f"# name:{name}" in line:
+                deleted = True
+                continue
+            new_lines.append(line)
+
+        if not deleted:
+            return JSONResponse({"ok": False, "error": f"未找到任务: {name}"}, status_code=404)
+
+        new_content = "\n".join(new_lines) + "\n"
+        proc = subprocess.run(["crontab", "-"], input=new_content, capture_output=True, text=True)
+        if proc.returncode != 0:
+            return JSONResponse({"ok": False, "error": proc.stderr}, status_code=500)
+        return JSONResponse({"ok": True, "entries": _get_crontab_entries()})
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
+
+# ============================================================
 # 图表数据 API（v2.11 Plotly 集成）
 # ============================================================
 

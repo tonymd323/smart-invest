@@ -7,12 +7,17 @@
 <div class="bg-white rounded-lg p-6 border border-gray-200 mb-6">
     <h3 class="font-semibold mb-4">🚀 手动触发 Pipeline</h3>
     <div class="flex gap-4 mb-4">
-        <select id="window" class="border rounded px-3 py-2">
-            <option value="4h">盘后 (4h)</option>
-            <option value="12h" selected>晚间 (12h)</option>
-            <option value="18h">早盘 (18h)</option>
-            <option value="720h">全量 (720h)</option>
-        </select>
+        <input id="window" type="text" list="window-presets" value="12h"
+               class="border rounded px-3 py-2 w-28" placeholder="如 2h/6h/24h">
+        <datalist id="window-presets">
+            <option value="2h">2小时</option>
+            <option value="4h">4小时</option>
+            <option value="6h">6小时</option>
+            <option value="12h">12小时</option>
+            <option value="18h">18小时</option>
+            <option value="24h">24小时</option>
+            <option value="720h">全量 (30天)</option>
+        </datalist>
         <button id="run-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 onclick="startPipeline()">
             ▶ 执行
@@ -32,21 +37,60 @@
     </div>
 </div>
 
-<!-- Cron 列表 -->
-<div class="bg-white rounded-lg p-6 border border-gray-200 mt-6">
-    <h3 class="font-semibold mb-4">⏰ 定时任务</h3>
-    {% if cron_status %}
-    <table class="data-table text-sm">
-        <thead><tr><th>名称</th><th>调度</th></tr></thead>
-        <tbody>
-        {% for name, schedule in cron_status %}
-        <tr><td>{{ name }}</td><td><code>{{ schedule }}</code></td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p class="text-gray-400 text-sm">暂无 Cron 任务</p>
-    {% endif %}
+<!-- Cron 管理 -->
+<div class="bg-white rounded-lg p-6 border border-gray-200 mt-6" x-data="cronManager()">
+    <h3 class="font-semibold mb-4">⏰ 定时任务管理</h3>
+    <!-- 当前任务列表 -->
+    <div x-show="entries.length > 0" class="mb-4">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="text-left px-3 py-2 text-gray-500">名称</th>
+                    <th class="text-left px-3 py-2 text-gray-500">调度</th>
+                    <th class="text-left px-3 py-2 text-gray-500">命令</th>
+                    <th class="text-right px-3 py-2 text-gray-500">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(e, i) in entries" :key="i">
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-3 py-2 font-medium" x-text="e.name"></td>
+                        <td class="px-3 py-2 font-mono text-xs" x-text="e.schedule"></td>
+                        <td class="px-3 py-2 text-xs text-gray-500 truncate max-w-xs" x-text="e.command"></td>
+                        <td class="px-3 py-2 text-right">
+                            <button @click="deleteEntry(e.name)" class="text-red-500 text-xs hover:underline">删除</button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+    <div x-show="entries.length === 0 && !loading" class="text-gray-400 text-sm mb-4">暂无定时任务</div>
+    <div x-show="loading" class="text-gray-400 text-sm mb-4">加载中...</div>
+
+    <!-- 添加表单 -->
+    <div class="border-t pt-4 mt-4">
+        <p class="text-sm font-medium mb-2">添加定时任务</p>
+        <div class="flex gap-3 flex-wrap items-end">
+            <div>
+                <label class="text-xs text-gray-500">名称</label>
+                <input x-model="form.name" class="border rounded px-2 py-1.5 text-sm w-36" placeholder="如 daily-report">
+            </div>
+            <div>
+                <label class="text-xs text-gray-500">调度表达式</label>
+                <input x-model="form.schedule" class="border rounded px-2 py-1.5 text-sm font-mono w-40" placeholder="0 8 * * *">
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="text-xs text-gray-500">命令</label>
+                <input x-model="form.command" class="border rounded px-2 py-1.5 text-sm w-full" placeholder="cd /path && python3 run.py">
+            </div>
+            <button @click="addEntry()" class="bg-green-600 text-white px-4 py-1.5 rounded text-sm hover:bg-green-700"
+                    :disabled="!form.name || !form.schedule || !form.command">
+                + 添加
+            </button>
+        </div>
+        <p x-show="msg" class="text-xs mt-2" :class="msgOk ? 'text-green-600' : 'text-red-500'" x-text="msg"></p>
+    </div>
 </div>
 {% endblock %}
 
@@ -63,11 +107,9 @@ async function startPipeline() {
     btn.disabled = true;
     btn.textContent = '⏳ 执行中...';
 
-    // 关闭之前的连接
     if (eventSource) { eventSource.close(); eventSource = null; }
 
     try {
-        // 1. POST 触发
         const resp = await fetch('/api/pipeline/run', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -76,7 +118,6 @@ async function startPipeline() {
         const data = await resp.json();
         const taskId = data.task_id;
 
-        // 2. SSE 日志流
         eventSource = new EventSource('/api/pipeline/stream/' + taskId + '?window=' + window);
 
         eventSource.onmessage = function(e) {
@@ -102,6 +143,75 @@ async function startPipeline() {
         btn.disabled = false;
         btn.textContent = '▶ 执行';
     }
+}
+
+// Cron 管理 (Alpine.js)
+function cronManager() {
+    return {
+        entries: [],
+        loading: true,
+        form: { name: '', schedule: '', command: '' },
+        msg: '',
+        msgOk: true,
+        async init() {
+            await this.load();
+        },
+        async load() {
+            this.loading = true;
+            try {
+                const r = await fetch('/api/cron');
+                this.entries = await r.json();
+            } catch(e) { this.entries = []; }
+            this.loading = false;
+        },
+        async addEntry() {
+            if (!this.form.name || !this.form.schedule || !this.form.command) return;
+            try {
+                const r = await fetch('/api/cron/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.form)
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    this.entries = data.entries;
+                    this.msg = '✅ 添加成功';
+                    this.msgOk = true;
+                    this.form = { name: '', schedule: '', command: '' };
+                } else {
+                    this.msg = '❌ ' + (data.error || '添加失败');
+                    this.msgOk = false;
+                }
+            } catch(e) {
+                this.msg = '❌ ' + e.message;
+                this.msgOk = false;
+            }
+            setTimeout(() => { this.msg = ''; }, 3000);
+        },
+        async deleteEntry(name) {
+            if (!confirm('确认删除任务: ' + name + '?')) return;
+            try {
+                const r = await fetch('/api/cron/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name })
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    this.entries = data.entries;
+                    this.msg = '✅ 已删除: ' + name;
+                    this.msgOk = true;
+                } else {
+                    this.msg = '❌ ' + (data.error || '删除失败');
+                    this.msgOk = false;
+                }
+            } catch(e) {
+                this.msg = '❌ ' + e.message;
+                this.msgOk = false;
+            }
+            setTimeout(() => { this.msg = ''; }, 3000);
+        }
+    };
 }
 </script>
 {% endblock %}
