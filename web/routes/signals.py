@@ -1,9 +1,9 @@
-"""信号看板页面路由 — v2.10 列表增强"""
+"""信号看板页面路由 — v2.18 多选筛选 + 公告类型筛选"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from web.services import get_db_stats, get_conn, paginate_query, map_analysis_type, map_signal, format_summary
 
@@ -16,7 +16,8 @@ SORT_WHITELIST = ['ar.created_at', 'ar.score', 'ar.stock_code']
 @router.get("/signals", response_class=HTMLResponse)
 async def signals_page(
     request: Request,
-    type: Optional[str] = None,
+    type: Optional[List[str]] = Query(None),
+    report_type: Optional[List[str]] = Query(None),
     days: int = Query(7),
     search: Optional[str] = None,
     sort: str = Query("created_at"),
@@ -37,9 +38,19 @@ async def signals_page(
     """
     params = [f'-{days} days']
 
+    # 多选：分析类型
     if type:
-        sql += " AND ar.analysis_type = ?"
-        params.append(type)
+        placeholders = ','.join(['?'] * len(type))
+        sql += f" AND ar.analysis_type IN ({placeholders})"
+        params.extend(type)
+
+    # 多选：公告类型（JOIN earnings 表）
+    if report_type:
+        placeholders = ','.join(['?'] * len(report_type))
+        sql += f""" AND ar.stock_code IN (
+            SELECT DISTINCT stock_code FROM earnings WHERE report_type IN ({placeholders})
+        )"""
+        params.extend(report_type)
 
     search_cols = ['ar.stock_code', 's.name'] if search else None
     rows, total, total_pages = paginate_query(
@@ -61,7 +72,8 @@ async def signals_page(
         "request": request, "active": "signals",
         "db_stats": db_stats,
         "signals": signals,
-        "current_type": type or "",
+        "current_types": type or [],
+        "current_report_types": report_type or [],
         "current_days": days,
         "search": search,
         "sort": sort, "order": order,

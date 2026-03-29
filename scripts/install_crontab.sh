@@ -15,6 +15,10 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # ── 每日收盘后数据采集（15:30，快速模式）──
 35 15 * * 1-5 cd /root/.openclaw/workspace/smart-invest && /usr/bin/python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> /root/.openclaw/workspace/smart-invest/data/logs/pipeline_eod.log 2>&1
 
+# ── 回调买入扫描（盘后 15:15）──
+# name:smart-invest-pullback
+15 15 * * 1-5 cd /root/.openclaw/workspace/smart-invest && /usr/bin/python3 -c "from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()" >> /root/.openclaw/workspace/smart-invest/data/logs/pullback_cron.log 2>&1
+
 # ── Web 服务器每日重启（06:00）──
 0 6 * * * kill $(lsof -t -i:8080) 2>/dev/null; sleep 2; cd /root/.openclaw/workspace/smart-invest && nohup python3 web/main.py >> /root/.openclaw/workspace/smart-invest/data/logs/web.log 2>&1 &
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/list_controls.html" import search_box, filter_select, pagination %}
+{% from "macros/list_controls.html" import search_box, filter_select, pagination, multi_filter_select %}
 {% block title %}事件流 — 投资系统 2.2{% endblock %}
 {% block content %}
 <div class="mb-6">
@@ -7,11 +7,12 @@
     <p class="text-gray-500 text-sm mt-1">{{ total }} 条事件</p>
 </div>
 
-<div class="flex gap-4 mb-4 flex-wrap items-center">
-    {{ filter_select("event_type", [("","全部类型"),("earnings_beat","超预期"),("profit_new_high","扣非新高"),("capital_buy","增持/回购"),("capital_sell","减持"),("major_contract","重大合同"),("finance_report","财报/经营"),("finance_dividend","分红派息"),("policy利好","政策利好"),("policy利空","政策利空"),("ops_production","投产/扩产"),("ops_restructure","重组/并购"),("risk_warning","风险警示")], event_type, base_url) }}
+<div class="flex gap-3 mb-4 flex-wrap items-center">
+    {{ multi_filter_select("event_type", [("earnings_beat","超预期"),("profit_new_high","扣非新高"),("capital_buy","增持/回购"),("capital_sell","减持"),("major_contract","重大合同"),("finance_report","财报/经营"),("finance_dividend","分红派息"),("policy利好","政策利好"),("policy利空","政策利空"),("ops_production","投产/扩产"),("ops_restructure","重组/并购"),("risk_warning","风险警示")], current_event_types, base_url, "事件类型") }}
+    {{ multi_filter_select("report_period", [("2025Q4","2025Q4"),("2026Q1","2026Q1"),("2026Q2","2026Q2"),("2026Q3","2026Q3"),("2026Q4","2026Q4"),("2025H1","2025H1"),("2025","2025年报")], current_report_periods, base_url, "报告期") }}
     {{ filter_select("sentiment", [("","全部情感"),("positive","利好"),("negative","利空"),("neutral","中性")], sentiment, base_url) }}
     {{ filter_select("days", [("1","今日"),("3","3天"),("7","7天"),("30","30天")], days|string, base_url) }}
-    {{ search_box(search, "搜索代码/名称...", base_url, {"event_type":event_type,"sentiment":sentiment,"days":days}) }}
+    {{ search_box(search, "搜索代码/名称...", base_url, {"event_type":current_event_types,"report_period":current_report_periods,"sentiment":sentiment,"days":days}) }}
 </div>
 
 {% if grouped_events %}
@@ -82,7 +83,7 @@
     {% endfor %}
 </div>
 
-{{ pagination(page, total_pages, base_url, {"event_type":event_type,"sentiment":sentiment,"days":days,"search":search or ""}) }}
+{{ pagination(page, total_pages, base_url, {"event_type":current_event_types,"report_period":current_report_periods,"sentiment":sentiment,"days":days,"search":search or ""}) }}
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">📭 暂无事件</div>
 {% endif %}

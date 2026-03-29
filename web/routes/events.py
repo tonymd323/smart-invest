@@ -1,9 +1,9 @@
-"""事件流页面路由 — v2.10 合并显示（新闻事件 + 信号跟踪）"""
+"""事件流页面路由 — v2.18 多选筛选 + 报告期筛选"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 import math
 
 from web.services import get_db_stats, get_conn, map_event_type
@@ -15,7 +15,8 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templa
 @router.get("/events", response_class=HTMLResponse)
 async def events_page(
     request: Request,
-    event_type: Optional[str] = None,
+    event_type: Optional[List[str]] = Query(None),
+    report_period: Optional[List[str]] = Query(None),
     sentiment: Optional[str] = None,
     days: int = Query(7),
     search: Optional[str] = None,
@@ -37,8 +38,9 @@ async def events_page(
     """
     params1 = [time_filter]
     if event_type:
-        sql1 += " AND e.event_type = ?"
-        params1.append(event_type)
+        placeholders = ','.join(['?'] * len(event_type))
+        sql1 += f" AND e.event_type IN ({placeholders})"
+        params1.extend(event_type)
     if sentiment:
         sql1 += " AND e.sentiment = ?"
         params1.append(sentiment)
@@ -62,8 +64,14 @@ async def events_page(
     """
     params2 = [time_filter]
     if event_type:
-        sql2 += " AND et.event_type = ?"
-        params2.append(event_type)
+        placeholders = ','.join(['?'] * len(event_type))
+        sql2 += f" AND et.event_type IN ({placeholders})"
+        params2.extend(event_type)
+    # 多选：报告期
+    if report_period:
+        placeholders = ','.join(['?'] * len(report_period))
+        sql2 += f" AND et.report_period IN ({placeholders})"
+        params2.extend(report_period)
     if search:
         sql2 += " AND (et.stock_code LIKE ? OR s.name LIKE ?)"
         params2.extend([f"%{search}%"] * 2)
@@ -114,7 +122,8 @@ async def events_page(
         "events": events,        # 保留分页后的列表（备用）
         "grouped_events": grouped,# 按日期分组的完整列表
         "days": days,
-        "event_type": event_type or "",
+        "current_event_types": event_type or [],
+        "current_report_periods": report_period or [],
         "sentiment": sentiment or "",
         "search": search,
         "page": page, "total_pages": total_pages, "total": total,

@@ -75,6 +75,15 @@ def run(args):
         tn = []
 
     try:
+        from core.analyzer import PullbackAnalyzer
+        pa = PullbackAnalyzer(db_path=str(DB_PATH))
+        pullback_results = pa.scan(test_codes)
+        print(f'   ├─ 回调买入: {len(pullback_results)} 条')
+    except Exception as e:
+        print(f'   ├─ 回调买入: 跳过 ({e})')
+        pullback_results = []
+
+    try:
         from core.analyzer import EventAnalyzer
         eva = EventAnalyzer(db_path=str(DB_PATH))
         events = eva.detect_from_pipeline(beats=beats, new_highs=highs)
@@ -122,6 +131,7 @@ def run(args):
     results['analyzer'] = {
         'beats': len(beats), 'highs': len(highs),
         'pool': len(auto_pool), 'tn': len(tn), 'events': len(events),
+        'pullback': len(pullback_results),
         'ms': ana_ms,
     }
 

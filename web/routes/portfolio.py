@@ -1,6 +1,6 @@
-"""持仓管理页面路由 — v2.7 + v2.10 列表增强"""
+"""持仓管理页面路由 — v2.18 搜索添加 + 按钮统一"""
 from fastapi import APIRouter, Request, Form, Query
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from datetime import datetime
@@ -30,6 +30,23 @@ def _save_stocks(data: dict):
     STOCKS_JSON.parent.mkdir(parents=True, exist_ok=True)
     with open(STOCKS_JSON, "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+@router.get("/api/stocks/search")
+async def stocks_search(q: str = Query(..., min_length=1)):
+    """股票搜索 API — 支持代码/名称模糊匹配"""
+    conn = get_conn()
+    rows = conn.execute("""
+        SELECT code, name, industry, sector
+        FROM stocks
+        WHERE code LIKE ? OR name LIKE ?
+        ORDER BY
+            CASE WHEN code = ? THEN 0 WHEN name = ? THEN 1 ELSE 2 END,
+            code
+        LIMIT 20
+    """, (f"%{q}%", f"%{q}%", q, q)).fetchall()
+    conn.close()
+    return JSONResponse([dict(r) for r in rows])
 
 
 @router.get("/portfolio", response_class=HTMLResponse)

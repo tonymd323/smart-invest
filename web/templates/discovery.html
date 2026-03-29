@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select %}
+{% from "macros/list_controls.html" import search_box, sort_header, pagination, multi_filter_select, filter_select %}
 {% block title %}发现池 — 投资系统 2.2{% endblock %}
 {% block content %}
 <div class="mb-6">
@@ -7,12 +7,15 @@
     <p class="text-gray-500 text-sm mt-1">{{ total }} 只候选</p>
 </div>
 
-<div class="flex gap-4 mb-4 flex-wrap items-center">
+<div class="flex gap-3 mb-4 flex-wrap items-center">
     {{ filter_select("signal", [("","全部"),("buy","买入"),("watch","关注"),("avoid","回避")], current_signal, base_url) }}
-    {{ search_box(search, "搜索代码/名称...", base_url, {"signal": current_signal}) }}
+    {% if industry_list %}
+    {{ multi_filter_select("industry", industry_list, current_industries, base_url, "行业") }}
+    {% endif %}
+    {{ search_box(search, "搜索代码/名称...", base_url, {"signal": current_signal, "industry": current_industries}) }}
     <div class="flex gap-1 ml-auto text-xs">
-        {{ sort_header("评分", "score", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}
-        {{ sort_header("发现时间", "discovered_at", sort, order, base_url, {"signal":current_signal,"search":search or ""}) }}
+        {{ sort_header("评分", "score", sort, order, base_url, {"signal":current_signal,"industry":current_industries,"search":search or ""}) }}
+        {{ sort_header("发现时间", "discovered_at", sort, order, base_url, {"signal":current_signal,"industry":current_industries,"search":search or ""}) }}
     </div>
 </div>
 
@@ -59,6 +62,18 @@
             {% if p.discovered_at %}<span>🕐 {{ p.discovered_at[:10] }}</span>{% endif %}
         </div>
 
+        <!-- 财务数据（来自 earnings 表） -->
+        {% if p.report_period or p.net_profit_yoy is not none %}
+        <div class="mt-2 pt-2 border-t border-gray-100 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            {% if p.report_period %}<span class="text-gray-400">📅 {{ p.report_period }}</span>{% endif %}
+            {% if p.net_profit_yoy is not none %}
+            <span class="font-mono {{ 'text-green-600' if p.net_profit_yoy > 0 else 'text-red-500' if p.net_profit_yoy < 0 else 'text-gray-400' }}">
+                净利 {{ "%+.1f"|format(p.net_profit_yoy) }}%
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+
         <!-- 升级按钮（hover 显示） -->
         {% if p.signal == 'watch' %}
         <div class="mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -70,7 +85,7 @@
     </div>
     {% endfor %}
 </div>
-{{ pagination(page, total_pages, base_url, {"signal":current_signal,"search":search or "","sort":sort,"order":order}) }}
+{{ pagination(page, total_pages, base_url, {"signal":current_signal,"industry":current_industries,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无候选</div>
 {% endif %}

@@ -1,17 +1,21 @@
-{# 通用列表控件宏：搜索 + 排序表头 + 分页导航 #}
+{# 通用列表控件宏：搜索 + 排序表头 + 分页导航 + 多选筛选 #}
 
 {# 搜索框 #}
 {% macro search_box(search_value, placeholder="搜索代码/名称...", base_url="/", params={}) %}
 <form method="get" action="{{ base_url }}" class="flex gap-2 items-center">
     {% for k, v in params.items() %}
+    {% if v is iterable and v is not string %}
+    {% for vv in v %}<input type="hidden" name="{{ k }}" value="{{ vv }}">{% endfor %}
+    {% else %}
     <input type="hidden" name="{{ k }}" value="{{ v }}">
+    {% endif %}
     {% endfor %}
     <input type="text" name="search" value="{{ search_value or '' }}"
            placeholder="{{ placeholder }}"
            class="border rounded px-3 py-1.5 text-sm w-48" />
     <button type="submit" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-sm hover:bg-gray-200">搜索</button>
     {% if search_value %}
-    <a href="{{ base_url }}{% if params %}?{% for k,v in params.items() %}{{ k }}={{ v }}&{% endfor %}{% endif %}"
+    <a href="{{ base_url }}{% if params %}?{% for k,v in params.items() %}{% if v is iterable and v is not string %}{% for vv in v %}{{ k }}={{ vv }}&{% endfor %}{% else %}{{ k }}={{ v }}&{% endif %}{% endfor %}{% endif %}"
        class="text-xs text-gray-400 hover:text-gray-600">清除</a>
     {% endif %}
 </form>
@@ -30,7 +34,7 @@
 {% set url_params = {} %}
 {% for k,v in params.items() %}{% if url_params.update({k:v}) %}{% endif %}{% endfor %}
 {% if url_params.update({'sort': field, 'order': new_order, 'page': '1'}) %}{% endif %}
-<a href="{{ base_url }}?{% for k,v in url_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+<a href="{{ base_url }}?{% for k,v in url_params.items() %}{% if v is iterable and v is not string %}{% for vv in v %}{{ k }}={{ vv }}&{% endfor %}{% else %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
    class="text-gray-500 hover:text-gray-700{{ ' font-semibold' if current_sort == field }}">
     {{ label }}{{ arrow }}
 </a>
@@ -46,7 +50,7 @@
         {% set prev_params = {} %}
         {% for k,v in params.items() %}{% if prev_params.update({k:v}) %}{% endif %}{% endfor %}
         {% if prev_params.update({'page': page - 1}) %}{% endif %}
-        <a href="{{ base_url }}?{% for k,v in prev_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+        <a href="{{ base_url }}?{% for k,v in prev_params.items() %}{% if v is iterable and v is not string %}{% for vv in v %}{{ k }}={{ vv }}&{% endfor %}{% else %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
            class="px-3 py-1 rounded border hover:bg-gray-50">上一页</a>
         {% endif %}
 
@@ -55,7 +59,7 @@
             {% set page_params = {} %}
             {% for k,v in params.items() %}{% if page_params.update({k:v}) %}{% endif %}{% endfor %}
             {% if page_params.update({'page': p}) %}{% endif %}
-            <a href="{{ base_url }}?{% for k,v in page_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+            <a href="{{ base_url }}?{% for k,v in page_params.items() %}{% if v is iterable and v is not string %}{% for vv in v %}{{ k }}={{ vv }}&{% endfor %}{% else %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
                class="px-3 py-1 rounded border {{ 'bg-blue-50 border-blue-200 text-blue-600' if p == page else 'hover:bg-gray-50' }}">
                 {{ p }}
             </a>
@@ -68,7 +72,7 @@
         {% set next_params = {} %}
         {% for k,v in params.items() %}{% if next_params.update({k:v}) %}{% endif %}{% endfor %}
         {% if next_params.update({'page': page + 1}) %}{% endif %}
-        <a href="{{ base_url }}?{% for k,v in next_params.items() %}{{ k }}={{ v }}&{% endfor %}"
+        <a href="{{ base_url }}?{% for k,v in next_params.items() %}{% if v is iterable and v is not string %}{% for vv in v %}{{ k }}={{ vv }}&{% endfor %}{% else %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
            class="px-3 py-1 rounded border hover:bg-gray-50">下一页</a>
         {% endif %}
     </div>
@@ -76,7 +80,7 @@
 {% endif %}
 {% endmacro %}
 
-{# 筛选下拉框 #}
+{# 筛选下拉框（单选，保留兼容） #}
 {% macro filter_select(name, options, current_value, base_url, params={}) %}
 <select class="border rounded px-3 py-1.5 text-sm"
         onchange="var p=new URLSearchParams(location.search);p.set('{{ name }}',this.value);p.set('page','1');location.href='{{ base_url }}?'+p.toString()">
@@ -84,4 +88,39 @@
     <option value="{{ value }}" {{ 'selected' if current_value == value }}>{{ label }}</option>
     {% endfor %}
 </select>
+{% endmacro %}
+
+{# 多选筛选下拉（Alpine.js checkbox dropdown） #}
+{% macro multi_filter_select(name, options, current_values, base_url, label_text="筛选") %}
+{# current_values: list of currently selected values #}
+{% set selected_json = current_values | tojson if current_values else '[]' %}
+<div class="relative" x-data="{ open: false, selected: {{ selected_json }} }" @click.away="open = false">
+    <button type="button" @click="open = !open"
+            class="border rounded px-3 py-1.5 text-sm flex items-center gap-1.5 bg-white hover:bg-gray-50 min-w-[100px]">
+        <span x-text="selected.length ? label_text + ' (' + selected.length + ')' : label_text">{{ label_text }}</span>
+        <svg class="w-3.5 h-3.5 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </button>
+    <div x-show="open" x-transition
+         class="absolute z-20 mt-1 bg-white border rounded-lg shadow-lg py-1 min-w-[180px]">
+        {% for value, label in options %}
+        <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer text-sm">
+            <input type="checkbox" value="{{ value }}" x-model="selected"
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span>{{ label }}</span>
+        </label>
+        {% endfor %}
+        <div class="border-t mt-1 pt-1 px-3 flex gap-2">
+            <button type="button" @click="
+                var p = new URLSearchParams(location.search);
+                p.delete('{{ name }}');
+                p.set('page','1');
+                selected.forEach(v => p.append('{{ name }}', v));
+                location.href = '{{ base_url }}?' + p.toString();
+            " class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">应用</button>
+            <button type="button" @click="selected = []" class="text-xs px-2 py-1 text-gray-400 hover:text-gray-600">清除</button>
+        </div>
+    </div>
+</div>
 {% endmacro %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/list_controls.html" import search_box, sort_header, pagination, filter_select %}
+{% from "macros/list_controls.html" import search_box, sort_header, pagination, multi_filter_select, filter_select %}
 {% block title %}信号看板 — 投资系统 2.2{% endblock %}
 {% block content %}
 <div class="mb-6">
@@ -8,10 +8,11 @@
 </div>
 
 <!-- 筛选 + 搜索 -->
-<div class="flex gap-4 mb-4 flex-wrap items-center">
-    {{ filter_select("type", [("","全部类型"),("earnings_beat","超预期"),("profit_new_high","扣非新高"),("pullback_buy_daily","回调买入")], current_type, base_url) }}
+<div class="flex gap-3 mb-4 flex-wrap items-center">
+    {{ multi_filter_select("type", [("earnings_beat","超预期"),("profit_new_high","扣非新高"),("pullback_buy_daily","回调买入"),("pullback_score","回调评分")], current_types, base_url, "分析类型") }}
+    {{ multi_filter_select("report_type", [("年报","年报"),("季报","季报"),("业绩预告","业绩预告"),("业绩快报","业绩快报")], current_report_types, base_url, "公告类型") }}
     {{ filter_select("days", [("1","今日"),("3","3天"),("7","7天"),("30","30天")], current_days|string, base_url) }}
-    {{ search_box(search, "搜索代码/名称...", base_url, {"type": current_type, "days": current_days}) }}
+    {{ search_box(search, "搜索代码/名称...", base_url, {"type":current_types,"report_type":current_report_types,"days":current_days}) }}
 </div>
 
 {% if signals %}
@@ -21,12 +22,12 @@
     <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b">
             <tr>
-                <th class="text-left px-4 py-2">{{ sort_header("股票", "ar.stock_code", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2">{{ sort_header("股票", "ar.stock_code", sort, order, base_url, {"type":current_types,"report_type":current_report_types,"days":current_days,"search":search or ""}) }}</th>
                 <th class="text-left px-4 py-2 text-gray-500">类型</th>
-                <th class="text-right px-4 py-2">{{ sort_header("评分", "ar.score", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
+                <th class="text-right px-4 py-2">{{ sort_header("评分", "ar.score", sort, order, base_url, {"type":current_types,"report_type":current_report_types,"days":current_days,"search":search or ""}) }}</th>
                 <th class="text-center px-4 py-2 text-gray-500">信号</th>
                 <th class="text-left px-4 py-2 text-gray-500">摘要</th>
-                <th class="text-left px-4 py-2">{{ sort_header("时间", "ar.created_at", sort, order, base_url, {"type":current_type,"days":current_days,"search":search or ""}) }}</th>
+                <th class="text-left px-4 py-2">{{ sort_header("时间", "ar.created_at", sort, order, base_url, {"type":current_types,"report_type":current_report_types,"days":current_days,"search":search or ""}) }}</th>
             </tr>
         </thead>
         <tbody>
@@ -57,7 +58,6 @@
 <div class="md:hidden space-y-3">
     {% for s in signals %}
     <div class="bg-white rounded-lg border border-gray-200 p-4">
-        <!-- 头部：股票名 + 类型 -->
         <div class="flex items-center justify-between mb-2">
             <div>
                 <span class="font-bold text-gray-900">{{ s.stock_name }}</span>
@@ -67,8 +67,6 @@
             </div>
             <span class="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded">{{ s.analysis_type_zh }}</span>
         </div>
-
-        <!-- 评分 + 信号 -->
         <div class="flex items-center gap-3 mb-2">
             {% if s.score %}
             <div class="flex items-center gap-1">
@@ -86,19 +84,15 @@
             <span class="text-xs text-gray-400">{{ s.signal_zh }}</span>
             {% endif %}
         </div>
-
-        <!-- 摘要 -->
         {% if s.summary_text %}
         <p class="text-sm text-gray-500 leading-relaxed mb-2">{{ s.summary_text }}</p>
         {% endif %}
-
-        <!-- 时间 -->
         <div class="text-xs text-gray-400">{{ s.created_at[:16] if s.created_at else '' }}</div>
     </div>
     {% endfor %}
 </div>
 
-{{ pagination(page, total_pages, base_url, {"type":current_type,"days":current_days,"search":search or "","sort":sort,"order":order}) }}
+{{ pagination(page, total_pages, base_url, {"type":current_types,"report_type":current_report_types,"days":current_days,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无信号</div>
 {% endif %}
