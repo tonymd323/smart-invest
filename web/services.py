@@ -841,6 +841,94 @@ def get_today_actions():
     return actions
 
 
+def get_dashboard_summary():
+    """
+    总览页数据聚合 — D-1/D-2/D-3 共用
+
+    Returns:
+        {
+            "signal_total": int,
+            "beat_count": int,
+            "event_count": int,
+            "has_signals": bool,
+            "top_actions": [action, ...],  # 前3条
+            "positions": [pos, ...],       # 持仓 mini 卡片
+        }
+    """
+    today = datetime.now().strftime('%Y-%m-%d')
+
+    # 今日信号统计
+    conn = get_conn()
+    signal_total = conn.execute(
+        "SELECT COUNT(*) FROM analysis_results WHERE date(created_at) = date('now')"
+    ).fetchone()[0]
+    beat_count = conn.execute(
+        "SELECT COUNT(*) FROM analysis_results WHERE analysis_type LIKE 'earnings_beat%' AND date(created_at) = date('now')"
+    ).fetchone()[0]
+    event_count = conn.execute(
+        "SELECT COUNT(*) FROM event_tracking WHERE date(created_at) = date('now')"
+    ).fetchone()[0]
+    conn.close()
+
+    # 今日行动（取前3条）
+    try:
+        top_actions = get_today_actions()[:3]
+    except Exception:
+        top_actions = []
+
+    # 持仓 mini 卡片（含实时行情+盈亏）
+    config_path = Path(__file__).parent.parent / "config" / "stocks.json"
+    positions = []
+    if config_path.exists():
+        with open(config_path) as f:
+            config = json.load(f)
+        try:
+            from core.data_provider import QuoteProvider
+            qp = QuoteProvider()
+            for stock in config.get('holdings', []):
+                code = stock.get('code', '')
+                cost = stock.get('cost', 0) or 0
+                shares = stock.get('shares', 0) or 0
+                price = 0
+                change_pct = 0
+                try:
+                    records = qp.fetch(code)
+                    if records:
+                        q = records[0].to_dict()
+                        price = q.get('price', 0)
+                        change_pct = q.get('change_pct', 0)
+                except Exception:
+                    pass
+                market_value = price * shares if price and shares else 0
+                cost_total = cost * shares if cost and shares else 0
+                pnl = market_value - cost_total
+                pnl_pct = (pnl / cost_total * 100) if cost_total > 0 else 0
+                positions.append({
+                    'code': code,
+                    'name': stock.get('name', code),
+                    'price': price,
+                    'change_pct': change_pct,
+                    'shares': shares,
+                    'cost': cost,
+                    'market_value': market_value,
+                    'pnl': pnl,
+                    'pnl_pct': pnl_pct,
+                    'target': stock.get('target'),
+                    'stop_loss': stock.get('stop_loss'),
+                })
+        except Exception:
+            positions = []
+
+    return {
+        'signal_total': signal_total,
+        'beat_count': beat_count,
+        'event_count': event_count,
+        'has_signals': signal_total > 0,
+        'top_actions': top_actions,
+        'positions': positions,
+    }
+
+
 def get_oversold_data() -> dict:
     """
     获取超跌监控数据（供 oversold 页面使用）

@@ -15,7 +15,9 @@
 </div>
 
 {% if signals %}
-<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+<!-- H-2 桌面端：表格 -->
+<div class="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
     <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b">
             <tr>
@@ -50,6 +52,52 @@
         </tbody>
     </table>
 </div>
+
+<!-- H-2 移动端：卡片 feed -->
+<div class="md:hidden space-y-3">
+    {% for s in signals %}
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <!-- 头部：股票名 + 类型 -->
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <span class="font-bold text-gray-900">{{ s.stock_name }}</span>
+                {% if s.stock_name != s.stock_code %}
+                <span class="text-gray-400 text-xs ml-1">{{ s.stock_code }}</span>
+                {% endif %}
+            </div>
+            <span class="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded">{{ s.analysis_type_zh }}</span>
+        </div>
+
+        <!-- 评分 + 信号 -->
+        <div class="flex items-center gap-3 mb-2">
+            {% if s.score %}
+            <div class="flex items-center gap-1">
+                <span class="text-xs text-gray-400">评分</span>
+                <span class="font-mono font-bold text-lg {% if s.score >= 80 %}text-red-500{% elif s.score >= 60 %}text-yellow-600{% else %}text-gray-600{% endif %}">
+                    {{ "%.0f"|format(s.score) }}
+                </span>
+            </div>
+            {% endif %}
+            {% if s.signal == 'buy' %}
+            <span class="tag-buy">{{ s.signal_zh }}</span>
+            {% elif s.signal == 'watch' %}
+            <span class="tag-watch">{{ s.signal_zh }}</span>
+            {% elif s.signal %}
+            <span class="text-xs text-gray-400">{{ s.signal_zh }}</span>
+            {% endif %}
+        </div>
+
+        <!-- 摘要 -->
+        {% if s.summary_text %}
+        <p class="text-sm text-gray-500 leading-relaxed mb-2">{{ s.summary_text }}</p>
+        {% endif %}
+
+        <!-- 时间 -->
+        <div class="text-xs text-gray-400">{{ s.created_at[:16] if s.created_at else '' }}</div>
+    </div>
+    {% endfor %}
+</div>
+
 {{ pagination(page, total_pages, base_url, {"type":current_type,"days":current_days,"search":search or "","sort":sort,"order":order}) }}
 {% else %}
 <div class="bg-white rounded-lg p-8 border border-gray-200 text-center text-gray-400">暂无信号</div>

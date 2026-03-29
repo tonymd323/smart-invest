@@ -7,90 +7,140 @@
     <p class="text-gray-500 text-sm mt-1">一页看全局</p>
 </div>
 
-<!-- 信号摘要 + 持仓 + 系统健康 -->
-<div class="grid grid-cols-3 gap-4 mb-6">
-    <!-- 今日信号 -->
-    <div class="bg-white rounded-lg p-4 border border-gray-200">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3">📋 今日信号</h3>
-        <div class="space-y-2">
-            <div class="flex justify-between">
-                <span>超预期</span>
-                <span class="font-bold {% if signal_summary.超预期 > 0 %}text-red-500{% endif %}">{{ signal_summary.超预期 }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span>扣非新高</span>
-                <span class="font-bold {% if signal_summary.扣非新高 > 0 %}text-blue-500{% endif %}">{{ signal_summary.扣非新高 }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span>回调买入</span>
-                <span class="font-bold {% if signal_summary.回调买入 > 0 %}text-green-500{% endif %}">{{ signal_summary.回调买入 }}</span>
-            </div>
-        </div>
+<!-- D-1 状态摘要横幅 -->
+<div class="{% if summary.has_signals %}bg-green-50 border-green-200{% else %}bg-gray-50 border-gray-200{% endif %} border rounded-lg px-4 py-3 mb-5 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+        <span class="text-lg">{% if summary.has_signals %}🟢{% else %}⚪{% endif %}</span>
+        <span class="font-medium {% if summary.has_signals %}text-green-800{% else %}text-gray-500{% endif %}">
+            今日 {{ summary.signal_total }} 个信号 · {{ summary.beat_count }} 个超预期 · {{ summary.event_count }} 条事件
+        </span>
     </div>
+    <a href="/signals" class="text-sm {% if summary.has_signals %}text-green-600 hover:text-green-700{% else %}text-gray-400 hover:text-gray-500{% endif %}">
+        查看详情 →
+    </a>
+</div>
 
-    <!-- 持仓状态 -->
-    <div class="bg-white rounded-lg p-4 border border-gray-200">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3">💼 持仓</h3>
-        <div class="space-y-2">
-            {% for pos in positions %}
-            <div class="flex justify-between text-sm">
-                <span>{{ pos.name }}</span>
-                <span class="{% if pos.change_pct > 0 %}up{% elif pos.change_pct < 0 %}down{% endif %}">
-                    ¥{{ "%.2f"|format(pos.price) }} {% if pos.change_pct > 0 %}+{% endif %}{{ "%.2f"|format(pos.change_pct) }}%
+<!-- D-2 今日行动预览 -->
+{% if summary.top_actions %}
+<div class="mb-5">
+    <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-semibold text-gray-600">📌 今日行动</h3>
+        <a href="/action" class="text-xs text-blue-500 hover:text-blue-700">查看全部 →</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {% for act in summary.top_actions %}
+        <a href="/action" class="block bg-white rounded-lg border {% if act.priority == 'sell' %}border-red-300 hover:border-red-400{% elif act.priority == 'buy' %}border-red-200 hover:border-red-300{% elif act.priority == 'adjust' %}border-yellow-200 hover:border-yellow-300{% else %}border-blue-200 hover:border-blue-300{% endif %} p-3 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5">
+                    <span>{{ act.emoji }}</span>
+                    <span class="font-bold text-gray-900">{{ act.stock_name }}</span>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded
+                    {% if act.priority == 'buy' %}bg-red-50 text-red-600
+                    {% elif act.priority == 'sell' %}bg-red-100 text-red-700
+                    {% elif act.priority == 'adjust' %}bg-yellow-50 text-yellow-700
+                    {% else %}bg-blue-50 text-blue-600{% endif %}">
+                    {% if act.priority == 'buy' %}买入{% elif act.priority == 'sell' %}卖出{% elif act.priority == 'adjust' %}调整{% else %}观望{% endif %}
                 </span>
             </div>
-            {% endfor %}
-            {% if not positions %}
-            <div class="text-gray-400 text-sm">暂无持仓配置</div>
+            {% if act.current_price > 0 %}
+            <div class="flex items-center justify-between text-sm">
+                <span class="font-mono">¥{{ "%.2f"|format(act.current_price) }}</span>
+                <span class="{{ 'up' if act.change_pct > 0 else 'down' if act.change_pct < 0 else 'text-gray-400' }} text-xs">
+                    {{ "%+.2f"|format(act.change_pct) }}%
+                </span>
+            </div>
             {% endif %}
-        </div>
-    </div>
-
-    <!-- 系统健康 -->
-    <div class="bg-white rounded-lg p-4 border border-gray-200">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3">🖥️ 系统</h3>
-        <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-                <span>数据库</span>
-                <span>{{ db_stats.db_size_mb }}MB</span>
-            </div>
-            <div class="flex justify-between">
-                <span>Earnings</span>
-                <span>{{ db_stats.earnings }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span>Analysis</span>
-                <span>{{ db_stats.analysis_results }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span>发现池</span>
-                <span>{{ db_stats.discovery_pool }}</span>
-            </div>
-        </div>
+            <p class="text-xs text-gray-500 mt-1.5 line-clamp-2">{{ act.action_text }}</p>
+        </a>
+        {% endfor %}
     </div>
 </div>
+{% endif %}
 
-<!-- 信号趋势图 -->
-<div class="bg-white rounded-lg p-4 border border-gray-200 mb-6">
-    <div id="signal-trend-chart" style="height: 250px;"></div>
-</div>
-
-<!-- 最近事件 -->
-<div class="bg-white rounded-lg p-4 border border-gray-200">
-    <h3 class="text-sm font-semibold text-gray-600 mb-3">📰 最近事件</h3>
-    {% if recent_events %}
-    <div class="space-y-2">
-        {% for evt in recent_events %}
-        <div class="flex items-start gap-3 text-sm py-2 border-b border-gray-100 last:border-0">
-            <span class="text-xs text-gray-400 whitespace-nowrap">{{ evt.created_at[:16] if evt.created_at else '' }}</span>
-            <span class="font-medium">{{ evt.stock_name }}</span>
-            <span class="text-gray-500">{{ evt.event_type_zh or evt.event_type }}</span>
+<!-- D-3 持仓 mini 卡片 -->
+{% if summary.positions %}
+<div class="mb-5">
+    <h3 class="text-sm font-semibold text-gray-600 mb-2">💼 持仓</h3>
+    <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+        {% for pos in summary.positions %}
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <span class="font-medium text-gray-900 truncate">{{ pos.name }}</span>
+                <span class="text-gray-400 text-xs whitespace-nowrap">{{ pos.code }}</span>
+            </div>
+            <div class="flex items-center gap-4 text-right flex-shrink-0">
+                <div>
+                    <div class="font-mono text-sm font-medium">{% if pos.price > 0 %}¥{{ "%.2f"|format(pos.price) }}{% else %}-{% endif %}</div>
+                    <div class="text-xs {{ 'up' if pos.change_pct > 0 else 'down' if pos.change_pct < 0 else 'text-gray-400' }}">
+                        {% if pos.price > 0 %}{{ "%+.2f"|format(pos.change_pct) }}%{% else %}-{% endif %}
+                    </div>
+                </div>
+                <div class="w-px h-8 bg-gray-100"></div>
+                <div>
+                    {% if pos.pnl != 0 %}
+                    <div class="font-mono text-sm font-medium {{ 'up' if pos.pnl > 0 else 'down' if pos.pnl < 0 else '' }}">
+                        {{ "%+d"|format(pos.pnl|int) }}
+                    </div>
+                    <div class="text-xs {{ 'up' if pos.pnl_pct > 0 else 'down' if pos.pnl_pct < 0 else 'text-gray-400' }}">
+                        {{ "%+.1f"|format(pos.pnl_pct) }}%
+                    </div>
+                    {% else %}
+                    <div class="text-xs text-gray-400">-</div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
-    {% else %}
-    <p class="text-gray-400 text-sm">暂无事件</p>
-    {% endif %}
+</div>
+{% endif %}
+
+<!-- D-4 图表 + 事件（折叠） -->
+<div x-data="{ chartOpen: false, eventsOpen: false }" class="space-y-3 mb-5">
+
+    <!-- 信号趋势图 -->
+    <div class="bg-white rounded-lg border border-gray-200">
+        <button @click="chartOpen = !chartOpen" class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors">
+            <span class="text-sm font-semibold text-gray-600">📈 信号趋势</span>
+            <svg :class="chartOpen ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div x-show="chartOpen" x-collapse x-transition>
+            <div class="px-4 pb-4">
+                <div id="signal-trend-chart" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近事件 -->
+    <div class="bg-white rounded-lg border border-gray-200">
+        <button @click="eventsOpen = !eventsOpen" class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors">
+            <span class="text-sm font-semibold text-gray-600">📰 最近事件</span>
+            <svg :class="eventsOpen ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div x-show="eventsOpen" x-collapse x-transition>
+            <div class="px-4 pb-4">
+                {% if recent_events %}
+                <div class="divide-y divide-gray-100">
+                    {% for evt in recent_events %}
+                    <div class="flex items-start gap-3 text-sm py-2.5">
+                        <span class="text-xs text-gray-400 whitespace-nowrap mt-0.5">{{ evt.created_at[:16] if evt.created_at else '' }}</span>
+                        <span class="font-medium text-gray-700">{{ evt.stock_name }}</span>
+                        <span class="text-gray-500">{{ evt.event_type_zh or evt.event_type }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-400 text-sm py-4 text-center">暂无事件</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="/static/plotly.min.js"></script>
@@ -98,21 +148,20 @@
 <script>
 fetch('/api/chart/signal_trend').then(r=>r.json()).then(data=>{
     const el=document.getElementById('signal-trend-chart');
-    if(data.length){
-        const traces=data.map((s,i)=>CHART.scatter(s.name,s.x,s.y,{
-            fill:'tozeroy', mode:'lines', width:1.5,
-            color:CHART.colors[i%CHART.colors.length],
-            markerSize:0, hover:'%{y} 个<extra>'+s.name+'</extra>'
-        }));
-        Plotly.newPlot(el,traces,{
-            ...CHART.layout,
-            title:{text:'近30天信号趋势',font:{size:14,color:'#334155'},x:0.02},
-            xaxis:{...CHART.layout.xaxis},
-            yaxis:{...CHART.layout.yaxis,rangemode:'tozero'},
-            legend:{orientation:'h',y:1.12,x:0.5,xanchor:'center',font:{size:11}},
-            margin:{t:64,r:16,b:36,l:44},
-        },CHART.config);
-    } else { el.innerHTML='<div class="text-center text-gray-400 py-16">暂无信号数据</div>'; }
+    if(!data.length){return;}
+    const traces=data.map((s,i)=>CHART.scatter(s.name,s.x,s.y,{
+        fill:'tozeroy', mode:'lines', width:1.5,
+        color:CHART.colors[i%CHART.colors.length],
+        markerSize:0, hover:'%{y} 个<extra>'+s.name+'</extra>'
+    }));
+    Plotly.newPlot(el,traces,{
+        ...CHART.layout,
+        title:{text:'近30天信号趋势',font:{size:14,color:'#334155'},x:0.02},
+        xaxis:{...CHART.layout.xaxis},
+        yaxis:{...CHART.layout.yaxis,rangemode:'tozero'},
+        legend:{orientation:'h',y:1.12,x:0.5,xanchor:'center',font:{size:11}},
+        margin:{t:64,r:16,b:36,l:44},
+    },CHART.config);
 });
 </script>
 {% endblock %}

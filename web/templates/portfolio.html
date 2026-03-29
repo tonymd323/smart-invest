@@ -30,8 +30,11 @@
             </div>
         </form>
     </div>
+
     {% if holdings %}
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+    <!-- H-1 桌面端：保持表格 -->
+    <div class="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b">
                 <tr>
@@ -82,6 +85,97 @@
             </tbody>
         </table>
     </div>
+
+    <!-- H-1 移动端：卡片布局 -->
+    <div class="md:hidden space-y-3">
+        {% for h in holdings %}
+        <div class="bg-white rounded-lg border border-gray-200 p-4">
+            <!-- 头部：名称 + 代码 -->
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <span class="font-bold text-gray-900">{{ h.name }}</span>
+                    <span class="text-gray-400 text-xs ml-1">{{ h.code }}</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleEdit('h','{{h.code}}')" class="text-xs text-blue-500 hover:text-blue-700">编辑</button>
+                    <form method="post" action="/portfolio/holding/delete" class="inline" onsubmit="return confirm('确认删除？')">
+                        <input type="hidden" name="code" value="{{h.code}}">
+                        <button type="submit" class="text-xs text-red-400 hover:text-red-600">删除</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 大号数字：市值 + 盈亏 -->
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                    <div class="text-xs text-gray-400 mb-0.5">市值</div>
+                    <div class="text-xl font-mono font-bold text-gray-900">
+                        {% if h.market_value %}{{ "%.0f"|format(h.market_value) }}{% else %}-{% endif %}
+                    </div>
+                    <div class="text-xs text-gray-400">{{ h.shares }}股</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-gray-400 mb-0.5">盈亏</div>
+                    {% if h.pnl %}
+                    <div class="text-xl font-mono font-bold {{ 'up' if h.pnl > 0 else 'down' if h.pnl < 0 else 'text-gray-900' }}">
+                        {{ "%+d"|format(h.pnl|int) }}
+                    </div>
+                    <div class="text-xs {{ 'up' if h.pnl_pct > 0 else 'down' if h.pnl_pct < 0 else 'text-gray-400' }}">
+                        {{ "%+.1f"|format(h.pnl_pct) }}%
+                    </div>
+                    {% else %}
+                    <div class="text-xl font-mono font-bold text-gray-400">-</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 盈亏进度条 -->
+            {% if h.target and h.cost and h.cost > 0 %}
+            {% set progress = ((h.price - h.cost) / (h.target - h.cost) * 100) if (h.target - h.cost) != 0 else 0 %}
+            {% set progress_clamped = [0, progress, 100]|sort|list %}
+            {% set progress_pct = progress_clamped[1] %}
+            <div class="mb-3">
+                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>¥{{ "%.2f"|format(h.cost) }}</span>
+                    <span>目标 ¥{{ "%.2f"|format(h.target) }}</span>
+                </div>
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500
+                        {% if progress >= 100 %}bg-green-500{% elif progress >= 50 %}bg-blue-500{% elif progress > 0 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
+                         style="width: {{ progress_pct }}%"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 底部：现价 + 涨跌 -->
+            <div class="flex items-center justify-between text-sm border-t border-gray-100 pt-2.5">
+                <span class="text-gray-500">现价</span>
+                <div class="flex items-center gap-2">
+                    <span class="font-mono font-medium">{% if h.price > 0 %}¥{{ "%.2f"|format(h.price) }}{% else %}-{% endif %}</span>
+                    <span class="text-xs font-mono {{ 'up' if h.change_pct > 0 else 'down' if h.change_pct < 0 else 'text-gray-400' }}">
+                        {% if h.price > 0 %}{{ "%+.2f"|format(h.change_pct) }}%{% else %}-{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- 编辑表单（折叠） -->
+            <div class="hidden mt-3 pt-3 border-t border-gray-100" id="edit-h-{{h.code|replace('.','-')}}">
+                <form method="post" action="/portfolio/holding/update" class="grid grid-cols-2 gap-2">
+                    <input type="hidden" name="code" value="{{h.code}}">
+                    <div><label class="text-xs text-gray-500">股数</label><input name="shares" type="number" value="{{h.shares}}" class="border rounded px-2 py-1 text-sm w-full"></div>
+                    <div><label class="text-xs text-gray-500">成本价</label><input name="cost" type="number" step="0.01" value="{{h.cost}}" class="border rounded px-2 py-1 text-sm w-full"></div>
+                    <div><label class="text-xs text-gray-500">目标价</label><input name="target" type="number" step="0.01" value="{{h.target or ''}}" class="border rounded px-2 py-1 text-sm w-full"></div>
+                    <div><label class="text-xs text-gray-500">止损价</label><input name="stop_loss" type="number" step="0.01" value="{{h.stop_loss or ''}}" class="border rounded px-2 py-1 text-sm w-full"></div>
+                    <div class="col-span-2 flex gap-2">
+                        <button type="submit" class="flex-1 px-3 py-1.5 bg-blue-600 text-white rounded text-sm">保存</button>
+                        <button type="button" onclick="toggleEdit('h','{{h.code}}')" class="flex-1 px-3 py-1.5 bg-gray-200 text-gray-600 rounded text-sm">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
     {% else %}
     <div class="bg-white rounded-lg p-6 border border-gray-200 text-center text-gray-400">暂无持仓</div>
     {% endif %}
@@ -138,8 +232,8 @@
         {{ search_box(search, "搜索代码/名称...", base_url, {"sort":sort,"order":order}) }}
     </div>
     {% if pool_candidates %}
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table class="w-full text-sm">
+    <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+        <table class="w-full text-sm" style="min-width:500px">
             <thead class="bg-gray-50 border-b">
                 <tr>
                     <th class="text-left px-4 py-2">{{ sort_header("股票", "stock_code", sort, order, base_url, {"search":search or ""}) }}</th>

@@ -234,6 +234,20 @@ table.data-table tr:hover td {
 .card-negative { border-left-color: #ef4444; }
 .card-neutral  { border-left-color: #d1d5db; }
 
+/* 持仓卡片移动端样式 */
+.portfolio-card .pnl-number {
+    font-size: 1.5rem;
+    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+    font-weight: 700;
+}
+.portfolio-card .price-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.625rem;
+    border-top: 1px solid #f3f4f6;
+}
+
 /* ============================================================
    移动端适配 (< 1024px)
    ============================================================ */
