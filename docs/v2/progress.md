@@ -1,23 +1,24 @@
 # JARVIS 投资系统 2.0 — 进度跟踪
 
-_版本：v2.13 | 日期：2026-03-29 | 状态：v2.11 全部完成 → v2.12 超跌集成+技术债收尾 待开发 ⏳_
+_版本：v2.11 | 日期：2026-03-29 12:40 | 状态：v2.9全部完成 + 小马v2.11完成 + 图表美化完成 ✅_
 
 ---
 
 ## 进度
 
 ```
-设计 ████████████████████ 100%
 P0+P1 ████████████████████ 100%
 数据质量 ████████████████████ 100%
-前端9页面 ██████████████████░░  90%   (超跌页面待开发)
+前端9页面 ████████████████████ 100%
 今日行动 ████████████████████ 100%
-事件采集 ████████████████████ 100%
+事件采集(12类) ████████████████████ 100%
 事件流合并 ████████████████████ 100%
 决策流转 ████████████████████ 100%
-测试 55/55 ████████████████████ 100%
 持仓行情 ████████████████████ 100%
-Plotly T+N ████████████████████ 100%
+Plotly图表 ████████████████████ 100% (含美化)
+测试 55/55 ████████████████████ 100%
+Docker ░░░░░░░░░░░░░░░░░░░░  0% ⏳
+```
 卖出决策 ████████████████████ 100%
 空表清理 ████████████████████ 100%
 超跌双通道 ░░░░░░░░░░░░░░░░░░░░  0%  v2.12 (MarketSnapshotProvider+前端)
@@ -59,6 +60,7 @@ Docker 化   ░░░░░░░░░░░░░░░░░░░░  0%  v
 | M23 | 事件采集pipeline集成(12类关键词) | ✅ | 3/29 11:00 |
 | M24 | 事件流合并显示(新闻+信号) | ✅ | 3/29 11:18 |
 | M25 | 测试55/55全部通过 | ✅ | 3/29 11:36 |
+| M26 | Plotly图表美化(色板+布局+悬停) | ✅ | 3/29 12:35 |
 | M23 | Plotly 图表集成 | ✅ | 3/29 11:50 |
 | M24 | 持仓实时行情+盈亏 | ✅ | 3/29 11:50 |
 | M25 | 卖出决策逻辑 | ✅ | 3/29 11:50 |
@@ -512,4 +514,55 @@ FastAPI + Jinja2 + HTMX + SSE + Plotly + Tailwind CDN
 
 ---
 
-_进度 v2.12 | 2026-03-29 v2.11全部完成 → v2.12 技术债收尾（空表清理+大函数拆分+Docker化）待开发_
+## v2.12 开发计划（超跌集成 + 技术债收尾）
+
+### Phase A: 超跌双通道集成（~6.5h）
+
+| # | 任务 | 文件 | 预估 | 说明 |
+|---|------|------|------|------|
+| A-1 | 新增 MarketSnapshot 模型 | core/data_provider.py | 0.5h | dataclass: up, down, total, btiq, signal, timestamp |
+| A-2 | 新增 MarketSnapshotProvider | core/data_provider.py | 1h | fetch_snapshot() → 腾讯行情批量API，复用 btiq_monitor 逻辑 |
+| A-3 | 新增 market_snapshots 表 | core/database.py | 0.5h | DDL + 索引 snapshot_time |
+| A-4 | 新增 MarketAnalyzer | core/analyzer.py | 1h | calc_btiq / calc_ma5 / judge_signal，从 OversoldScanner 迁移 |
+| A-5 | Pipeline.run_market_snapshot | core/pipeline.py | 0.5h | 市场通道入口 |
+| A-6 | 前端路由 oversold.py | web/routes/oversold.py | 0.5h | GET /oversold |
+| A-7 | 前端模板 oversold.html | web/templates/oversold.html | 1.5h | 信号卡片 + Plotly BTIQ趋势图 + 信号时间线 |
+| A-8 | services.py 数据查询 | web/services.py | 0.5h | get_oversold_data() |
+| A-9 | 测试 T26-T28 | tests/test_real.py | 1h | Provider/Analyzer/集成 |
+
+### Phase B: 大函数拆分（~2h）
+
+| # | 任务 | 文件 | 预估 |
+|---|------|------|------|
+| B-1 | get_today_actions 拆分 277→60 | web/services.py | 1h |
+| B-2 | format_summary 拆分 121→28 | web/services.py | 1h |
+
+### Phase C: Docker 化部署（~1.5h）
+
+| # | 任务 | 预估 |
+|---|------|------|
+| C-1 | Dockerfile | 0.5h |
+| C-2 | docker-compose.yml | 0.5h |
+| C-3 | systemd → Docker 迁移验证 | 0.5h |
+
+### 开发顺序
+
+```
+A-1 (模型) → A-2 (Provider) → A-3 (DB表) → A-4 (Analyzer) → A-5 (Pipeline)
+    → A-9 (测试后端) → A-6 (路由) → A-7 (模板) → A-8 (services) → A-9 (测试前端)
+    → B-1 + B-2 (并行) → C-1 + C-2 + C-3
+```
+
+### 里程碑
+
+| M | 内容 | 依赖 |
+|---|------|------|
+| M1 | 超跌后端通路可用（Provider→DB→Analyzer） | A-1~A-5 |
+| M2 | 超跌前端可用（路由→模板→数据查询） | M1 + A-6~A-8 |
+| M3 | 超跌全量测试通过 | M2 + A-9 |
+| M4 | 大函数拆分完成 | 无依赖 |
+| M5 | Docker 化完成 | M4 |
+
+---
+
+_进度 v2.13 | 2026-03-29 v2.11全部完成 → v2.12 超跌集成(Phase A 6.5h) + 大函数拆分(Phase B 2h) + Docker化(Phase C 1.5h) = 总计 10h_

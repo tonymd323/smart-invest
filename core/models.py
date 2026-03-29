@@ -240,6 +240,23 @@ class QuoteData:
 
 
 @dataclass
+class MarketSnapshot:
+    """全市场快照数据（市场通道专用）"""
+    up_count: int                            # 上涨家数
+    down_count: int                          # 下跌家数
+    flat_count: int                          # 平盘家数
+    total_count: int                         # 总数
+    btiq: float                              # 涨跌比 = up/(up+down)*100
+    ma5: Optional[float] = None              # 5日均值
+    signal: Optional[str] = None             # buy / warn / hot / none
+    snapshot_time: Optional[str] = None      # 采集时间 (ISO 格式)
+    source: str = "tencent"                  # 数据来源
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
 class SectorData:
     """板块轮动数据（Provider 标准输出）"""
     sector_name: str                        # 板块名称

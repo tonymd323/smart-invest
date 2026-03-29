@@ -24,7 +24,7 @@ import os
 from pathlib import Path
 from datetime import datetime, timedelta
 
-from core.models import QuoteData, SectorData
+from core.models import QuoteData, SectorData, MarketSnapshot
 
 logger = logging.getLogger(__name__)
 
@@ -1417,3 +1417,178 @@ class SectorProvider(BaseProvider):
         except Exception as e:
             logger.error(f"[SectorProvider] AkShare 获取失败: {e}")
         return []
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MarketSnapshotProvider — 全市场快照（市场通道专用）
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class MarketSnapshotProvider:
+    """
+    全市场快照采集 — 市场通道专用
+
+    区别于单股 Provider（fetch(stock_code)），本 Provider 接口为 fetch_snapshot()，
+    一次调用获取全市场涨跌状态。
+
+    数据源：腾讯行情批量 API（qt.gtimg.cn）
+    复用 scripts/btiq_monitor.py 的核心逻辑。
+    """
+
+    ALERT_THRESHOLD = 30   # 超跌信号阈值（MA5 < 30）
+    WARN_THRESHOLD = 25    # 冰点警告（MA5 < 25）
+    HOT_THRESHOLD = 80     # 过热警告（MA5 > 80）
+
+    def __init__(self):
+        # 国内 API 直连，不走代理
+        import os as _os
+        _os.environ['no_proxy'] = _os.environ.get('no_proxy', '') + ',qt.gtimg.cn,*.qq.com'
+
+    def fetch_snapshot(self) -> MarketSnapshot:
+        """
+        获取全市场快照。
+
+        Returns:
+            MarketSnapshot 对象，包含 up/down/total/btiq/signal/timestamp
+
+        Raises:
+            Exception: 网络或数据异常时抛出
+        """
+        stocks = self._fetch_all_stocks()
+        if not stocks:
+            raise ValueError("未获取到任何股票数据")
+
+        result = self._calc_btiq(stocks)
+        if not result:
+            raise ValueError("无法计算涨跌比（无涨跌数据）")
+
+        snapshot = MarketSnapshot(
+            up_count=result["up"],
+            down_count=result["down"],
+            flat_count=result["flat"],
+            total_count=result["total"],
+            btiq=result["btiq"],
+            snapshot_time=datetime.now().isoformat(),
+            source="tencent",
+        )
+        return snapshot
+
+    def _fetch_all_stocks(self) -> List[Dict]:
+        """
+        通过腾讯行情 API 获取全市场数据。
+        使用 akshare 获取标准 A 股代码列表，然后批量查询腾讯行情。
+        """
+        import urllib.request
+
+        # 获取 A 股列表
+        stock_list = self._get_stock_list()
+        if not stock_list:
+            logger.error("[MarketSnapshotProvider] 获取 A 股列表失败")
+            return []
+
+        logger.info(f"[MarketSnapshotProvider] 标准 A 股: {len(stock_list)} 只")
+
+        # 构造腾讯行情代码
+        codes = []
+        for code in stock_list:
+            if code.startswith(('6', '9')):
+                codes.append(f'sh{code}')
+            else:
+                codes.append(f'sz{code}')
+
+        stocks = []
+        batch_size = 800
+
+        for start in range(0, len(codes), batch_size):
+            batch = codes[start:start + batch_size]
+            url = f"https://qt.gtimg.cn/q={','.join(batch)}"
+            try:
+                req = urllib.request.Request(url)
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                with opener.open(req, timeout=15) as resp:
+                    data = resp.read().decode('gbk', errors='ignore')
+
+                for line in data.split(';'):
+                    if '~' not in line:
+                        continue
+                    parts = line.split('~')
+                    if len(parts) < 40:
+                        continue
+                    try:
+                        code = parts[2].strip()
+                        price = float(parts[3]) if parts[3] else 0
+                        change_pct = float(parts[32]) if parts[32] else 0
+                        if price > 0 and code:
+                            stocks.append({
+                                "code": code,
+                                "price": price,
+                                "change_pct": change_pct,
+                            })
+                    except (ValueError, IndexError):
+                        continue
+            except Exception as e:
+                logger.debug(f"[MarketSnapshotProvider] batch {start} error: {e}")
+                continue
+
+        logger.info(f"[MarketSnapshotProvider] 获取 {len(stocks)} 只股票行情")
+        return stocks
+
+    @staticmethod
+    def _get_stock_list() -> dict:
+        """通过 akshare 获取 A 股代码列表 → {code: name}"""
+        try:
+            import akshare as ak
+            import requests
+            # 绕过代理
+            original = requests.Session.request
+            def no_proxy(self, *args, **kwargs):
+                kwargs.setdefault('proxies', {'http': None, 'https': None})
+                return original(self, *args, **kwargs)
+            requests.Session.request = no_proxy
+            df = ak.stock_info_a_code_name()
+            requests.Session.request = original
+            return dict(zip(df['code'], df['name']))
+        except Exception as e:
+            logger.error(f"[MarketSnapshotProvider] akshare 获取股票列表失败: {e}")
+            return {}
+
+    @staticmethod
+    def _calc_btiq(stocks: List[Dict]) -> Optional[Dict]:
+        """计算涨跌比指标 BTIQ"""
+        up = sum(1 for s in stocks if s["change_pct"] > 0)
+        down = sum(1 for s in stocks if s["change_pct"] < 0)
+        flat = sum(1 for s in stocks if s["change_pct"] == 0)
+        total = up + down
+
+        if total == 0:
+            return None
+
+        btiq = up / total * 100
+
+        return {
+            "up": up,
+            "down": down,
+            "flat": flat,
+            "total": len(stocks),
+            "btiq": round(btiq, 2),
+        }
+
+    @staticmethod
+    def judge_signal(btiq: float, ma5: Optional[float] = None) -> Optional[str]:
+        """
+        信号判断
+
+        Args:
+            btiq: 当前涨跌比
+            ma5: 5日均值（可选）
+
+        Returns:
+            buy / warn / hot / None
+        """
+        if ma5 is not None:
+            if ma5 < MarketSnapshotProvider.WARN_THRESHOLD:
+                return "warn"  # 冰点
+            if ma5 < MarketSnapshotProvider.ALERT_THRESHOLD:
+                return "buy"   # 超跌
+        if ma5 is not None and ma5 > MarketSnapshotProvider.HOT_THRESHOLD:
+            return "hot"       # 过热
+        return None

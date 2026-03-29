@@ -214,6 +214,21 @@ CREATE TABLE IF NOT EXISTS events (
     FOREIGN KEY (stock_code) REFERENCES stocks(code)
 );
 
+-- 10. 全市场快照（超跌监控历史）
+CREATE TABLE IF NOT EXISTS market_snapshots (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    snapshot_time   TEXT    NOT NULL,                   -- 采集时间 (ISO 格式)
+    btiq            REAL,                              -- 涨跌比 = up/(up+down)*100
+    up_count        INTEGER,                           -- 上涨家数
+    down_count      INTEGER,                           -- 下跌家数
+    flat_count      INTEGER,                           -- 平盘家数
+    total_count     INTEGER,                           -- 总数
+    ma5             REAL,                              -- 5日均值 BTIQ
+    signal          TEXT,                              -- buy / warn / hot / none
+    source          TEXT    DEFAULT 'tencent',          -- 数据来源
+    created_at      TEXT    DEFAULT (datetime('now', 'localtime'))
+);
+
 -- ── 索引 ────────────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_earnings_stock     ON earnings(stock_code, report_date);
 CREATE INDEX IF NOT EXISTS idx_prices_stock       ON prices(stock_code, trade_date);
@@ -222,6 +237,7 @@ CREATE INDEX IF NOT EXISTS idx_consensus_stock    ON consensus(stock_code);
 CREATE INDEX IF NOT EXISTS idx_discovery_status   ON discovery_pool(status, score);
 CREATE INDEX IF NOT EXISTS idx_events_stock       ON events(stock_code, published_at);
 CREATE INDEX IF NOT EXISTS idx_events_type        ON events(event_type, created_at);
+CREATE INDEX IF NOT EXISTS idx_market_snap_time   ON market_snapshots(snapshot_time);
 """
 
 
