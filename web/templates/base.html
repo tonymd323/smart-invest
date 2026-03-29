@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}投资系统 2.2{% endblock %}</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <!-- Plotly -->
-    <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+    <!-- Tailwind CSS (本地) -->
+    <script src="/static/tailwind.js"></script>
+    <!-- HTMX (本地) -->
+    <script src="/static/htmx.min.js"></script>
+    <!-- Plotly (需要时加载) -->
+    <!-- <script src="/static/plotly.min.js"></script> -->
     <!-- 自定义 -->
     <link rel="stylesheet" href="/static/style.css">
     {% block head %}{% endblock %}

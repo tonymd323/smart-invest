@@ -38,20 +38,20 @@
                     </div>
                 </div>
             </div>
-            <div class="flex gap-2" id="decision-{{ act.stock_code }}">
+            <div class="flex gap-2" id="decision-{{ act.stock_code | replace('.', '-') }}">
                 <button class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
                         hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"bought","reason":"{{ act.reason }}"}'
-                        hx-target="#decision-{{ act.stock_code }}" hx-swap="innerHTML">
+                        hx-target="#decision-{{ act.stock_code | replace('.', '-') }}" hx-swap="innerHTML">
                     ✅ 已买入
                 </button>
                 <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
                         hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"skip"}'
-                        hx-target="#decision-{{ act.stock_code }}" hx-swap="innerHTML">
+                        hx-target="#decision-{{ act.stock_code | replace('.', '-') }}" hx-swap="innerHTML">
                     ❌ 跳过
                 </button>
                 <button class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200"
                         hx-post="/api/decision" hx-vals='{"code":"{{ act.stock_code }}","action":"watch"}'
-                        hx-target="#decision-{{ act.stock_code }}" hx-swap="innerHTML">
+                        hx-target="#decision-{{ act.stock_code | replace('.', '-') }}" hx-swap="innerHTML">
                     👀 观望
                 </button>
             </div>
