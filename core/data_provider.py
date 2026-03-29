@@ -1148,7 +1148,7 @@ class NewsProvider(BaseProvider):
         except ImportError:
             logger.error("[NewsProvider] akshare 库未安装")
         except Exception as e:
-            logger.error(f"[NewsProvider] AKShare 新闻获取失败 {stock_code}: {e}")
+            logger.warning(f"[NewsProvider] AKShare 无数据 {stock_code}: {e}")
         return []
 
     def _fetch_from_eastmoney(self, stock_code: str, limit: int = 20) -> List:
