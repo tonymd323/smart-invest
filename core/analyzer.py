@@ -512,14 +512,15 @@ class EarningsAnalyzer:
             today = datetime.now().strftime("%Y-%m-%d")
 
             for code in stock_codes:
-                # 检查是否已存在同日同类型的跟踪记录
+                # 检查是否已存在同类型的跟踪记录（避免多日扫描产生重复）
                 existing = conn.execute("""
                     SELECT id FROM event_tracking
-                    WHERE stock_code = ? AND event_date = ? AND event_type = ?
-                """, (code, today, event_type)).fetchone()
+                    WHERE stock_code = ? AND event_type = ?
+                    ORDER BY id DESC LIMIT 1
+                """, (code, event_type)).fetchone()
 
                 if existing:
-                    logger.info(f"[T+N] {code} {today} {event_type} 已存在，跳过")
+                    logger.info(f"[T+N] {code} {event_type} 已存在(id={existing['id']})，跳过")
                     continue
 
                 # 从 prices 表取最新收盘价
