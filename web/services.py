@@ -834,7 +834,20 @@ def get_today_actions():
             # 已持仓但无新信号 — 检查风险
             hold_sigs = code_signals.get(code, [])
             has_avoid = any(s.get('signal') == 'avoid' for s in hold_sigs)
-            if has_avoid:
+
+            # 跌破止损价 → 卖出建议
+            if stop_loss and current_price > 0 and current_price < stop_loss:
+                priority = 'sell'
+                action_text = f'⚠️ 跌破止损 ¥{stop_loss:.2f}，建议卖出'
+                reasons.append(f'当前价 ¥{current_price:.2f} < 止损 ¥{stop_loss:.2f}')
+
+            # 达到目标价 → 获利了结
+            elif target and current_price > 0 and current_price >= target:
+                priority = 'sell'
+                action_text = f'🎯 达到目标价 ¥{target:.2f}，可考虑获利了结'
+                reasons.append(f'当前价 ¥{current_price:.2f} ≥ 目标 ¥{target:.2f}')
+
+            elif has_avoid:
                 priority = 'adjust'
                 action_text = f'信号偏弱，考虑减仓'
                 if stop_loss:
@@ -846,7 +859,7 @@ def get_today_actions():
 
         # 生成最终行动项
         if priority != 'none':
-            emoji_map = {'buy': '🔥', 'wait': '⏳', 'adjust': '⚠️', 'none': '☕'}
+            emoji_map = {'buy': '🔥', 'sell': '💰', 'wait': '⏳', 'adjust': '⚠️', 'none': '☕'}
             action = {
                 'priority': priority,
                 'emoji': emoji_map.get(priority, '☕'),
@@ -865,7 +878,7 @@ def get_today_actions():
             actions.append(action)
 
     # 排序: buy > adjust > wait > none
-    priority_order = {'buy': 0, 'adjust': 1, 'wait': 2, 'none': 3}
+    priority_order = {'sell': 0, 'buy': 1, 'adjust': 2, 'wait': 3, 'none': 4}
     actions.sort(key=lambda x: (priority_order.get(x['priority'], 9), -x.get('current_price', 0)))
 
     conn.close()

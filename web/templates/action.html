@@ -10,7 +10,7 @@
 {% if actions %}
 <div class="space-y-4">
     {% for act in actions %}
-    <div class="bg-white rounded-lg border {% if act.priority == 'buy' %}border-red-200{% elif act.priority == 'adjust' %}border-yellow-200{% elif act.priority == 'wait' %}border-blue-200{% else %}border-gray-200{% endif %} p-4">
+    <div class="bg-white rounded-lg border {% if act.priority == 'sell' %}border-red-300{% elif act.priority == 'buy' %}border-red-200{% elif act.priority == 'adjust' %}border-yellow-200{% elif act.priority == 'wait' %}border-blue-200{% else %}border-gray-200{% endif %} p-4">
 
         <!-- 头部：优先级 + 股票名 + 价格 -->
         <div class="flex items-start justify-between mb-3">
