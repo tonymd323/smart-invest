@@ -1,4 +1,4 @@
-"""信号看板页面路由 — v2.18 多选筛选 + 公告类型筛选"""
+"""信号看板页面路由 — 筛选维度：分析类型 + 披露类型 + 报告期"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -12,12 +12,30 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templa
 
 SORT_WHITELIST = ['ar.created_at', 'ar.score', 'ar.stock_code']
 
+# 报告期标签 → SQL 条件映射
+PERIOD_MAP = {
+    '2025年报': "e.report_date = '2025-12-31'",
+    '2025Q3': "e.report_date = '2025-09-30'",
+    '2025中报': "e.report_date = '2025-06-30'",
+    '2025Q1': "e.report_date = '2025-03-31'",
+    '2024年报': "e.report_date = '2024-12-31'",
+    '2026Q1预告': "e.report_date = '2026-03-31'",
+}
+
+# 披露类型中文名
+DISCLOSURE_LABELS = {
+    '财报': '财报',
+    '业绩预告': '业绩预告',
+    '业绩快报': '业绩快报',
+}
+
 
 @router.get("/signals", response_class=HTMLResponse)
 async def signals_page(
     request: Request,
     type: Optional[List[str]] = Query(None),
-    report_type: Optional[List[str]] = Query(None),
+    disclosure_type: Optional[List[str]] = Query(None),
+    period: Optional[List[str]] = Query(None),
     days: int = Query(7),
     search: Optional[str] = None,
     sort: str = Query("ar.created_at"),
@@ -38,19 +56,28 @@ async def signals_page(
     """
     params = [f'-{days} days']
 
-    # 多选：分析类型
+    # 分析类型筛选
     if type:
         placeholders = ','.join(['?'] * len(type))
         sql += f" AND ar.analysis_type IN ({placeholders})"
         params.extend(type)
 
-    # 多选：公告类型（JOIN earnings 表）
-    if report_type:
-        placeholders = ','.join(['?'] * len(report_type))
-        sql += f""" AND ar.stock_code IN (
-            SELECT DISTINCT stock_code FROM earnings WHERE report_type IN ({placeholders})
-        )"""
-        params.extend(report_type)
+    # 披露类型 + 报告期筛选（都 JOIN earnings 表）
+    if disclosure_type or period:
+        # 用 JOIN 而非子查询，性能更好
+        sql += " AND EXISTS (SELECT 1 FROM earnings e WHERE e.stock_code = ar.stock_code"
+        if disclosure_type:
+            placeholders = ','.join(['?'] * len(disclosure_type))
+            sql += f" AND e.report_type IN ({placeholders})"
+            params.extend(disclosure_type)
+        if period:
+            period_conditions = []
+            for p in period:
+                if p in PERIOD_MAP:
+                    period_conditions.append(PERIOD_MAP[p])
+            if period_conditions:
+                sql += f" AND ({' OR '.join(period_conditions)})"
+        sql += ")"
 
     search_cols = ['ar.stock_code', 's.name'] if search else None
     rows, total, total_pages = paginate_query(
@@ -73,7 +100,8 @@ async def signals_page(
         "db_stats": db_stats,
         "signals": signals,
         "current_types": type or [],
-        "current_report_types": report_type or [],
+        "current_disclosure_types": disclosure_type or [],
+        "current_periods": period or [],
         "current_days": days,
         "search": search,
         "sort": sort, "order": order,

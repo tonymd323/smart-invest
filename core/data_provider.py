@@ -399,9 +399,9 @@ class FinancialProvider(BaseProvider):
 
             results = []
             for item in data['result']['data']:
-                # 只要净利润相关的预告
+                # 只要归母净利润相关的预告（CODE=004），跳过扣非净利润（CODE=005）
                 finance_code = item.get('PREDICT_FINANCE_CODE', '')
-                if finance_code not in ('004', '005'):  # 004=归母净利润, 005=扣非净利润
+                if finance_code != '004':  # 只要归母净利润
                     continue
 
                 report_date = (item.get('REPORT_DATE') or '')[:10]

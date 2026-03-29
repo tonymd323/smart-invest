@@ -9,6 +9,9 @@
 
 <div class="flex gap-3 mb-4 flex-wrap items-center">
     {{ filter_select("signal", [("","全部"),("buy","买入"),("watch","关注"),("avoid","回避")], current_signal, base_url) }}
+    {% if source_list %}
+    {{ multi_filter_select("source", source_list, current_sources, base_url, "公告类型") }}
+    {% endif %}
     {% if industry_list %}
     {{ multi_filter_select("industry", industry_list, current_industries, base_url, "行业") }}
     {% endif %}

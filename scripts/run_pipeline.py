@@ -76,6 +76,18 @@ def run(args):
     auto_pool = ea.auto_discover_pool(beats, highs)
     print(f'   ├─ 发现池: {len(auto_pool)} 入池')
 
+    # 为新入池股票创建 T+N 跟踪
+    if auto_pool:
+        try:
+            for entry in auto_pool:
+                code = entry.get("stock_code")
+                source = entry.get("source")
+                if code and source:
+                    ea.create_tn_tracking([code], source)
+            print(f'   ├─ T+N 创建: {len(auto_pool)} 条')
+        except Exception as e:
+            print(f'   ├─ T+N 创建: 跳过 ({e})')
+
     try:
         tn = ea.update_tn_tracking()
         print(f'   ├─ T+N 更新: {len(tn)} 条')
