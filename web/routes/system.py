@@ -43,6 +43,82 @@ PRESET_TASKS = {
 }
 
 # ============================================================
+# 可手动执行的任务面板
+# ============================================================
+TASK_PANEL = {
+    "pipeline": {
+        "name": "Pipeline 数据管道",
+        "desc": "全量采集 → 分析 → 入池",
+        "icon": "🚀",
+        "group": "数据采集",
+        "cmd": ["python3", "scripts/run_pipeline.py", "--window", "{window}", "--max-stocks", "{max_stocks}"],
+        "params": [
+            {"key": "window", "label": "时间窗口", "type": "select", "default": "12h",
+             "options": ["2h", "4h", "6h", "12h", "18h", "24h", "720h"]},
+            {"key": "max_stocks", "label": "最大股票数", "type": "select", "default": "300",
+             "options": ["10", "100", "300", "1000", "5000"]},
+        ],
+    },
+    "pullback": {
+        "name": "回调买入扫描",
+        "desc": "扫描跟踪池回调买入信号",
+        "icon": "📉",
+        "group": "分析扫描",
+        "cmd": ["python3", "-c", "from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()"],
+        "params": [],
+    },
+    "btiq_backfill": {
+        "name": "BTIQ 历史回填",
+        "desc": "回填涨跌比历史数据，使 MA5 可用",
+        "icon": "📊",
+        "group": "数据采集",
+        "cmd": ["python3", "scripts/btiq_backfill.py"],
+        "params": [
+            {"key": "days", "label": "回填天数", "type": "number", "default": "5"},
+        ],
+    },
+    "btiq_monitor": {
+        "name": "超跌监控",
+        "desc": "BTIQ 涨跌比全市场扫描",
+        "icon": "🔴",
+        "group": "分析扫描",
+        "cmd": ["python3", "scripts/btiq_monitor.py"],
+        "params": [],
+    },
+    "event_monitor": {
+        "name": "事件监控",
+        "desc": "股价异动 + 新闻事件检测",
+        "icon": "📰",
+        "group": "分析扫描",
+        "cmd": ["python3", "scripts/event_monitor.py"],
+        "params": [],
+    },
+    "sector_rotation": {
+        "name": "板块轮动",
+        "desc": "行业资金流向 TOP10",
+        "icon": "🔄",
+        "group": "分析扫描",
+        "cmd": ["python3", "scripts/sector_rotation.py"],
+        "params": [],
+    },
+    "bitable_sync": {
+        "name": "Bitable 同步",
+        "desc": "同步发现池+跟踪池到飞书多维表格",
+        "icon": "📋",
+        "group": "推送同步",
+        "cmd": ["python3", "-c",
+            "import sys; sys.path.insert(0, '.'); "
+            "from core.bitable_sync import BitableSync; "
+            "s = BitableSync.from_preset('scan'); print('scan ok'); "
+            "s2 = BitableSync.from_preset('discovery_pool'); print('pool ok')"],
+        "params": [],
+    },
+}
+
+# 按 group 分组，保持顺序
+TASK_GROUPS = ["数据采集", "分析扫描", "推送同步"]
+
+# ============================================================
 # Cron 解析/管理
 # ============================================================
 def _get_crontab_entries():
@@ -168,33 +244,61 @@ async def system_page(request: Request):
 from fastapi.responses import JSONResponse
 
 # ============================================================
-# Pipeline API
+# 任务面板 API（统一手动执行入口）
 # ============================================================
-@router.post("/api/pipeline/run")
-async def run_pipeline(request: Request, body: dict = None):
-    """触发 Pipeline 运行，返回 SSE 任务 ID"""
-    body = body or {}
-    window = body.get("window", "12h")
-    as_of = body.get("as_of", "")
-    dry_run = body.get("dry_run", False)
-    import uuid
-    task_id = str(uuid.uuid4())[:8]
-    return {"task_id": task_id, "window": window, "as_of": as_of, "dry_run": dry_run}
+@router.get("/api/tasks")
+async def list_tasks():
+    """返回所有可手动执行的任务列表（按组分类）"""
+    groups = {}
+    for gid in TASK_GROUPS:
+        groups[gid] = []
+    for key, t in TASK_PANEL.items():
+        group = t.get("group", "其他")
+        if group not in groups:
+            groups[group] = []
+        groups[group].append({
+            "key": key,
+            "name": t["name"],
+            "desc": t.get("desc", ""),
+            "icon": t.get("icon", "⚡"),
+            "params": t.get("params", []),
+        })
+    return JSONResponse({"groups": groups, "group_order": TASK_GROUPS})
 
 
-@router.get("/api/pipeline/stream/{task_id}")
-async def pipeline_sse(task_id: str, window: str = "12h", as_of: str = "", dry_run: bool = False):
-    """SSE 实时日志流"""
+@router.get("/api/task/stream")
+async def task_sse(request: Request, task_key: str = ""):
+    """通用 SSE 日志流"""
     import asyncio
-    async def generate():
-        cmd = ["python3", str(PROJECT_ROOT / "scripts" / "run_pipeline.py"), "--window", window]
-        if as_of:
-            cmd.extend(["--as-of", as_of])
-        if dry_run:
-            cmd.append("--dry-run")
-        cmd.extend(["--max-stocks", "10"])
 
-        yield f"data: {json.dumps({'type': 'info', 'msg': f'🚀 启动 Pipeline (window={window})'})}\n\n"
+    if task_key not in TASK_PANEL:
+        return JSONResponse({"error": f"未知任务: {task_key}"}, status_code=400)
+
+    task = TASK_PANEL[task_key]
+
+    # 构建命令，替换参数
+    cmd = []
+    for part in task["cmd"]:
+        if part.startswith("{") and part.endswith("}"):
+            param_key = part[1:-1]
+            val = request.query_params.get(param_key, "")
+            if not val:
+                # 从 params 定义取默认值
+                for p in task.get("params", []):
+                    if p["key"] == param_key:
+                        val = p.get("default", "")
+                        break
+            cmd.append(str(val))
+        else:
+            cmd.append(part)
+
+    task_icon = task.get("icon", "⚡")
+    task_name = task["name"]
+
+    async def generate():
+        yield f"data: {json.dumps({'type': 'info', 'msg': f'{task_icon} 启动: {task_name}'})}\n\n"
+        cmd_str = " ".join(cmd)
+        yield f"data: {json.dumps({'type': 'info', 'msg': f'命令: {cmd_str}'})}\n\n"
 
         try:
             proc = await asyncio.create_subprocess_exec(
@@ -220,9 +324,15 @@ async def pipeline_sse(task_id: str, window: str = "12h", as_of: str = "", dry_r
                     yield f"data: {json.dumps({'type': log_type, 'msg': text})}\n\n"
 
             await proc.wait()
-            yield f"data: {json.dumps({'type': 'done', 'code': proc.returncode})}\n\n"
+            code = proc.returncode
+            if code == 0:
+                yield f"data: {json.dumps({'type': 'success', 'msg': '✅ 执行完成'})}\n\n"
+            else:
+                yield f"data: {json.dumps({'type': 'error', 'msg': f'❌ 退出码: {code}'})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'code': code})}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'type': 'error', 'msg': str(e)})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'code': -1})}\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
 

@@ -30,13 +30,10 @@ def normalize_dates(conn: sqlite3.Connection, dry_run: bool = False) -> dict:
     """统一日期格式"""
     stats = {'updated': 0, 'tables': {}}
 
-    # 需要标准化的表和字段
+    # 需要标准化的表和字段（只处理纯日期字段，不处理时间戳）
     date_fields = [
         ('event_tracking', 'event_date'),
         ('earnings', 'report_date'),
-        ('discovery_pool', 'discovered_at'),
-        ('discovery_pool', 'expires_at'),
-        ('discovery_pool', 'updated_at'),
     ]
 
     for table, field in date_fields:

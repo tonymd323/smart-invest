@@ -31,11 +31,11 @@ class StockResolver:
             conn = sqlite3.connect(self.db_path)
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
-                "SELECT code, stock_name FROM stocks WHERE stock_name IS NOT NULL"
+                "SELECT code, name FROM stocks WHERE name IS NOT NULL"
             ).fetchall()
             for r in rows:
                 code = r['code']
-                name = r['stock_name']
+                name = r['name']
                 if code:
                     self._cache[code.upper()] = code
                     # 也缓存无后缀版本
@@ -98,7 +98,7 @@ class StockResolver:
 
             # 精确匹配名称
             row = conn.execute(
-                "SELECT code FROM stocks WHERE stock_name = ?", (input_str,)
+                "SELECT code FROM stocks WHERE name = ?", (input_str,)
             ).fetchone()
             if row:
                 conn.close()
@@ -107,7 +107,7 @@ class StockResolver:
 
             # 模糊匹配名称
             row = conn.execute(
-                "SELECT code FROM stocks WHERE stock_name LIKE ? LIMIT 1",
+                "SELECT code FROM stocks WHERE name LIKE ? LIMIT 1",
                 (f'%{input_str}%',)
             ).fetchone()
             conn.close()
@@ -149,14 +149,14 @@ class StockResolver:
             conn = sqlite3.connect(self.db_path)
             # 检查是否存在
             existing = conn.execute(
-                "SELECT code, stock_name FROM stocks WHERE code = ?", (canonical,)
+                "SELECT code, name FROM stocks WHERE code = ?", (canonical,)
             ).fetchone()
 
             if existing:
                 # 更新名称
                 if name and not existing[1]:
                     conn.execute(
-                        "UPDATE stocks SET stock_name = ? WHERE code = ?",
+                        "UPDATE stocks SET name = ? WHERE code = ?",
                         (name, canonical)
                     )
                     conn.commit()
@@ -168,7 +168,7 @@ class StockResolver:
 
             # 插入新记录
             conn.execute(
-                "INSERT INTO stocks (code, stock_name) VALUES (?, ?)",
+                "INSERT INTO stocks (code, name) VALUES (?, ?)",
                 (canonical, name)
             )
             conn.commit()
@@ -189,7 +189,7 @@ class StockResolver:
         try:
             conn = sqlite3.connect(self.db_path)
             conn.execute(
-                "UPDATE stocks SET stock_name = ? WHERE code = ? AND (stock_name IS NULL OR stock_name = '')",
+                "UPDATE stocks SET name = ? WHERE code = ? AND (name IS NULL OR name = '')",
                 (name, code)
             )
             conn.commit()
@@ -250,10 +250,10 @@ class StockResolver:
                     logger.info(f"[StockResolver] 合并: {bare} → {canonical}")
                 else:
                     # bare 存在但 canonical 不存在，直接改名
-                    stock_name = conn.execute(
-                        "SELECT stock_name FROM stocks WHERE code = ?", (bare,)
+                    name = conn.execute(
+                        "SELECT name FROM stocks WHERE code = ?", (bare,)
                     ).fetchone()
-                    name = stock_name[0] if stock_name else None
+                    name = name[0] if name else None
 
                     conn.execute(
                         "UPDATE stocks SET code = ? WHERE code = ?",

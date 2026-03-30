@@ -1,15 +1,5 @@
 [
   {
-    "time": "2026-03-24 15:00:00",
-    "up": 5136,
-    "down": 329,
-    "flat": 16,
-    "total": 5481,
-    "btiq": 93.98,
-    "top_gainers": [],
-    "top_losers": []
-  },
-  {
     "time": "2026-03-25 09:00:51",
     "up": 4866,
     "down": 299,
@@ -4230,6 +4220,138 @@
         "name": "银星能源",
         "price": 7.15,
         "change_pct": -9.84
+      }
+    ]
+  },
+  {
+    "time": "2026-03-30 13:06:59",
+    "up": 2194,
+    "down": 2812,
+    "flat": 186,
+    "total": 5192,
+    "btiq": 43.83,
+    "top_gainers": [
+      {
+        "code": "688693",
+        "name": "锴威特",
+        "price": 54.9,
+        "change_pct": 20.0
+      },
+      {
+        "code": "301008",
+        "name": "宏昌科技",
+        "price": 35.24,
+        "change_pct": 19.99
+      },
+      {
+        "code": "688677",
+        "name": "海泰新光",
+        "price": 47.83,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300385",
+        "name": "雪浪环境",
+        "price": 19.82,
+        "change_pct": 19.98
+      },
+      {
+        "code": "688308",
+        "name": "欧科亿",
+        "price": 91.31,
+        "change_pct": 14.78
+      },
+      {
+        "code": "300313",
+        "name": "*ST天山",
+        "price": 8.54,
+        "change_pct": 14.17
+      },
+      {
+        "code": "688288",
+        "name": "鸿泉技术",
+        "price": 26.93,
+        "change_pct": 13.29
+      },
+      {
+        "code": "301048",
+        "name": "金鹰重工",
+        "price": 11.28,
+        "change_pct": 11.35
+      },
+      {
+        "code": "300961",
+        "name": "深水海纳",
+        "price": 14.25,
+        "change_pct": 11.24
+      },
+      {
+        "code": "688272",
+        "name": "富吉瑞",
+        "price": 45.77,
+        "change_pct": 11.15
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "300751",
+        "name": "迈为股份",
+        "price": 230.03,
+        "change_pct": -15.96
+      },
+      {
+        "code": "688485",
+        "name": "九州一轨",
+        "price": 24.8,
+        "change_pct": -13.68
+      },
+      {
+        "code": "688793",
+        "name": "倍轻松",
+        "price": 25.11,
+        "change_pct": -10.96
+      },
+      {
+        "code": "600726",
+        "name": "华电能源",
+        "price": 6.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000767",
+        "name": "晋控电力",
+        "price": 4.58,
+        "change_pct": -10.02
+      },
+      {
+        "code": "600396",
+        "name": "华电辽能",
+        "price": 8.09,
+        "change_pct": -10.01
+      },
+      {
+        "code": "603863",
+        "name": "松炀资源",
+        "price": 16.64,
+        "change_pct": -10.01
+      },
+      {
+        "code": "000639",
+        "name": "西王食品",
+        "price": 2.88,
+        "change_pct": -10.0
+      },
+      {
+        "code": "001896",
+        "name": "豫能控股",
+        "price": 14.89,
+        "change_pct": -9.98
+      },
+      {
+        "code": "000862",
+        "name": "银星能源",
+        "price": 7.14,
+        "change_pct": -9.96
       }
     ]
   }
