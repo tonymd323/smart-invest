@@ -20,4 +20,7 @@ services:
       # 推送目标
       - SI_FEISHU_DAILY_TARGET=oc_0b6ecc5a6fdd9246b88415267dbc3224
       - SI_FEISHU_ALERT_TARGET=ou_5e001757460aaacd5e22857be92d4743
+    dns:
+      - 223.5.5.5
+      - 114.114.114.114
     restart: unless-stopped

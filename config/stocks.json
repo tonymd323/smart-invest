@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated_at": "2026-03-30 18:03",
+  "updated_at": "2026-03-30 18:55",
   "updated_by": "web",
   "holdings": [
     {
@@ -8,6 +8,28 @@
       "name": "福耀玻璃",
       "shares": 100,
       "cost": 66.59
+    },
+    {
+      "code": "601318.SH",
+      "name": "中国平安",
+      "shares": 100,
+      "cost": 20.0,
+      "target": null,
+      "stop_loss": null
+    },
+    {
+      "code": "600519.SH",
+      "name": "贵州茅台",
+      "shares": 100,
+      "cost": 1000.0,
+      "target": null,
+      "stop_loss": null
+    },
+    {
+      "code": "872824.SZ",
+      "name": "先歌国际",
+      "shares": 0,
+      "cost": 0
     }
   ],
   "watchlist": [
