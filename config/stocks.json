@@ -1,25 +1,13 @@
 {
   "version": "1.0",
-  "updated_at": "2026-03-29 08:39",
+  "updated_at": "2026-03-30 18:03",
   "updated_by": "web",
   "holdings": [
     {
       "code": "600660.SH",
       "name": "福耀玻璃",
-      "shares": 1700,
+      "shares": 100,
       "cost": 66.59
-    },
-    {
-      "code": "600938.SH",
-      "name": "中国海油",
-      "shares": 600,
-      "cost": 30.15
-    },
-    {
-      "code": "600875.SH",
-      "name": "东方电气",
-      "shares": 400,
-      "cost": 40.63
     }
   ],
   "watchlist": [
@@ -49,5 +37,14 @@
       "sector": "化工原料"
     }
   ],
-  "_rules": "改这里=全局生效。任何agent修改持仓/备选，必须同步此文件。"
+  "_rules": "改这里=全局生效。任何agent修改持仓/备选，必须同步此文件。",
+  "sold": [
+    {
+      "code": "600938.SH",
+      "name": "中国海油",
+      "shares": 600,
+      "cost": 30.15,
+      "sold_at": "2026-03-30 16:38"
+    }
+  ]
 }

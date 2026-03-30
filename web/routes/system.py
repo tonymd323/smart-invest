@@ -121,20 +121,29 @@ TASK_GROUPS = ["数据采集", "分析扫描", "推送同步"]
 # ============================================================
 # Cron 解析/管理
 # ============================================================
+CONTAINER_NAME = "smart-invest"
+
+def _read_container_crontab():
+    """读取容器 crontab 内容，回退到备份文件"""
+    result = subprocess.run(
+        ["docker", "exec", CONTAINER_NAME, "crontab", "-l"],
+        capture_output=True, text=True, timeout=10,
+    )
+    if result.returncode == 0:
+        return result.stdout.splitlines()
+    # 回退到备份文件
+    crontab_file = "/app/data/crontab.txt"
+    if os.path.exists(crontab_file):
+        with open(crontab_file) as f:
+            return f.read().splitlines()
+    return ["SHELL=/bin/bash", "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"]
+
 def _get_crontab_entries():
-    """读取当前 crontab，解析 smart-invest 相关条目"""
+    """读取容器 crontab，解析 smart-invest 相关条目"""
     import re
     try:
-        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
-        if result.returncode != 0:
-            crontab_file = "/app/data/crontab.txt"
-            try:
-                with open(crontab_file) as f:
-                    content = f.read()
-            except FileNotFoundError:
-                return []
-        else:
-            content = result.stdout
+        lines = _read_container_crontab()
+        content = "\n".join(lines)
 
         entries = []
         last_comment = None
@@ -245,15 +254,18 @@ def _schedule_to_readable(schedule: str) -> str:
 
 
 def _save_crontab(lines: list):
-    """保存 crontab（系统 + 文件双写）"""
+    """保存 crontab（容器 + 文件双写）"""
     crontab_file = "/app/data/crontab.txt"
-    SHELL_HEADER = "SHELL=/bin/bash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
+    SHELL_HEADER = "CRON_TZ=Asia/Shanghai\nSHELL=/bin/bash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
 
-    # 写系统 crontab（只取 cron 行）
+    # 写容器 crontab（只取 cron 行）
     cron_lines = "\n".join(
-        l for l in lines if l.strip() and not l.startswith("SHELL") and not l.startswith("PATH")
+        l for l in lines if l.strip() and not l.startswith("SHELL") and not l.startswith("PATH") and not l.startswith("CRON_TZ")
     ) + "\n"
-    subprocess.run(["crontab", "-"], input=cron_lines, capture_output=True, text=True)
+    subprocess.run(
+        ["docker", "exec", "-i", CONTAINER_NAME, "crontab", "-"],
+        input=cron_lines, capture_output=True, text=True, timeout=10,
+    )
 
     # 备份到文件（含 SHELL/PATH）
     full_content = SHELL_HEADER + "\n".join(
@@ -407,17 +419,8 @@ async def add_cron(request: Request):
     entry = f"{schedule} {task['command']}"
 
     try:
-        # 读取现有
-        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
-        if result.returncode == 0:
-            existing_lines = result.stdout.splitlines()
-        else:
-            crontab_file = "/app/data/crontab.txt"
-            if os.path.exists(crontab_file):
-                with open(crontab_file) as f:
-                    existing_lines = f.read().splitlines()
-            else:
-                existing_lines = ["SHELL=/bin/bash", "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"]
+        # 读取容器 crontab
+        existing_lines = _read_container_crontab()
 
         # 检查是否已存在同名任务
         for i, line in enumerate(existing_lines):
@@ -443,16 +446,7 @@ async def delete_cron(request: Request):
         return JSONResponse({"ok": False, "error": "name 必填"}, status_code=400)
 
     try:
-        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
-        if result.returncode == 0:
-            existing_lines = result.stdout.splitlines()
-        else:
-            crontab_file = "/app/data/crontab.txt"
-            if os.path.exists(crontab_file):
-                with open(crontab_file) as f:
-                    existing_lines = f.read().splitlines()
-            else:
-                return JSONResponse({"ok": False, "error": "无 crontab"}, status_code=404)
+        existing_lines = _read_container_crontab()
 
         new_lines = []
         deleted = False

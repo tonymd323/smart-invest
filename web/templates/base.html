@@ -86,6 +86,11 @@
     {% block scripts %}{% endblock %}
 
     <script>
+        // 编辑行展开/折叠
+        function toggleEdit(t, code) {
+            var el = document.getElementById('edit-' + t + '-' + code.replace(/\./g, '-'));
+            if (el) el.classList.toggle('hidden');
+        }
         // 侧边栏开关（移动端）
         function toggleMenu() {
             const sb = document.getElementById('sidebar');

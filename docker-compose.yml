@@ -18,6 +18,6 @@ services:
       - FEISHU_APP_ID=cli_a92e5d71f2799bdb
       - FEISHU_APP_SECRET=i4OkFLYNfu8sTqDtvQo1Bd8sJ7FeUQUp
       # 推送目标
-      - SI_FEISHU_DAILY_TARGET=oc_ead8c17950436b3984170e0229bee08a
+      - SI_FEISHU_DAILY_TARGET=oc_0b6ecc5a6fdd9246b88415267dbc3224
       - SI_FEISHU_ALERT_TARGET=ou_5e001757460aaacd5e22857be92d4743
     restart: unless-stopped

@@ -866,6 +866,10 @@ class PullbackAnalyzer:
 
                 results.append(result)
 
+                # 只写入 buy 信号（S/A 级回调买入）
+                if result["signal"] != "buy":
+                    continue
+
                 # 写入 analysis_results
                 pb_code = normalizer.normalize_code(code)
                 conn.execute(

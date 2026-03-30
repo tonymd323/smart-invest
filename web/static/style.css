@@ -291,3 +291,4 @@ table.data-table tr:hover td {
         display: none;
     }
 }
+[x-cloak] { display: none !important; }

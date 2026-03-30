@@ -182,6 +182,19 @@ async def update_holding(
     return RedirectResponse("/portfolio", status_code=303)
 
 
+@router.post("/portfolio/holding/sell")
+async def sell_holding(code: str = Form(...)):
+    stocks = _load_stocks()
+    holding = next((h for h in stocks.get("holdings", []) if h["code"] == code), None)
+    if holding:
+        stocks["holdings"] = [h for h in stocks.get("holdings", []) if h["code"] != code]
+        # 记录到已卖出
+        sold = {**holding, "sold_at": datetime.now().strftime("%Y-%m-%d %H:%M")}
+        stocks.setdefault("sold", []).append(sold)
+        _save_stocks(stocks)
+    return RedirectResponse("/portfolio", status_code=303)
+
+
 @router.post("/portfolio/holding/delete")
 async def delete_holding(code: str = Form(...)):
     stocks = _load_stocks()
