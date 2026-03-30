@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}运行日志 - 投资系统 2.2{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- 标题栏 -->
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">📜 运行日志</h1>
+        <div class="flex items-center gap-3">
+            <form method="get" action="/logs" class="flex items-center gap-2">
+                <select name="module" onchange="this.form.submit()"
+                        class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white">
+                    <option value="">全部模块</option>
+                    {% for m in modules %}
+                    <option value="{{ m }}" {% if current_module == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+                <select name="status" onchange="this.form.submit()"
+                        class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white">
+                    <option value="">全部状态</option>
+                    <option value="success" {% if current_status == 'success' %}selected{% endif %}>✅ 成功</option>
+                    <option value="error" {% if current_status == 'error' %}selected{% endif %}>❌ 失败</option>
+                    <option value="warn" {% if current_status == 'warn' %}selected{% endif %}>⚠️ 警告</option>
+                    <option value="info" {% if current_status == 'info' %}selected{% endif %}>ℹ️ 信息</option>
+                </select>
+            </form>
+            <button onclick="cleanupLogs()"
+                    class="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm hover:bg-red-100">
+                🗑️ 清理30天前
+            </button>
+        </div>
+    </div>
+
+    <!-- 日志列表 -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-20">状态</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-24">模块</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">描述</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-28">耗时</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-44">时间</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-16"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for log in logs %}
+                <tr class="hover:bg-gray-50 group">
+                    <td class="px-4 py-3">
+                        {% if log.status == 'success' %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">✅ 成功</span>
+                        {% elif log.status == 'error' %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">❌ 失败</span>
+                        {% elif log.status == 'warn' %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">⚠️ 警告</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">ℹ️ 信息</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ log.module }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700">
+                        <div>{{ log.description or '-' }}</div>
+                        {% if log.result %}
+                        <div class="text-xs text-gray-500 mt-0.5">{{ log.result }}</div>
+                        {% endif %}
+                        {% if log.error %}
+                        <div class="text-xs text-red-600 mt-0.5">{{ log.error }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-500">
+                        {% if log.duration_ms is not none %}
+                            {% if log.duration_ms >= 1000 %}
+                                {{ "%.1f"|format(log.duration_ms / 1000) }}s
+                            {% else %}
+                                {{ log.duration_ms }}ms
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-500">{{ log.created_at }}</td>
+                    <td class="px-4 py-3">
+                        {% if log.detail %}
+                        <button onclick="toggleDetail({{ log.id }})"
+                                class="text-xs text-blue-600 hover:text-blue-800">
+                            详情
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if log.detail %}
+                <tr id="detail-{{ log.id }}" class="hidden">
+                    <td colspan="6" class="px-4 py-3 bg-gray-50">
+                        <pre class="text-xs text-gray-600 whitespace-pre-wrap font-mono">{{ log.detail }}</pre>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                {% if not logs %}
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">暂无日志记录</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function toggleDetail(id) {
+    const el = document.getElementById('detail-' + id);
+    el.classList.toggle('hidden');
+}
+
+function cleanupLogs() {
+    if (!confirm('确定清理30天前的日志？')) return;
+    fetch('/api/logs/cleanup?keep_days=30', { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+            if (d.ok) {
+                alert(`已清理 ${d.deleted} 条旧日志`);
+                location.reload();
+            }
+        });
+}
+</script>
+{% endblock %}

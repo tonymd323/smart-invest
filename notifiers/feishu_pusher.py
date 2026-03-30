@@ -163,18 +163,20 @@ class FeishuPusher:
         """
         return self._send_message(text, title, push_type="custom")
 
-    def push_daily_scan_card(self, beats: list, new_highs: list) -> bool:
+    def push_daily_scan_card(self, beats: list, new_highs: list, industry_map: dict = None, pullback_signals: list = None) -> bool:
         """
         推送备选股池日报（飞书交互式卡片）
 
         Args:
             beats: 业绩超预期列表
             new_highs: 扣非净利润新高列表
+            industry_map: 股票代码→行业映射（可选）
+            pullback_signals: 回调买入信号列表（可选）
 
         Returns:
             是否推送成功
         """
-        card = self.card_gen.generate_daily_scan_card(beats, new_highs)
+        card = self.card_gen.generate_daily_scan_card(beats, new_highs, industry_map, pullback_signals)
         card_json = json.dumps(card, ensure_ascii=False)
 
         log_entry = {

@@ -224,7 +224,132 @@ def run(args):
         print(f'✅ 完成 | {summary}')
         print(f'{"="*50}')
 
+        # ── Step 5: 飞书推送 ──────────────────────────────────────────────────
+        if not args.quiet:
+            try:
+                _push_feishu_notifications(beats, highs, pb_signals)
+            except Exception as e:
+                print(f'⚠️ 飞书推送异常（不影响Pipeline）: {e}')
+
     return results
+
+
+def _push_feishu_notifications(beats, highs, pullback_signals):
+    """
+    Pipeline 完成后推送飞书卡片通知。
+
+    触发条件：
+    - 有超预期信号（含一致预期的 beats）
+    - 有扣非净利润新高
+    - 有回调买入信号（S/A 级）
+    """
+    import sys, os, sqlite3
+    sys.path.insert(0, str(PROJECT_ROOT))
+    from notifiers.feishu_pusher import FeishuPusher
+
+    # ── 筛选有意义的信号 ──
+    true_beats = [b for b in beats if b.get('signal') in ('buy', 'watch') and b.get('actual_profit_yoy') is not None]
+    real_highs = [h for h in highs if h.get('is_new_high')]
+    top_pullback = [p for p in pullback_signals if p.get('grade') in ('S', 'A')]
+
+    total_signals = len(true_beats) + len(real_highs) + len(top_pullback)
+    if total_signals == 0:
+        print(f'\n📢 飞书推送：无新信号，跳过')
+        return
+
+    print(f'\n📢 飞书推送：检测到 {total_signals} 个信号，准备推送...')
+
+    # ── 构建行业映射 ──
+    industry_map = {}
+    try:
+        conn = sqlite3.connect(str(DB_PATH))
+        rows = conn.execute("SELECT code, industry FROM stocks WHERE industry IS NOT NULL").fetchall()
+        for r in rows:
+            industry_map[r[0]] = r[1]
+        conn.close()
+    except Exception:
+        pass
+
+    # ── 格式转换：analyzer → card_generator ──
+    card_beats = []
+    for b in true_beats:
+        code = b.get('stock_code', '')
+        ann = b.get('report_period', '')
+        card_beats.append({
+            'code': code,
+            'name': b.get('stock_name', ''),
+            'consensus_available': True,
+            'actual_profit_yoy': b.get('actual_profit_yoy'),
+            'expected_profit_yoy': None,  # 从 beat_diff 反推
+            'actual_rev_yoy': None,
+            'expected_rev_yoy': None,
+            'is_non_recurring': b.get('is_forecast', 0) == 1,
+            'report_type': _infer_report_type(ann),
+            'ann_date': ann.replace('-', '') if '-' in ann else ann,
+        })
+        # 反推 expected_profit_yoy
+        diff = b.get('beat_diff_pct')
+        actual = b.get('actual_profit_yoy')
+        if diff is not None and actual is not None:
+            card_beats[-1]['expected_profit_yoy'] = round(actual - diff, 1)
+
+    card_highs = []
+    for h in real_highs:
+        code = h.get('stock_code', '')
+        profit = h.get('quarterly_net_profit', 0)
+        # 从 discovery_pool 获取名称
+        name = ''
+        pe = None
+        try:
+            conn2 = sqlite3.connect(str(DB_PATH))
+            r = conn2.execute("SELECT stock_name FROM discovery_pool WHERE stock_code = ? LIMIT 1", (code,)).fetchone()
+            if r:
+                name = r[0]
+            conn2.close()
+        except Exception:
+            pass
+        ann = h.get('report_period', '')
+        card_highs.append({
+            'code': code,
+            'name': name,
+            'quarterly_profit': round(profit / 1e8, 2) if profit else 0,  # 元 → 亿
+            'growth_vs_high': h.get('growth_pct', 0),
+            'pe': pe,
+            'report_type': _infer_report_type(ann),
+            'ann_date': ann.replace('-', '') if '-' in ann else ann,
+        })
+
+    card_pullback = []
+    for p in top_pullback:
+        card_pullback.append({
+            'code': p.get('stock_code', ''),
+            'name': p.get('stock_name', ''),
+            'grade': p.get('grade', 'C'),
+            'score': p.get('score', 0),
+            'close': p.get('close'),
+            'reason': p.get('reason', '')[:30],
+        })
+
+    # ── 发送 ──
+    pusher = FeishuPusher()
+    success = pusher.push_daily_scan_card(card_beats, card_highs, industry_map, card_pullback)
+    if success:
+        print(f'   ✅ 飞书卡片推送成功 (超预期{len(card_beats)} / 新高{len(card_highs)} / 回调{len(card_pullback)})')
+    else:
+        print(f'   ❌ 飞书卡片推送失败')
+
+
+def _infer_report_type(report_date: str) -> str:
+    """从报告期推断类型"""
+    if not report_date:
+        return '财报'
+    try:
+        md = report_date.replace('-', '')[4:8] if len(report_date.replace('-', '')) >= 8 else ''
+        if md in ('0331', '0630', '0930', '1231'):
+            return {'0331': 'Q1', '0630': 'Q2', '0930': 'Q3', '1231': '年报'}[md]
+    except Exception:
+        pass
+    return '财报'
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
