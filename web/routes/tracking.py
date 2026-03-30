@@ -1,3 +1,4 @@
+from datetime import datetime
 """T+N 跟踪页面路由 — v2.10 列表增强"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
@@ -98,6 +99,7 @@ async def tracking_page(
     return templates.TemplateResponse("tracking.html", {
         "request": request, "active": "tracking",
         "db_stats": db_stats,
+        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "tracking": results,
         "status": status or "",
         "event_type": event_type or "",

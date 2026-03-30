@@ -1,3 +1,4 @@
+from datetime import datetime
 """超跌监控页面路由 — BTIQ 涨跌比趋势图 + 市场情绪信号"""
 from pathlib import Path
 
@@ -19,5 +20,6 @@ async def oversold_page(request: Request):
         "request": request,
         "active": "oversold",
         "db_stats": db_stats,
+        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         **data,
     })

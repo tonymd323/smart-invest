@@ -1,5 +1,6 @@
 """系统控制页面路由 + Pipeline API + Cron 管理"""
 import os
+import time
 import json
 import subprocess
 from datetime import datetime
@@ -22,22 +23,22 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templa
 PRESET_TASKS = {
     "pipeline_eod": {
         "name": "盘后全量扫描",
-        "command": "python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> data/logs/pipeline_eod.log 2>&1",
+        "command": "python3 scripts/run_with_log.py pipeline_eod 盘后全量扫描 -- python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> data/logs/pipeline_eod.log 2>&1",
         "default_schedule": "35 15 * * 1-5",
     },
     "pipeline_evening": {
         "name": "晚间补充扫描",
-        "command": "python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1",
+        "command": "python3 scripts/run_with_log.py pipeline_evening 晚间补充扫描 -- python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1",
         "default_schedule": "30 20 * * 1-5",
     },
     "pullback_scan": {
         "name": "回调买入信号",
-        "command": "python3 -c \"from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()\" >> data/logs/pullback_cron.log 2>&1",
+        "command": "python3 scripts/run_with_log.py pullback 回调买入扫描 -- python3 -c \"from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()\" >> data/logs/pullback_cron.log 2>&1",
         "default_schedule": "15 15 * * 1-5",
     },
     "backtest_weekly": {
         "name": "每周回测回填",
-        "command": "python3 scripts/btiq_backfill.py >> data/logs/backtest_cron.log 2>&1",
+        "command": "python3 scripts/run_with_log.py btiq_backfill BTIQ历史回填 -- python3 scripts/btiq_backfill.py >> data/logs/backtest_cron.log 2>&1",
         "default_schedule": "0 10 * * 0",
     },
 }
@@ -375,6 +376,13 @@ async def task_sse(request: Request, task_key: str = ""):
     task_name = task["name"]
 
     async def generate():
+        # 记录到系统日志
+        from core.system_logger import SystemLogger
+        db = str(PROJECT_ROOT / "data" / "smart_invest.db")
+        slog = SystemLogger(db_path=db)
+        start_time = time.time()
+        output_lines = []
+
         yield f"data: {json.dumps({'type': 'info', 'msg': f'{task_icon} 启动: {task_name}'})}\n\n"
         cmd_str = " ".join(cmd)
         yield f"data: {json.dumps({'type': 'info', 'msg': f'命令: {cmd_str}'})}\n\n"
@@ -392,6 +400,7 @@ async def task_sse(request: Request, task_key: str = ""):
                     break
                 text = line.decode('utf-8', errors='replace').rstrip()
                 if text:
+                    output_lines.append(text)
                     if '✅' in text or 'SUCCESS' in text:
                         log_type = 'success'
                     elif '⚠️' in text or 'WARN' in text:
@@ -404,13 +413,19 @@ async def task_sse(request: Request, task_key: str = ""):
 
             await proc.wait()
             code = proc.returncode
+            duration_ms = int((time.time() - start_time) * 1000)
+
             if code == 0:
                 yield f"data: {json.dumps({'type': 'success', 'msg': '✅ 执行完成'})}\n\n"
+                slog.success("manual", task_name, result=f"{len(output_lines)} 行输出 | {duration_ms}ms", duration_ms=duration_ms)
             else:
                 yield f"data: {json.dumps({'type': 'error', 'msg': f'❌ 退出码: {code}'})}\n\n"
+                slog.error("manual", task_name, error=f"退出码 {code}", detail="\n".join(output_lines[-10:]))
             yield f"data: {json.dumps({'type': 'done', 'code': code})}\n\n"
         except Exception as e:
+            duration_ms = int((time.time() - start_time) * 1000)
             yield f"data: {json.dumps({'type': 'error', 'msg': str(e)})}\n\n"
+            slog.error("manual", task_name, error=str(e))
             yield f"data: {json.dumps({'type': 'done', 'code': -1})}\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")

@@ -1124,7 +1124,28 @@ class EventAnalyzer:
         """
         events = []
 
-        # 预加载名称映射（多源查询）
+        # 预加载合法股票代码白名单（过滤北交所误标.SZ、新股申购A2xxxx等无效代码）
+        valid_codes = set()
+        try:
+            _conn = sqlite3.connect(self.db_path)
+            for row in _conn.execute("SELECT code FROM stocks").fetchall():
+                valid_codes.add(row[0])
+            _conn.close()
+        except Exception:
+            pass
+
+        def _is_valid(code):
+            if not code:
+                return False
+            if "." not in code:
+                return any(c.startswith(code + ".") for c in valid_codes)
+            return code in valid_codes
+
+        # 股票代码过滤：丢弃不在 stocks 白名单中的代码
+        beats = [b for b in (beats or []) if _is_valid(b.get("stock_code"))]
+        new_highs = [h for h in (new_highs or []) if _is_valid(h.get("stock_code"))]
+
+# 预加载名称映射（多源查询）
         conn = sqlite3.connect(self.db_path)
         try:
             name_map = {}

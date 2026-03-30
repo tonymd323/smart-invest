@@ -1,3 +1,4 @@
+from datetime import datetime
 """信号看板页面路由 — 筛选维度：分析类型 + 披露类型 + 报告期"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
@@ -96,6 +97,7 @@ async def signals_page(
     return templates.TemplateResponse("signals.html", {
         "request": request, "active": "signals",
         "db_stats": db_stats,
+        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "signals": signals,
         "current_types": type or [],
         "current_disclosure_types": disclosure_type or [],

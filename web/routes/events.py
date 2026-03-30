@@ -1,3 +1,4 @@
+from datetime import datetime
 """事件流页面路由 — 仅显示新闻/公告类事件（不含信号跟踪）"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
@@ -102,6 +103,7 @@ async def events_page(
     return templates.TemplateResponse("events.html", {
         "request": request, "active": "events",
         "db_stats": db_stats,
+        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "events": all_events,
         "grouped_events": grouped,
         "days": days,

@@ -1,3 +1,4 @@
+from datetime import datetime
 """策略回测页面路由 — v2.10 列表增强"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
@@ -58,6 +59,7 @@ async def backtest_page(
     return templates.TemplateResponse("backtest.html", {
         "request": request, "active": "backtest",
         "db_stats": db_stats,
+        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "backtest": results,
         "performance": performance,
         "signal_type": signal_type or "",

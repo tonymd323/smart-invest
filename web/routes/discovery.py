@@ -1,3 +1,4 @@
+from datetime import datetime
 """发现池页面路由 — v2.18 信息扩展 + 行业筛选 + 公告类型筛选"""
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse
@@ -113,6 +114,7 @@ async def discovery_page(
     return templates.TemplateResponse("discovery.html", {
         "request": request, "active": "discovery",
         "db_stats": db_stats,
+        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "pool": results,
         "current_signal": signal or "",
         "current_sources": source or [],
