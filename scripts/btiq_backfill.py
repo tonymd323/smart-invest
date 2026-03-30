@@ -6,9 +6,10 @@ BTIQ 历史数据回填
 计算 BTIQ 并写入 btiq_history.json，使 MA5 立即可用。
 """
 
-import os
+import os; os.environ['TZ'] = 'Asia/Shanghai'
 import sys
 import json
+import time; time.tzset()
 from datetime import datetime, timedelta
 
 DATA_DIR = os.path.expanduser("~/.openclaw/workspace/smart-invest/data/oversold")

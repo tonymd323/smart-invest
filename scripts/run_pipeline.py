@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """投资系统 2.2 — Pipeline Runner"""
+import os; os.environ['TZ'] = 'Asia/Shanghai'
 import sys, json, time, argparse, sqlite3
+time.tzset()
 from datetime import datetime
 from pathlib import Path
 

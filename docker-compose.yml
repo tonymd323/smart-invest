@@ -12,6 +12,7 @@ services:
       - ./config:/app/config   # stocks.json
     environment:
       - PYTHONUNBUFFERED=1
+      - TZ=Asia/Shanghai
       - TUSHARE_TOKEN=54c6afc7620641d1611663eb05a9538c6a5b1b4cbd9e0151afdacbd2
       # 飞书推送凭证（HTTP API 直发）
       - FEISHU_APP_ID=cli_a92e5d71f2799bdb
