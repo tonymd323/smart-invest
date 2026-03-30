@@ -1,14 +1,55 @@
 # JARVIS 投资系统 2.0 — 架构设计
 
-_版本：v2.15 | 日期：2026-03-29 | Docker 化部署 + 跟踪页增强_
+_版本：v2.23 | 日期：2026-03-30 | 数据标准化层_
 
 ---
 
 ## 架构原则
 
-三层分离 | 数据驱动 | 自动降级 | 零重复 | 双池分离 | 采集分析职责分离 | **采集粒度与分析粒度对齐**
+三层分离 | 数据驱动 | 自动降级 | 零重复 | 双池分离 | 采集分析职责分离 | 采集粒度与分析粒度对齐 | **写入归一化，读取无歧义**
 
 ## 系统分层
+
+### Layer -1: 数据标准化层（DataNormalizer + StockResolver）← v2.23 新增
+
+**所有数据入库前必须经过此层。禁止任何模块直接 INSERT。**
+
+```
+Tushare API ──┐
+AKShare API ──┤──► DataNormalizer.normalize() ──► SQLite（统一格式）
+东方财富 API ──┤        │
+用户手动输入 ──┘        ├── 日期：YYYY-MM-DD（ISO）
+                       ├── 代码：canonical_code（000001.SZ）
+                       └── 数值：round(2) + 单位校验
+```
+
+**核心组件：**
+
+| 组件 | 职责 | 接口 |
+|------|------|------|
+| `DataNormalizer` | 格式归一化 | `normalize_date(str) → YYYY-MM-DD`<br>`normalize_code(str) → canonical_code`<br>`normalize_pct(float) → round(2)` |
+| `StockResolver` | 身份解析+防重复 | `resolve(input) → canonical_code`<br>`ensure_exists(code, name) → canonical_code` |
+
+**数据格式标准（强制）：**
+
+| 字段 | 标准格式 | 示例 |
+|------|---------|------|
+| 日期 | `YYYY-MM-DD` | `2026-03-30` |
+| 股票代码 | `{数字}.{交易所}` | `000001.SZ` `600660.SH` |
+| 价格 | `REAL, round(2)` | `57.85` |
+| 百分比 | `REAL, round(2)` | `5.23`（表示 5.23%） |
+| 时间戳 | `YYYY-MM-DD HH:MM:SS` | `2026-03-30 13:00:00` |
+
+**防重复机制：**
+- `stocks.canonical_code` PRIMARY KEY — 数据库层拦截重复
+- `StockResolver.ensure_exists()` — 代码层查重
+- 所有业务表 `stock_code` 引用 `stocks.canonical_code` — JOIN 无歧义
+
+**存量清洗：**
+- `scripts/clean_normalize.py` — 一次性清洗脚本
+- 合并重复 stock_code（`000001` → `000001.SZ`）
+- 统一所有日期格式（去连字符 / 加连字符）
+- 修复已知 Bug#21（140条错误收益数据）
 
 ### Layer 0: Provider（7 个，6 个在线）
 
