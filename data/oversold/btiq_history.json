@@ -1,5 +1,55 @@
 [
   {
+    "time": "2026-03-17 15:00:00",
+    "up": 867,
+    "down": 4541,
+    "flat": 70,
+    "total": 5478,
+    "btiq": 16.03,
+    "top_gainers": [],
+    "top_losers": []
+  },
+  {
+    "time": "2026-03-18 15:00:00",
+    "up": 3554,
+    "down": 1831,
+    "flat": 94,
+    "total": 5479,
+    "btiq": 66.0,
+    "top_gainers": [],
+    "top_losers": []
+  },
+  {
+    "time": "2026-03-19 15:00:00",
+    "up": 505,
+    "down": 4955,
+    "flat": 19,
+    "total": 5479,
+    "btiq": 9.25,
+    "top_gainers": [],
+    "top_losers": []
+  },
+  {
+    "time": "2026-03-20 15:00:00",
+    "up": 662,
+    "down": 4786,
+    "flat": 33,
+    "total": 5481,
+    "btiq": 12.15,
+    "top_gainers": [],
+    "top_losers": []
+  },
+  {
+    "time": "2026-03-23 15:00:00",
+    "up": 305,
+    "down": 5172,
+    "flat": 6,
+    "total": 5483,
+    "btiq": 5.57,
+    "top_gainers": [],
+    "top_losers": []
+  },
+  {
     "time": "2026-03-24 15:00:00",
     "up": 5136,
     "down": 329,

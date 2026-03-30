@@ -152,4 +152,8 @@ def _sync_to_db(history):
 
 
 if __name__ == '__main__':
-    backfill(5)
+    import argparse
+    parser = argparse.ArgumentParser(description='BTIQ 历史数据回填')
+    parser.add_argument('--days', type=int, default=5, help='回填天数')
+    args = parser.parse_args()
+    backfill(args.days)

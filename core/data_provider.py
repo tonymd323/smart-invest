@@ -1489,33 +1489,97 @@ class SectorProvider(BaseProvider):
         获取板块轮动数据（行业板块涨跌排行）。
 
         降级逻辑：
-        1. 东方财富 Push2 API
-        2. 失败 → AkShare 板块资金流向
-        3. 都失败 → 返回空列表
+        1. 东方财富 datacenter API（行业板块涨跌，实时）
+        2. 失败 → 腾讯行情 + Tushare 行业分类
+        3. 失败 → AkShare 板块资金流向
+        4. 都失败 → 返回空列表
         """
-        results = self._fetch_from_eastmoney()
+        results = self._fetch_from_datacenter()
         if results:
-            self.last_source = "eastmoney"
+            self.last_source = "datacenter"
             return results
 
-        logger.info("[SectorProvider] 东财无数据，降级到 AkShare")
-        results = self._fetch_from_akshare()
-        if results:
-            self.last_source = "akshare"
-            return results
-
-        logger.info("[SectorProvider] AkShare 无数据，降级到腾讯行情+Tushare 行业")
+        logger.info("[SectorProvider] datacenter 无数据，降级到腾讯行情+Tushare 行业")
         results = self._fetch_from_tencent()
         if results:
             self.last_source = "tencent"
+            return results
+
+        logger.info("[SectorProvider] 腾讯无数据，降级到 AkShare")
+        results = self._fetch_from_akshare()
+        if results:
+            self.last_source = "akshare"
             return results
 
         logger.warning("[SectorProvider] 所有数据源均无板块数据")
         self.last_source = "none"
         return []
 
+    def _fetch_from_datacenter(self) -> List[SectorData]:
+        """
+        从东方财富 datacenter API 获取今日行业板块涨跌幅
+
+        数据源：RPT_BOARD_WHEEL 报告
+        不走东方财富 Push2（被墙），直连 datacenter.eastmoney.com
+        """
+        try:
+            import requests as _req
+            url = "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+            params = {
+                "reportName": "RPT_BOARD_WHEEL",
+                "columns": "BOARD_CODE,BOARD_NAME,TRADE_DATE,INDICATORID",
+                "filter": '(COMMON_TYPE1="001")(COMMON_TYPE2="2")',
+                "source": "SECURITIES",
+                "client": "APP",
+                "sortColumns": "TRADE_DATE,INDICATORID",
+                "sortTypes": "-1,-1",
+                "pageSize": "200",
+                "pageNumber": "1",
+            }
+            resp = _req.get(url, params=params, timeout=15, headers={
+                "User-Agent": "Mozilla/5.0",
+            })
+            resp.raise_for_status()
+            data = resp.json()
+            if not data.get("success") or not data.get("result"):
+                return []
+
+            rows = data["result"].get("data", [])
+            if not rows:
+                return []
+
+            # 取最新交易日的日期
+            latest_date = rows[0]["TRADE_DATE"][:10]
+            today_rows = [r for r in rows if r["TRADE_DATE"].startswith(latest_date)]
+
+            results = []
+            for item in today_rows:
+                name = item.get("BOARD_NAME", "")
+                if not name:
+                    continue
+                try:
+                    change_pct = float(item.get("INDICATORID") or 0)
+                except (ValueError, TypeError):
+                    continue
+                results.append(SectorData(
+                    sector_name=name,
+                    change_pct=round(change_pct, 2),
+                    net_inflow=0.0,
+                    up_count=0,
+                    down_count=0,
+                    source="datacenter",
+                ))
+
+            if results:
+                logger.info(f"[SectorProvider] datacenter 返回 {len(results)} 个板块 ({latest_date})")
+                return results
+
+        except Exception as e:
+            logger.error(f"[SectorProvider] datacenter API 调用失败: {e}")
+        return []
+
     def _fetch_from_eastmoney(self) -> List[SectorData]:
-        """从东方财富 Push2 获取行业板块数据"""
+        """从东方财富 Push2 获取行业板块数据（已废弃，push2被墙）"""
         try:
             import requests
             resp = requests.get(self.EM_URL, params=self.EM_PARAMS, timeout=15)

@@ -72,7 +72,7 @@ TASK_PANEL = {
         "desc": "回填涨跌比历史数据，使 MA5 可用",
         "icon": "📊",
         "group": "数据采集",
-        "cmd": ["python3", "scripts/btiq_backfill.py"],
+        "cmd": ["python3", "scripts/btiq_backfill.py", "--days", "{days}"],
         "params": [
             {"key": "days", "label": "回填天数", "type": "number", "default": "5"},
         ],
