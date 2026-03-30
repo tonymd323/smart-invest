@@ -26,7 +26,7 @@
 {% endif %}
 
 <div class="flex gap-4 mb-4 flex-wrap items-center">
-    {{ filter_select("signal_type", [("","全部类型"),("earnings_beat","超预期"),("profit_new_high","扣非新高")], signal_type, base_url) }}
+    {{ filter_select("signal_type", [("","全部类型"),("earnings_beat","超预期"),("profit_new_high","扣非新高"),("pullback_score","回调评分")], signal_type, base_url) }}
     {{ search_box(search, "搜索代码/名称...", base_url, {"signal_type":signal_type}) }}
 </div>
 

@@ -900,6 +900,17 @@ class PullbackAnalyzer:
                     json.dumps(detail, default=_to_native, ensure_ascii=False),
                 ))
 
+                # 写入 backtest 表（S/A 级信号）
+                if score_result.get("score", 0) >= 60:
+                    pb_date = normalizer.normalize_date(today)
+                    pb_entry = score_result.get("close")
+                    if pb_entry and pb_entry > 0:
+                        conn.execute("""
+                            INSERT OR IGNORE INTO backtest
+                            (stock_code, event_date, event_type, entry_price)
+                            VALUES (?, ?, 'pullback_score', ?)
+                        """, (pb_code, pb_date, pb_entry))
+
             except Exception as e:
                 logger.error(f"[PullbackAnalyzer] {code} 扫描失败: {e}")
                 continue
