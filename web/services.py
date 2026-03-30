@@ -945,11 +945,11 @@ def get_oversold_data() -> dict:
     conn.row_factory = sqlite3.Row
 
     try:
-        # 最新快照
+        # 最新快照（按快照时间排序，不按入库时间）
         row = conn.execute("""
             SELECT snapshot_time, btiq, ma5, signal, up_count, down_count, flat_count, total_count
             FROM market_snapshots
-            ORDER BY created_at DESC
+            ORDER BY snapshot_time DESC
             LIMIT 1
         """).fetchone()
 

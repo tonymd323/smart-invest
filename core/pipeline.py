@@ -20,7 +20,20 @@ import json
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
+from core.data_normalizer import normalizer
+
 logger = logging.getLogger(__name__)
+
+
+def _normalize_for_write(record: dict, date_fields: list = None, code_field: str = 'stock_code') -> dict:
+    """写入前标准化一条记录"""
+    r = record.copy()
+    if code_field and r.get(code_field):
+        r[code_field] = normalizer.normalize_code(r[code_field])
+    for f in (date_fields or []):
+        if r.get(f):
+            r[f] = normalizer.normalize_date(r[f])
+    return r
 
 
 # ── 数据质量校验 ──────────────────────────────────────────────────────────────
@@ -248,6 +261,7 @@ class Pipeline:
                         logger.debug(f"[Pipeline] {stock_code} {rec.get('report_date')} 已有实际财报，跳过预告")
                         continue
 
+                nr = _normalize_for_write(rec, date_fields=['report_date'])
                 conn.execute("""
                     INSERT OR REPLACE INTO earnings
                     (stock_code, report_date, report_type, net_profit, net_profit_yoy,
@@ -256,22 +270,22 @@ class Pipeline:
                      koufei_yoy, profit_quality_risk)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    rec.get("stock_code"),
-                    rec.get("report_date"),
+                    nr.get("stock_code"),
+                    nr.get("report_date"),
                     report_type,
-                    rec.get("net_profit"),
-                    rec.get("net_profit_yoy"),
-                    rec.get("revenue"),
-                    rec.get("revenue_yoy"),
-                    rec.get("roe"),
-                    rec.get("gross_margin"),
-                    rec.get("eps"),
+                    nr.get("net_profit"),
+                    nr.get("net_profit_yoy"),
+                    nr.get("revenue"),
+                    nr.get("revenue_yoy"),
+                    nr.get("roe"),
+                    nr.get("gross_margin"),
+                    nr.get("eps"),
                     is_forecast,
-                    rec.get("net_profit_yoy_lower"),
-                    rec.get("net_profit_yoy_upper"),
-                    rec.get("forecast_type"),
-                    rec.get("koufei_yoy"),
-                    1 if rec.get("profit_quality_risk") else 0,
+                    nr.get("net_profit_yoy_lower"),
+                    nr.get("net_profit_yoy_upper"),
+                    nr.get("forecast_type"),
+                    nr.get("koufei_yoy"),
+                    1 if nr.get("profit_quality_risk") else 0,
                 ))
                 written += 1
 
@@ -494,6 +508,8 @@ def run_backtest(db_path: str) -> Dict[str, int]:
                 )
 
                 # 写入 backtest 表
+                bt_code = normalizer.normalize_code(code)
+                bt_date = normalizer.normalize_date(event_date)
                 conn.execute("""
                     INSERT OR REPLACE INTO backtest
                     (stock_code, event_date, event_type, entry_price,
@@ -502,7 +518,7 @@ def run_backtest(db_path: str) -> Dict[str, int]:
                      alpha_5d, alpha_10d, alpha_20d, alpha_60d, is_win)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    code, event_date, event_type, actual_entry,
+                    bt_code, bt_date, event_type, actual_entry,
                     returns.get("return_5d"), returns.get("return_10d"),
                     returns.get("return_20d"), returns.get("return_60d"),
                     benchmark_returns.get("benchmark_5d"),
@@ -595,7 +611,7 @@ def fetch_and_apply_consensus(db_path: str, stock_codes: list = None) -> dict:
                     (stock_code, year, net_profit_yoy, rev_yoy, num_analysts, source, source_detail)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    code,
+                    normalizer.normalize_code(code),
                     year,
                     consensus_data.net_profit_yoy,
                     consensus_data.rev_yoy,

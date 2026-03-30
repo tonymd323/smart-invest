@@ -183,14 +183,51 @@ def _get_crontab_entries():
 
 
 def _schedule_to_readable(schedule: str) -> str:
-    """cron调度 → 可读中文"""
+    """cron调度 → 可读中文，支持 */N、范围、逗号等 cron 语法"""
     parts = schedule.split()
     if len(parts) != 5:
         return schedule
     minute, hour, dom, month, dow = parts
 
-    # 时间
-    time_str = f"{int(hour):02d}:{int(minute):02d}"
+    def _fmt_part(v):
+        """格式化单个 cron 字段，支持 *, */N, N-M, N,M """
+        if v == "*":
+            return "*"
+        if "/" in v:
+            return v  # */5, 10/15 等
+        if "-" in v:
+            return v  # 9-11
+        if "," in v:
+            return v  # 1,3,5
+        try:
+            return f"{int(v):02d}"
+        except ValueError:
+            return v
+
+    # 时间显示
+    def _fmt_time(h, m):
+        # */5 分钟
+        if "/" in m:
+            m_str = m
+        else:
+            try:
+                m_str = f"{int(m):02d}"
+            except ValueError:
+                m_str = m
+
+        if h == "*":
+            return f"每{m_str.replace('*/', '')}分钟" if "/" in m else "每分钟"
+        try:
+            if "-" in h:
+                s, e = h.split("-")
+                return f"{int(s):02d}:{m_str}-{int(e):02d}:{m_str}"
+            elif "," in h:
+                return "、".join(f"{int(x):02d}:{m_str}" for x in h.split(","))
+            return f"{int(h):02d}:{m_str}"
+        except ValueError:
+            return f"{h}:{m}"
+
+    time_str = _fmt_time(hour, minute)
 
     # 星期
     dow_map = {"0": "周日", "1": "周一", "2": "周二", "3": "周三", "4": "周四", "5": "周五", "6": "周六"}

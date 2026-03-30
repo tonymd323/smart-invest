@@ -21,6 +21,8 @@ import urllib.request
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 
+from core.data_normalizer import normalizer
+
 logger = logging.getLogger(__name__)
 
 
@@ -331,7 +333,7 @@ class EarningsAnalyzer:
             (stock_code, analysis_type, score, signal, summary, created_at)
             VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
         """, (
-            result["stock_code"],
+            normalizer.normalize_code(result["stock_code"]),
             result["analysis_type"],
             result.get("score"),
             result.get("signal"),
@@ -481,13 +483,14 @@ class EarningsAnalyzer:
             return None
 
         try:
+            dp_code = normalizer.normalize_code(stock_code)
             conn.execute("""
                 INSERT OR REPLACE INTO discovery_pool
                 (stock_code, stock_name, industry, source, score, signal, detail, status, discovered_at, expires_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, 'active', datetime('now', 'localtime'), ?)
             """, (
-                stock_code,
-                stock_name or stock_code,
+                dp_code,
+                stock_name or dp_code,
                 industry,
                 source,
                 data.get("score", 0),
@@ -583,12 +586,14 @@ class EarningsAnalyzer:
                     expected_yoy = detail.get("expected_yoy")
                     profit_diff = detail.get("beat_diff")
 
+                et_code = normalizer.normalize_code(code)
+                et_date = normalizer.normalize_date(today)
                 conn.execute("""
                     INSERT INTO event_tracking
                     (stock_code, stock_name, event_type, event_date, entry_price, 
                      report_period, actual_yoy, expected_yoy, profit_diff, tracking_status)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-                """, (code, stock_name, event_type, today, entry_price,
+                """, (et_code, stock_name, event_type, et_date, entry_price,
                       report_period, actual_yoy, expected_yoy, profit_diff))
 
                 logger.info(
@@ -862,16 +867,17 @@ class PullbackAnalyzer:
                 results.append(result)
 
                 # 写入 analysis_results
+                pb_code = normalizer.normalize_code(code)
                 conn.execute(
                     "DELETE FROM analysis_results WHERE stock_code = ? AND analysis_type = ?",
-                    (code, "pullback_score")
+                    (pb_code, "pullback_score")
                 )
                 conn.execute("""
                     INSERT INTO analysis_results
                     (stock_code, analysis_type, score, signal, summary, detail, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
                 """, (
-                    code,
+                    pb_code,
                     "pullback_score",
                     score_result["score"],
                     result["signal"],
@@ -1232,13 +1238,14 @@ class EventAnalyzer:
                 if existing:
                     continue
 
+                ev_code = normalizer.normalize_code(stock_code) if stock_code else stock_code
                 conn.execute("""
                     INSERT INTO events
                     (stock_code, event_type, title, content, source, url,
                      sentiment, sentiment_score, severity, published_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    stock_code,
+                    ev_code,
                     event.get("event_type"),
                     title,
                     event.get("content", ""),
