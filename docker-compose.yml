@@ -10,6 +10,9 @@ services:
     volumes:
       - ./data:/app/data      # SQLite DB + 配置数据 + crontab
       - ./config:/app/config   # stocks.json
+      - ./web:/app/web           # Web 前端（模板+路由）
+      - ./scripts:/app/scripts     # Pipeline + 工具脚本
+      - ./core:/app/core           # 核心模块
     environment:
       - PYTHONUNBUFFERED=1
       - TZ=Asia/Shanghai

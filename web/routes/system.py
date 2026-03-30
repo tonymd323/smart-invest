@@ -22,22 +22,22 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templa
 PRESET_TASKS = {
     "pipeline_eod": {
         "name": "盘后全量扫描",
-        "command": "cd /app && /usr/bin/python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> data/logs/pipeline_eod.log 2>&1",
+        "command": "python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> data/logs/pipeline_eod.log 2>&1",
         "default_schedule": "35 15 * * 1-5",
     },
     "pipeline_evening": {
         "name": "晚间补充扫描",
-        "command": "cd /app && /usr/bin/python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1",
+        "command": "python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1",
         "default_schedule": "30 20 * * 1-5",
     },
     "pullback_scan": {
         "name": "回调买入信号",
-        "command": "cd /app && /usr/bin/python3 -c \"from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()\" >> data/logs/pullback_cron.log 2>&1",
+        "command": "python3 -c \"from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()\" >> data/logs/pullback_cron.log 2>&1",
         "default_schedule": "15 15 * * 1-5",
     },
     "backtest_weekly": {
         "name": "每周回测回填",
-        "command": "cd /app && /usr/bin/python3 scripts/btiq_backfill.py >> data/logs/backtest_cron.log 2>&1",
+        "command": "python3 scripts/btiq_backfill.py >> data/logs/backtest_cron.log 2>&1",
         "default_schedule": "0 10 * * 0",
     },
 }
@@ -132,7 +132,7 @@ def _read_container_crontab():
     if result.returncode == 0:
         return result.stdout.splitlines()
     # 回退到备份文件
-    crontab_file = "/app/data/crontab.txt"
+    crontab_file = str(PROJECT_ROOT / "data" / "crontab.txt")
     if os.path.exists(crontab_file):
         with open(crontab_file) as f:
             return f.read().splitlines()
@@ -255,7 +255,7 @@ def _schedule_to_readable(schedule: str) -> str:
 
 def _save_crontab(lines: list):
     """保存 crontab（容器 + 文件双写）"""
-    crontab_file = "/app/data/crontab.txt"
+    crontab_file = str(PROJECT_ROOT / "data" / "crontab.txt")
     SHELL_HEADER = "CRON_TZ=Asia/Shanghai\nSHELL=/bin/bash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
 
     # 写容器 crontab（只取 cron 行）

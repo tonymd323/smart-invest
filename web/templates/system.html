@@ -12,23 +12,22 @@
             </div>
             <div class="divide-y divide-gray-100">
                 <template x-for="task in group.tasks" :key="task.key">
-                    <div class="px-6 py-3 flex items-center justify-between hover:bg-gray-50">
+                    <div class="px-4 lg:px-6 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 hover:bg-gray-50">
                         <div class="flex items-center gap-3 min-w-0">
                             <span class="text-lg" x-text="task.icon"></span>
                             <div class="min-w-0">
                                 <span class="font-medium text-sm" x-text="task.name"></span>
-                                <span class="text-xs text-gray-400 ml-2" x-text="task.desc"></span>
+                                <span class="text-xs text-gray-400 lg:ml-2 block lg:inline" x-text="task.desc"></span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0 ml-4">
+                        <div class="flex items-center gap-2 flex-wrap pl-9 lg:pl-0">
                             <!-- 参数选择 -->
                             <template x-for="p in task.params" :key="p.key">
                                 <div class="flex items-center gap-1">
                                     <label class="text-xs text-gray-400" x-text="p.label + ':'"></label>
                                     <template x-if="p.type === 'select'">
                                         <select :id="'param-' + task.key + '-' + p.key"
-                                                class="border rounded px-1.5 py-0.5 text-xs bg-white w-20"
-                                                :x-model="'params.' + task.key + '.' + p.key">
+                                                class="border rounded px-1.5 py-0.5 text-xs bg-white w-20">
                                             <template x-for="opt in p.options" :key="opt">
                                                 <option :value="opt" x-text="opt" :selected="opt === p.default"></option>
                                             </template>
