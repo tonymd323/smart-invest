@@ -643,13 +643,16 @@ class EarningsAnalyzer:
                     continue
 
                 # 获取事件日后的交易日数据
+                # 注意：prices.trade_date 格式为 20260327，event_date 格式为 2026-03-29
+                # 需要统一格式比较，否则字符串比较会出错
+                event_date_compact = event_date.replace('-', '') if event_date else ''
                 prices_after = conn.execute("""
                     SELECT trade_date, close_price
                     FROM prices
                     WHERE stock_code = ? AND trade_date > ?
                     ORDER BY trade_date ASC
                     LIMIT 25
-                """, (stock_code, event_date)).fetchall()
+                """, (stock_code, event_date_compact)).fetchall()
 
                 if not prices_after:
                     continue

@@ -435,13 +435,16 @@ def run_backtest(db_path: str) -> Dict[str, int]:
 
             try:
                 # 从 prices 表获取入池日之后的收盘价序列
+                # 注意：prices.trade_date 格式为 20260327，event_date 格式为 2026-03-29
+                # 需要统一格式比较
+                event_date_compact = event_date.replace('-', '') if event_date else ''
                 price_rows = conn.execute("""
                     SELECT trade_date, close_price
                     FROM prices
                     WHERE stock_code = ? AND trade_date >= ?
                     ORDER BY trade_date ASC
                     LIMIT 65
-                """, (code, event_date)).fetchall()
+                """, (code, event_date_compact)).fetchall()
 
                 if len(price_rows) < 2:
                     logger.debug(f"[run_backtest] {code} {event_date} 价格数据不足，跳过")
@@ -451,7 +454,7 @@ def run_backtest(db_path: str) -> Dict[str, int]:
                 # 入池价取 prices 表中 event_date 当天收盘价（如果有的话）
                 actual_entry = entry_price
                 for pr in price_rows:
-                    if pr["trade_date"] == event_date:
+                    if pr["trade_date"] == event_date_compact:
                         actual_entry = pr["close_price"] or entry_price
                         break
 
