@@ -586,6 +586,17 @@ class EarningsAnalyzer:
                     expected_yoy = detail.get("expected_yoy")
                     profit_diff = detail.get("beat_diff")
 
+                # 从 earnings 表补填缺失的财务数据（profit_new_high 场景）
+                if report_period and actual_yoy is None:
+                    rp_iso = report_period[:4] + "-" + report_period[4:6] + "-" + report_period[6:8] if len(report_period) == 8 else report_period
+                    earn_row = conn.execute("""
+                        SELECT net_profit_yoy, koufei_yoy, profit_quality_risk
+                        FROM earnings WHERE stock_code = ? AND report_date = ?
+                        LIMIT 1
+                    """, (code, rp_iso)).fetchone()
+                    if earn_row:
+                        actual_yoy = earn_row["net_profit_yoy"]
+
                 et_code = normalizer.normalize_code(code)
                 et_date = normalizer.normalize_date(today)
                 conn.execute("""
