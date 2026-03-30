@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 os.environ['no_proxy'] = os.environ.get('no_proxy', '') + ',qt.gtimg.cn,*.qq.com'
 
 # ============ 配置 ============
-DATA_DIR = os.path.expanduser("~/.openclaw/workspace/smart-invest/data/oversold")
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "oversold")
 HISTORY_FILE = os.path.join(DATA_DIR, "btiq_history.json")
 ALERT_THRESHOLD = 30  # 买入信号阈值
 WARN_THRESHOLD = 25   # 冰点警告

@@ -123,12 +123,32 @@ TASK_GROUPS = ["数据采集", "分析扫描", "推送同步"]
 # ============================================================
 CONTAINER_NAME = "smart-invest"
 
+def _is_in_docker():
+    """检测是否运行在 Docker 容器内"""
+    return os.path.exists('/.dockerenv')
+
+def _crontab_read():
+    """读取 crontab（容器内直接读，宿主机通过 docker exec）"""
+    if _is_in_docker():
+        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+    else:
+        result = subprocess.run(
+            ["docker", "exec", CONTAINER_NAME, "crontab", "-l"],
+            capture_output=True, text=True,
+        )
+    return result
+
 def _read_container_crontab():
     """读取容器 crontab 内容，回退到备份文件"""
-    result = subprocess.run(
-        ["docker", "exec", CONTAINER_NAME, "crontab", "-l"],
-        capture_output=True, text=True, timeout=10,
-    )
+    if _is_in_docker():
+        result = subprocess.run(
+            ["crontab", "-l"], capture_output=True, text=True, timeout=10,
+        )
+    else:
+        result = subprocess.run(
+            ["docker", "exec", CONTAINER_NAME, "crontab", "-l"],
+            capture_output=True, text=True, timeout=10,
+        )
     if result.returncode == 0:
         return result.stdout.splitlines()
     # 回退到备份文件
@@ -167,10 +187,17 @@ def _get_crontab_entries():
                 task_key = None
                 task_label = comment_name
                 for k, v in PRESET_TASKS.items():
-                    if v["command"].split(">>")[0].strip() in command or v["command"].split("&&")[1].strip().split(">>")[0].strip() in command:
+                    cmd_base = v["command"].split(">>")[0].strip()
+                    if cmd_base in command:
                         task_key = k
                         task_label = v["name"]
                         break
+                    if "&&" in v["command"]:
+                        cmd_and = v["command"].split("&&")[1].strip().split(">>")[0].strip()
+                        if cmd_and in command:
+                            task_key = k
+                            task_label = v["name"]
+                            break
 
                 # 解析调度为可读格式
                 readable = _schedule_to_readable(schedule)
@@ -258,14 +285,17 @@ def _save_crontab(lines: list):
     crontab_file = str(PROJECT_ROOT / "data" / "crontab.txt")
     SHELL_HEADER = "CRON_TZ=Asia/Shanghai\nSHELL=/bin/bash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
 
-    # 写容器 crontab（只取 cron 行）
+    # 写 crontab（只取 cron 行）
     cron_lines = "\n".join(
         l for l in lines if l.strip() and not l.startswith("SHELL") and not l.startswith("PATH") and not l.startswith("CRON_TZ")
     ) + "\n"
-    subprocess.run(
-        ["docker", "exec", "-i", CONTAINER_NAME, "crontab", "-"],
-        input=cron_lines, capture_output=True, text=True, timeout=10,
-    )
+    if _is_in_docker():
+        subprocess.run(["crontab", "-"], input=cron_lines, capture_output=True, text=True, timeout=10)
+    else:
+        subprocess.run(
+            ["docker", "exec", "-i", CONTAINER_NAME, "crontab", "-"],
+            input=cron_lines, capture_output=True, text=True, timeout=10,
+        )
 
     # 备份到文件（含 SHELL/PATH）
     full_content = SHELL_HEADER + "\n".join(

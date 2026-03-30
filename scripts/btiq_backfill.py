@@ -12,7 +12,7 @@ import json
 import time; time.tzset()
 from datetime import datetime, timedelta
 
-DATA_DIR = os.path.expanduser("~/.openclaw/workspace/smart-invest/data/oversold")
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "oversold")
 HISTORY_FILE = os.path.join(DATA_DIR, "btiq_history.json")
 
 
@@ -106,7 +106,7 @@ def _sync_to_db(history):
     """将 JSON 数据同步到 market_snapshots 表"""
     import sqlite3
 
-    db_path = os.path.expanduser("~/.openclaw/workspace/smart-invest/data/smart_invest.db")
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "smart_invest.db")
     if not os.path.exists(db_path):
         print("  数据库不存在，跳过同步")
         return

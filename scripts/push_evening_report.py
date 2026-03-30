@@ -33,33 +33,35 @@ def get_tenant_token():
 
 
 def fetch_index_overview():
-    """获取主要指数行情"""
+    """获取主要指数行情（腾讯 API）"""
+    indices_map = {
+        "sh000001": "上证指数",
+        "sz399001": "深证成指",
+        "sz399006": "创业板指",
+        "sh000300": "沪深300",
+        "sh000905": "中证500",
+        "sh000688": "科创50",
+    }
     try:
-        import akshare as ak
-        df = ak.stock_zh_index_spot_em()
-        if df is None or df.empty:
-            return []
-
-        targets = {
-            "上证指数": "sh000001",
-            "深证成指": "sz399001",
-            "创业板指": "sz399006",
-            "科创50": "sh000688",
-            "沪深300": "sh000300",
-            "中证500": "sh000905",
-        }
-
+        codes = ",".join(indices_map.keys())
+        url = f"https://qt.gtimg.cn/q={codes}"
+        req = urllib.request.Request(url)
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(req, timeout=10) as resp:
+            data = resp.read().decode('gbk', errors='ignore')
         results = []
-        for _, row in df.iterrows():
-            name = str(row.get("名称", ""))
-            if name in targets:
-                close = row.get("最新价", 0)
-                change_pct = row.get("涨跌幅", 0)
-                results.append({
-                    "name": name,
-                    "close": float(close) if close else 0,
-                    "change_pct": float(change_pct) if change_pct else 0,
-                })
+        for line in data.split(';'):
+            if '~' not in line:
+                continue
+            parts = line.split('~')
+            if len(parts) < 40:
+                continue
+            code = parts[2]
+            name = indices_map.get(code, parts[1])
+            close = float(parts[3]) if parts[3] else 0
+            change_pct = float(parts[32]) if parts[32] else 0
+            if close > 0:
+                results.append({"name": name, "close": close, "change_pct": change_pct})
         return results
     except Exception as e:
         print(f"指数获取失败: {e}")
@@ -88,10 +90,10 @@ def build_card(indices, sector_data):
 
     # 板块涨幅 TOP10
     today_top = sector_data.get("today", [])
-    if today_top and not today_top[0].get("error"):
+    if today_top:
         lines = ["**📈 板块涨幅 TOP10**"]
         for i, s in enumerate(today_top[:10], 1):
-            lead = f" | 龙头: {s['lead_stock']}" if s.get("lead_stock") else ""
+            lead = f" | 龙头: {s.get('lead_stock','')}" if s.get("lead_stock") else ""
             sign = "+" if s.get("change_pct", 0) > 0 else ""
             lines.append(f"{i}. {s['name']} {sign}{s['change_pct']:.2f}%{lead}")
         elements.append({
@@ -112,7 +114,7 @@ def build_card(indices, sector_data):
 
     # 5日资金流向
     day5 = sector_data.get("5day", [])
-    if day5 and not day5[0].get("error"):
+    if day5:
         lines = ["**💰 5日主力资金流入 TOP5**"]
         for i, s in enumerate(day5[:5], 1):
             fund = f"{s['fund_flow_yi']:.1f}亿" if s.get("fund_flow_yi") else ""
@@ -125,9 +127,9 @@ def build_card(indices, sector_data):
     # 检查是否所有数据都是错误
     has_real_data = (
         indices or
-        (today_top and not today_top[0].get("error")) or
-        today_bottom or
-        (day5 and not day5[0].get("error"))
+        bool(today_top) or
+        bool(today_bottom) or
+        bool(day5)
     )
     if not has_real_data:
         elements.append({
@@ -166,27 +168,64 @@ def send_card(token, target, card):
 
 
 def main():
-    from scripts.sector_rotation import fetch_sector_flow, fetch_bottom
-
     print("📊 A股晚报采集...")
 
-    # 1. 获取指数
+    # 1. 获取指数（腾讯 API）
     indices = fetch_index_overview()
     print(f"  指数: {len(indices)} 个")
 
-    # 2. 获取板块数据
-    sector_data = {
-        "today": fetch_sector_flow("今日"),
-        "today_bottom": fetch_bottom("今日"),
-        "5day": fetch_sector_flow("5日"),
-        "10day": fetch_sector_flow("10日"),
-    }
-    print(f"  板块: {len(sector_data['today'])} 个")
+    # 2. 获取板块数据（SectorProvider，自动降级到腾讯+Tushare）
+    from core.data_provider import SectorProvider
+    sp = SectorProvider()
+    top_sectors = sp.fetch()  # 全部，已按涨跌幅排序
+    bottom_sectors = top_sectors[::-1]  # 反转 = 跌幅排行
+    print(f"  板块: {len(top_sectors)} 个 (来源: {sp.last_source})")
 
-    # 3. 构建卡片
+    sector_data = {
+        "today": [{"name": s.sector_name, "change_pct": s.change_pct,
+                    "lead_stock": ""} for s in top_sectors],
+        "today_bottom": [{"name": s.sector_name, "change_pct": s.change_pct}
+                         for s in bottom_sectors],
+        "5day": [],
+    }
+
+    # 3. 检查是否有真实数据（指数+板块至少有一项）
+    has_real_indices = len(indices) > 0
+    has_real_sectors = len(sector_data.get("today", [])) > 0
+    has_real_bottom = len(sector_data.get("today_bottom", [])) > 0
+    has_real_5day = len(sector_data.get("5day", [])) > 0
+
+    if not has_real_indices and not has_real_sectors and not has_real_bottom:
+        print("❌ 指数和板块数据全部失败，发送失败通知")
+        target = os.getenv("SI_FEISHU_DAILY_TARGET", "")
+        token = get_tenant_token()
+        if target and token:
+            fail_card = {
+                "config": {"wide_screen_mode": True},
+                "header": {
+                    "title": {"tag": "plain_text", "content": f"⚠️ A股晚报推送失败 — {datetime.now().strftime('%Y-%m-%d')}"},
+                    "template": "red",
+                },
+                "elements": [{
+                    "tag": "div",
+                    "text": {"tag": "lark_md", "content": "今日数据采集异常（API 连接失败），请稍后重试"},
+                }],
+            }
+            send_card(token, target, fail_card)
+        sys.exit(1)
+
+    # 清理错误数据，只保留有效板块
+    if not has_real_sectors:
+        sector_data["today"] = []
+    if not has_real_bottom:
+        sector_data["today_bottom"] = []
+    if not has_real_5day:
+        sector_data["5day"] = []
+
+    # 4. 构建卡片
     card = build_card(indices, sector_data)
 
-    # 4. 推送
+    # 5. 推送
     target = os.getenv("SI_FEISHU_DAILY_TARGET", "")
     if not target:
         print("❌ 未配置推送目标")
@@ -198,7 +237,7 @@ def main():
 
     success = send_card(token, target, card)
     if success:
-        print("✅ A股晚报推送成功")
+        print(f"✅ A股晚报推送成功 (指数{len(indices)} 板块{len(sector_data.get('today',[]))}条)")
     else:
         print("❌ A股晚报推送失败")
         sys.exit(1)

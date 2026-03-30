@@ -1504,6 +1504,12 @@ class SectorProvider(BaseProvider):
             self.last_source = "akshare"
             return results
 
+        logger.info("[SectorProvider] AkShare 无数据，降级到腾讯行情+Tushare 行业")
+        results = self._fetch_from_tencent()
+        if results:
+            self.last_source = "tencent"
+            return results
+
         logger.warning("[SectorProvider] 所有数据源均无板块数据")
         self.last_source = "none"
         return []
@@ -1591,6 +1597,139 @@ class SectorProvider(BaseProvider):
             logger.error("[SectorProvider] akshare 库未安装")
         except Exception as e:
             logger.error(f"[SectorProvider] AkShare 获取失败: {e}")
+        return []
+
+    def _fetch_from_tencent(self) -> List[SectorData]:
+        """
+        从腾讯全市场行情 + Tushare 行业分类计算板块数据
+
+        数据源：
+        - Tushare pro.stock_basic() → 行业分类映射（5494 只）
+        - 腾讯 qt.gtimg.cn 批量行情 → 实时涨跌幅
+
+        无任何东方财富依赖，纯腾讯 + tushare 通路。
+        """
+        try:
+            import urllib.request
+            import tushare as ts
+            import os
+            import json as _json
+
+            # 1. 获取行业分类
+            token = os.environ.get('TUSHARE_TOKEN', '')
+            if not token:
+                logger.warning("[SectorProvider] TUSHARE_TOKEN 未设置，跳过腾讯板块")
+                return []
+
+            pro = ts.pro_api(token)
+            df_basic = pro.stock_basic(
+                exchange='', list_status='L',
+                fields='ts_code,name,industry'
+            )
+            if df_basic is None or df_basic.empty:
+                return []
+
+            # 构建 code → industry 映射
+            industry_map = {}
+            for _, row in df_basic.iterrows():
+                ts_code = str(row.get('ts_code', ''))
+                industry = str(row.get('industry', ''))
+                if not ts_code or not industry:
+                    continue
+                # ts_code: 000858.SZ → 腾讯格式: sz000858
+                parts = ts_code.split('.')
+                if len(parts) == 2:
+                    code, exchange = parts
+                    prefix = 'sh' if exchange in ('SH',) else 'sz'
+                    tencent_code = f'{prefix}{code}'
+                    industry_map[tencent_code] = industry
+
+            if not industry_map:
+                return []
+
+            # 2. 批量获取腾讯行情
+            all_codes = list(industry_map.keys())
+            batch_size = 800
+
+            # 按行业分组统计
+            sector_data = {}  # industry → {ups, downs, flats, total_changes}
+
+            for start in range(0, len(all_codes), batch_size):
+                batch = all_codes[start:start + batch_size]
+                url = f"https://qt.gtimg.cn/q={','.join(batch)}"
+                try:
+                    req = urllib.request.Request(url)
+                    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                    with opener.open(req, timeout=15) as resp:
+                        data = resp.read().decode('gbk', errors='ignore')
+
+                    for line in data.split(';'):
+                        if '~' not in line:
+                            continue
+                        parts = line.split('~')
+                        if len(parts) < 33:
+                            continue
+                        try:
+                            code = parts[2]
+                            price = float(parts[3]) if parts[3] else 0
+                            change_pct = float(parts[32]) if parts[32] else 0
+                            if price <= 0:
+                                continue
+
+                            tencent_code = code
+                            if code not in industry_map and len(code) == 6:
+                                prefix = 'sh' if code.startswith(('6', '9')) else 'sz'
+                                tencent_code = f'{prefix}{code}'
+                            industry = industry_map.get(tencent_code, '')
+                            if not industry:
+                                continue
+
+                            if industry not in sector_data:
+                                sector_data[industry] = {'ups': 0, 'downs': 0, 'flats': 0, 'changes': []}
+
+                            sector_data[industry]['changes'].append(change_pct)
+                            if change_pct > 0:
+                                sector_data[industry]['ups'] += 1
+                            elif change_pct < 0:
+                                sector_data[industry]['downs'] += 1
+                            else:
+                                sector_data[industry]['flats'] += 1
+                        except (ValueError, IndexError):
+                            continue
+                except Exception as e:
+                    logger.warning(f"[SectorProvider] 腾讯行情批次 {start} 失败: {e}")
+                    continue
+
+            if not sector_data:
+                return []
+
+            # 3. 计算板块统计
+            results = []
+            for industry, stats in sector_data.items():
+                changes = stats['changes']
+                if not changes:
+                    continue
+                avg_change = round(sum(changes) / len(changes), 2)
+                results.append(SectorData(
+                    sector_name=industry,
+                    change_pct=avg_change,
+                    net_inflow=0.0,  # 腾讯 API 无资金流向数据
+                    up_count=stats['ups'],
+                    down_count=stats['downs'],
+                    source="tencent",
+                ))
+
+            # 按涨跌幅排序
+            results.sort(key=lambda x: x.change_pct, reverse=True)
+
+            if results:
+                logger.info(f"[SectorProvider] 腾讯计算返回 {len(results)} 个行业")
+                return results
+
+        except ImportError:
+            logger.error("[SectorProvider] tushare 库未安装")
+        except Exception as e:
+            logger.error(f"[SectorProvider] 腾讯板块计算失败: {e}")
         return []
 
 
