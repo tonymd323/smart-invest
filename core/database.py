@@ -229,6 +229,41 @@ CREATE TABLE IF NOT EXISTS market_snapshots (
     created_at      TEXT    DEFAULT (datetime('now', 'localtime'))
 );
 
+-- 11. 五维度评分快照（超预期评分体系 v2.0）
+CREATE TABLE IF NOT EXISTS stock_scores (
+    stock_code          TEXT    NOT NULL,
+    score_date          TEXT    NOT NULL,               -- YYYY-MM-DD
+    -- 五维度原始分
+    q_score             REAL,                           -- 质量因子 0-100
+    g_score             REAL,                           -- 成长因子 0-100
+    v_score             REAL,                           -- 估值因子 0-100
+    c_score             REAL,                           -- 护城河因子 0-100
+    s_score             REAL,                           -- 超预期因子 0-100
+    -- 综合
+    total_score         REAL,
+    grade               TEXT,                           -- S/A/B/C/D
+    signal              TEXT,                           -- strong_buy/buy/watch/hold/avoid
+    -- 明细数据（JSON）
+    detail              TEXT,                           -- 各子指标得分
+    -- 估值数据
+    pe_ttm              REAL,
+    pb                  REAL,
+    peg                 REAL,
+    reasonable_pe       REAL,
+    safety_margin       REAL,
+    -- 财务快照
+    roe                 REAL,
+    gross_margin        REAL,
+    revenue_yoy         REAL,
+    profit_yoy          REAL,
+    cashflow_profit_ratio REAL,
+    debt_ratio          REAL,
+    -- 否决
+    veto_applied        TEXT,                           -- 触发的否决条件（逗号分隔）
+    created_at          TEXT    DEFAULT (datetime('now', 'localtime')),
+    PRIMARY KEY (stock_code, score_date)
+);
+
 -- ── 索引 ────────────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_earnings_stock     ON earnings(stock_code, report_date);
 CREATE INDEX IF NOT EXISTS idx_prices_stock       ON prices(stock_code, trade_date);
@@ -238,6 +273,8 @@ CREATE INDEX IF NOT EXISTS idx_discovery_status   ON discovery_pool(status, scor
 CREATE INDEX IF NOT EXISTS idx_events_stock       ON events(stock_code, published_at);
 CREATE INDEX IF NOT EXISTS idx_events_type        ON events(event_type, created_at);
 CREATE INDEX IF NOT EXISTS idx_market_snap_time   ON market_snapshots(snapshot_time);
+CREATE INDEX IF NOT EXISTS idx_stock_scores_code  ON stock_scores(stock_code, score_date);
+CREATE INDEX IF NOT EXISTS idx_stock_scores_total ON stock_scores(total_score DESC);
 """
 
 
@@ -249,6 +286,20 @@ def _migrate_schema(conn: sqlite3.Connection):
     existing_cols = {row[1] for row in conn.execute('PRAGMA table_info(earnings)').fetchall()}
     migrations = [
         ('earnings', 'revenue_yoy', 'REAL'),
+        # v2.0 评分体系新增字段
+        ('earnings', 'debt_ratio', 'REAL'),              # 资产负债率（%）
+        ('earnings', 'operating_cashflow', 'REAL'),       # 经营活动现金流净额（亿元）
+        ('earnings', 'cashflow_per_share', 'REAL'),       # 每股经营现金流（元）
+        ('earnings', 'inventory_turnover', 'REAL'),       # 存货周转率（次/年）
+        ('earnings', 'inventory_days', 'REAL'),           # 存货周转天数
+        ('earnings', 'bps', 'REAL'),                      # 每股净资产（元）
+        ('earnings', 'roic', 'REAL'),                     # 投入资本回报率（%）
+        ('earnings', 'current_ratio', 'REAL'),            # 流动比率
+        ('earnings', 'cash_to_revenue', 'REAL'),          # 销售现金/营收比
+        ('earnings', 'koufei_net_profit', 'REAL'),        # 扣非净利润（亿元）
+        ('earnings', 'koufei_yoy', 'REAL'),               # 扣非净利润同比（%）
+        ('earnings', 'gross_margin_yoy', 'REAL'),         # 毛利率同比变化（pp）
+        ('earnings', 'total_assets', 'REAL'),             # 总资产（亿元）
     ]
     for table, col, col_type in migrations:
         if col not in existing_cols:

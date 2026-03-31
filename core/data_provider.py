@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class FinancialData:
-    """财务数据标准格式"""
+    """财务数据标准格式 — v2.0 扩展：现金流/负债率/存货/估值"""
     stock_code: str
     report_date: str
     net_profit: float            # 归母净利润（亿元）
@@ -44,6 +44,20 @@ class FinancialData:
     gross_margin: float          # 毛利率（%）
     eps: float                   # 基本每股收益
     source: str                  # 数据来源标识
+    # ── v2.0 新增字段 ──
+    debt_ratio: float = 0.0          # 资产负债率（%）
+    operating_cashflow: float = 0.0  # 经营活动现金流净额（亿元）
+    cashflow_per_share: float = 0.0  # 每股经营现金流（元）
+    inventory_turnover: float = 0.0  # 存货周转率（次/年）
+    inventory_days: float = 0.0      # 存货周转天数
+    bps: float = 0.0                 # 每股净资产（元）
+    roic: float = 0.0                # 投入资本回报率（%）
+    current_ratio: float = 0.0       # 流动比率
+    cash_to_revenue: float = 0.0     # 销售现金/营收比
+    koufei_net_profit: float = 0.0   # 扣非净利润（亿元）
+    koufei_yoy: float = 0.0          # 扣非净利润同比（%）
+    gross_margin_yoy: float = 0.0    # 毛利率同比变化（pp）
+    total_assets: float = 0.0        # 总资产（亿元）
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -182,7 +196,12 @@ class FinancialProvider(BaseProvider):
         return []
 
     def _fetch_from_em(self, stock_code: str, period: str = None) -> List[FinancialData]:
-        """从东方财富获取（优先预注入数据，其次实时 API）"""
+        """
+        从东方财富获取（优先预注入数据，其次实时 API）
+
+        v2.0: 使用 RPT_F10_FINANCE_MAINFINADATA（F10主表）替代旧报表，
+        包含现金流、负债率、存货周转等完整财务指标。
+        """
         # 优先使用预注入数据
         if self.data is not None:
             if stock_code in self.data:
@@ -191,7 +210,7 @@ class FinancialProvider(BaseProvider):
                 return self._parse_em_items(items, stock_code)
             return []
 
-        # 实时调用东方财富 API
+        # 实时调用东方财富 F10 API
         try:
             import requests
             code = _ts_code_to_em(stock_code)
@@ -202,6 +221,8 @@ class FinancialProvider(BaseProvider):
                 'pageSize': 10,
                 'sortColumns': 'REPORT_DATE',
                 'sortTypes': -1,
+                'source': 'WEB',
+                'client': 'WEB',
             }
             if period:
                 params['filter'] += f'(REPORT_DATE=\'{period}\')'
@@ -212,9 +233,37 @@ class FinancialProvider(BaseProvider):
 
             if data.get('success') and data.get('result', {}).get('data'):
                 return self._parse_em_items(data['result']['data'], stock_code)
+
+            # F10 降级到旧报表
+            logger.warning(f"[FinancialProvider] F10 无数据 {stock_code}，降级到 LICO_FN_CPD")
+            return self._fetch_from_em_fallback(stock_code, period)
+
+        except Exception as e:
+            logger.error(f"[FinancialProvider] F10 API 调用失败 {stock_code}: {e}")
+            return self._fetch_from_em_fallback(stock_code, period)
+
+    def _fetch_from_em_fallback(self, stock_code: str, period: str = None) -> List[FinancialData]:
+        """降级：使用 RPT_LICO_FN_CPD（字段较少但稳定）"""
+        try:
+            import requests
+            code = _ts_code_to_em(stock_code)
+            params = {
+                'reportName': 'RPT_LICO_FN_CPD',
+                'columns': 'ALL',
+                'filter': f'(SECUCODE="{code}.{"SH" if stock_code.endswith(".SH") else "SZ"}")',
+                'pageSize': 10,
+                'source': 'SECURITIES',
+                'client': 'WEB',
+            }
+            resp = requests.get(self.BASE_URL, params=params, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
+
+            if data.get('success') and data.get('result', {}).get('data'):
+                return self._parse_em_items(data['result']['data'], stock_code)
             return []
         except Exception as e:
-            logger.error(f"[FinancialProvider] 东方财富 API 调用失败 {stock_code}: {e}")
+            logger.error(f"[FinancialProvider] 降级报表也失败 {stock_code}: {e}")
             return []
 
     def _parse_em_items(self, items: list, stock_code: str) -> List[FinancialData]:
@@ -239,7 +288,13 @@ class FinancialProvider(BaseProvider):
         return default
 
     def _parse_em_item(self, item: dict, stock_code: str) -> Optional[FinancialData]:
-        """解析单条东方财富数据（兼容 v1 下划线 + v2 无下划线字段名）"""
+        """
+        解析单条东方财富数据
+
+        兼容两种报表：
+        - RPT_F10_FINANCE_MAINFINADATA（F10主表，字段全）
+        - RPT_LICO_FN_CPD（核心指标表，字段少）
+        """
         report_date = (
             item.get("REPORT_DATE")
             or item.get("REPORT_DATE_NAME")
@@ -250,6 +305,8 @@ class FinancialProvider(BaseProvider):
             return None
 
         BILLION = 1e9
+
+        # ── 基础字段（两表共通）──
         net_profit = (self._get_field(item, "PARENTNETPROFIT", "PARENT_NETPROFIT", default=0) or 0) / BILLION
         revenue = (self._get_field(item, "TOTALOPERATEREVE", "TOTAL_OPERATE_INCOME", default=0) or 0) / BILLION
 
@@ -259,9 +316,31 @@ class FinancialProvider(BaseProvider):
             default=0,
         )
         revenue_yoy = self._get_field(
-            item, "DJD_TOI_YOY", "TOTAL_OPERATE_INCOME_YOY",
+            item, "DJD_TOI_YOY", "TOTAL_OPERATE_INCOME_YOY", "TOTALOPERATEREVETZ",
+            "OI_YOYRATIO_PK",
             default=0,
         )
+
+        roe = float(self._get_field(item, "ROEJQ", "WEIGHTAVG_ROE", default=0) or 0)
+        gross_margin = float(self._get_field(item, "XSMLL", "GROSS_PROFIT_RATIO", default=0) or 0)
+        eps = float(self._get_field(item, "EPSJB", "EPS-basic", default=0) or 0)
+
+        # ── v2.0 新增：F10 专有字段 ──
+        debt_ratio = float(self._get_field(item, "ZCFZL", default=0) or 0)  # 资产负债率%
+        operating_cf = float(self._get_field(item, "NETCASH_OPERATE_PK", default=0) or 0) / BILLION  # 经营现金流→亿
+        cf_per_share = float(self._get_field(item, "MGJYXJJE", default=0) or 0)  # 每股经营现金流
+        inv_turnover = float(self._get_field(item, "CHZZL", default=0) or 0)  # 存货周转率
+        inv_days = float(self._get_field(item, "CHZZTS", default=0) or 0)  # 存货周转天数
+        bps = float(self._get_field(item, "BPS", default=0) or 0)  # 每股净资产
+        roic = float(self._get_field(item, "ROIC", default=0) or 0)  # ROIC
+        current_ratio = float(self._get_field(item, "LD", default=0) or 0)  # 流动比率
+        cash_to_rev = float(self._get_field(item, "XSJXLYYSR", default=0) or 0)  # 销售现金/营收比
+
+        koufei_profit = float(self._get_field(item, "KCFJCXSYJLR", default=0) or 0) / BILLION  # 扣非净利润→亿
+        koufei_yoy = float(self._get_field(item, "KCFJCXSYJLRTZ", "DJD_DEDUCTDPNP_YOY", default=0) or 0)
+
+        gm_yoy = float(self._get_field(item, "XSMLL_TB", default=0) or 0)  # 毛利率同比变化pp
+        total_assets = float(self._get_field(item, "TOTAL_ASSETS_PK", default=0) or 0) / BILLION  # 总资产→亿
 
         return FinancialData(
             stock_code=stock_code,
@@ -270,10 +349,24 @@ class FinancialProvider(BaseProvider):
             net_profit_yoy=float(net_profit_yoy or 0),
             revenue=round(revenue, 4),
             revenue_yoy=float(revenue_yoy or 0),
-            roe=float(self._get_field(item, "ROEJQ", "WEIGHTAVG_ROE", default=0) or 0),
-            gross_margin=float(self._get_field(item, "XSMLL", "GROSS_PROFIT_RATIO", default=0) or 0),
-            eps=float(self._get_field(item, "EPSJB", "EPS-basic", default=0) or 0),
+            roe=roe,
+            gross_margin=gross_margin,
+            eps=eps,
             source="eastmoney",
+            # v2.0
+            debt_ratio=round(debt_ratio, 2),
+            operating_cashflow=round(operating_cf, 4),
+            cashflow_per_share=round(cf_per_share, 4),
+            inventory_turnover=round(inv_turnover, 4),
+            inventory_days=round(inv_days, 2),
+            bps=round(bps, 4),
+            roic=round(roic, 2),
+            current_ratio=round(current_ratio, 2),
+            cash_to_revenue=round(cash_to_rev, 4),
+            koufei_net_profit=round(koufei_profit, 4),
+            koufei_yoy=round(koufei_yoy, 2),
+            gross_margin_yoy=round(gm_yoy, 2),
+            total_assets=round(total_assets, 4),
         )
 
     def _fetch_from_tushare(self, stock_code: str) -> List[FinancialData]:
