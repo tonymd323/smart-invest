@@ -1211,8 +1211,73 @@ class CompositeScorer:
         # 按总分降序
         results.sort(key=lambda x: x.total_score, reverse=True)
 
+        # 同步更新发现池评分
+        self._sync_discovery_pool()
+
         logger.info(f"[CompositeScorer] 批量评分完成: {len(results)} 只")
         return results
+
+    def _sync_discovery_pool(self):
+        """将 stock_scores 同步回 discovery_pool 的 score 和 signal 字段"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            # 1. 更新已有条目的评分
+            conn.execute("""
+                UPDATE discovery_pool
+                SET score = (
+                    SELECT s.total_score FROM stock_scores s
+                    WHERE s.stock_code = discovery_pool.stock_code
+                    ORDER BY s.score_date DESC LIMIT 1
+                ),
+                signal = (
+                    SELECT CASE
+                        WHEN s.total_score >= 85 THEN 'strong_buy'
+                        WHEN s.total_score >= 70 THEN 'buy'
+                        WHEN s.total_score >= 55 THEN 'watch'
+                        WHEN s.total_score >= 40 THEN 'hold'
+                        ELSE 'avoid'
+                    END
+                    FROM stock_scores s
+                    WHERE s.stock_code = discovery_pool.stock_code
+                    ORDER BY s.score_date DESC LIMIT 1
+                ),
+                updated_at = datetime('now', 'localtime')
+                WHERE status = 'active'
+                  AND stock_code IN (SELECT stock_code FROM stock_scores)
+            """)
+
+            # 2. D级（<40分）且触发否决 → 自动过期
+            conn.execute("""
+                UPDATE discovery_pool
+                SET status = 'expired', updated_at = datetime('now', 'localtime')
+                WHERE status = 'active'
+                  AND stock_code IN (
+                    SELECT stock_code FROM stock_scores
+                    WHERE total_score < 40 AND veto_applied IS NOT NULL AND veto_applied != ''
+                  )
+            """)
+
+            # 3. A级以上（>=70分）不在池中的 → 自动入池
+            conn.execute("""
+                INSERT OR IGNORE INTO discovery_pool
+                (stock_code, stock_name, industry, source, score, signal, status, discovered_at, expires_at)
+                SELECT s.stock_code, st.name, st.industry, 'composite_scan',
+                       s.total_score,
+                       CASE WHEN s.total_score >= 85 THEN 'strong_buy' ELSE 'buy' END,
+                       'active',
+                       datetime('now', 'localtime'),
+                       datetime('now', '+7 days')
+                FROM stock_scores s
+                LEFT JOIN stocks st ON s.stock_code = st.code
+                WHERE s.total_score >= 70
+                  AND s.stock_code NOT IN (SELECT stock_code FROM discovery_pool WHERE status = 'active')
+            """)
+
+            conn.commit()
+            conn.close()
+            logger.info("[CompositeScorer] 发现池已同步（更新评分+清理D级+自动入池A级）")
+        except Exception as e:
+            logger.error(f"[CompositeScorer] 发现池同步失败: {e}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
