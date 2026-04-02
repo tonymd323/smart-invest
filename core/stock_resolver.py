@@ -287,6 +287,58 @@ class StockResolver:
 
 
 # ── 工厂函数 ──────────────────────────────────────────────
+
+
+# ── 常量 ──────────────────────────────────────────────────
+# 不支持的市场前缀（数据源不覆盖）
+# 北交所(83xxx/87xxx)已在东方财富覆盖范围内，仅排除新三板(Axxxxx)
+UNSUPPORTED_PREFIXES = ('A',)  # 仅排除新三板
+
+
+def is_supported_market(code: str) -> bool:
+    """判断股票代码是否在数据源覆盖范围内"""
+    if not code:
+        return False
+    pure = code.replace('.SH', '').replace('.SZ', '').replace('.BJ', '').replace('.', '')
+    return not pure.startswith(UNSUPPORTED_PREFIXES)
+
+
+def validate_pool_entry(code: str, name: str = None, db_path: str = None) -> dict:
+    """
+    发现池/跟踪池准入校验。入池前统一调用。
+
+    Returns:
+        {"valid": bool, "code": str, "name": str, "reason": str}
+    """
+    from core.data_normalizer import normalizer
+    from pathlib import Path
+
+    if db_path is None:
+        db_path = str(Path(__file__).parent.parent / 'data' / 'smart_invest.db')
+
+    # 1. 代码标准化
+    canonical = normalizer.normalize_code(code)
+    if not canonical:
+        return {"valid": False, "code": code, "name": name, "reason": "无法标准化代码"}
+
+    # 2. 市场覆盖检查
+    if not is_supported_market(canonical):
+        return {"valid": False, "code": canonical, "name": name, "reason": "北交所/新三板，数据源不覆盖"}
+
+    # 3. 名称解析
+    resolved_name = name
+    if not resolved_name or resolved_name == canonical:
+        conn = sqlite3.connect(db_path)
+        row = conn.execute("SELECT name FROM stocks WHERE code = ?", (canonical,)).fetchone()
+        conn.close()
+        if row and row[0]:
+            resolved_name = row[0]
+    if not resolved_name or resolved_name == canonical:
+            return {"valid": False, "code": canonical, "name": canonical, "reason": "无法获取公司名称"}
+
+    return {"valid": True, "code": canonical, "name": resolved_name, "reason": ""}
+
+
 def get_resolver(db_path: str = None) -> StockResolver:
     """获取 StockResolver 实例"""
     if db_path is None:

@@ -13,6 +13,7 @@ services:
       - ./web:/app/web           # Web 前端（模板+路由）
       - ./scripts:/app/scripts     # Pipeline + 工具脚本
       - ./core:/app/core           # 核心模块
+      - ./scanners:/app/scanners   # 扫描器模块
     environment:
       - PYTHONUNBUFFERED=1
       - TZ=Asia/Shanghai
@@ -23,6 +24,8 @@ services:
       # 推送目标
       - SI_FEISHU_DAILY_TARGET=oc_0b6ecc5a6fdd9246b88415267dbc3224
       - SI_FEISHU_ALERT_TARGET=ou_5e001757460aaacd5e22857be92d4743
+      # 小米 MiMo LLM API（事件分析）
+      - XIAOMI_API_KEY=sk-c9lltttwyjgamxteheavdwupnuaw7q97zd9dek2afixkxcq3
     dns:
       - 223.5.5.5
       - 114.114.114.114

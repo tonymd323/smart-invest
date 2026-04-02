@@ -267,8 +267,12 @@ class Pipeline:
                     (stock_code, report_date, report_type, net_profit, net_profit_yoy,
                      revenue, revenue_yoy, roe, gross_margin, eps,
                      is_forecast, net_profit_yoy_lower, net_profit_yoy_upper, forecast_type,
-                     koufei_yoy, profit_quality_risk)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     koufei_yoy, profit_quality_risk,
+                     bps, debt_ratio, operating_cashflow, cashflow_per_share,
+                     inventory_turnover, inventory_days, roic, current_ratio,
+                     cash_to_revenue, koufei_net_profit, gross_margin_yoy, total_assets)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     nr.get("stock_code"),
                     nr.get("report_date"),
@@ -286,6 +290,18 @@ class Pipeline:
                     nr.get("forecast_type"),
                     nr.get("koufei_yoy"),
                     1 if nr.get("profit_quality_risk") else 0,
+                    nr.get("bps"),
+                    nr.get("debt_ratio"),
+                    nr.get("operating_cashflow"),
+                    nr.get("cashflow_per_share"),
+                    nr.get("inventory_turnover"),
+                    nr.get("inventory_days"),
+                    nr.get("roic"),
+                    nr.get("current_ratio"),
+                    nr.get("cash_to_revenue"),
+                    nr.get("koufei_net_profit"),
+                    nr.get("gross_margin_yoy"),
+                    nr.get("total_assets"),
                 ))
                 written += 1
 

@@ -82,7 +82,7 @@
     <div x-data="{editing:null}">
 
     <!-- H-1 桌面端：保持表格 -->
-    <div class="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div class="hidden md:block bg-white rounded-lg border border-gray-200 overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b">
                 <tr>
@@ -275,7 +275,7 @@
         </form>
     </div>
     {% if watchlist %}
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b">
                 <tr><th class="text-left px-4 py-2 text-gray-500">股票</th><th class="text-left px-4 py-2 text-gray-500">行业</th><th class="text-center px-4 py-2 text-gray-500">操作</th></tr>

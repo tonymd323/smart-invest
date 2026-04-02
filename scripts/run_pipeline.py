@@ -27,6 +27,165 @@ def run(args):
 
     with logger.run("pipeline", f"全量扫描 window={hours}h max={max_stocks}") as log:
 
+        # Step 0: 批量更新跟踪股行情
+        from core.database import init_db
+        init_db(str(DB_PATH))
+
+        print(f'📈 Step 0: 批量更新跟踪股行情')
+        t0 = time.time()
+        conn = sqlite3.connect(str(DB_PATH))
+
+        # 收集所有需要持续跟踪的股票
+        track_codes = set()
+
+        # 1) 发现池（active）
+        for r in conn.execute("SELECT DISTINCT stock_code FROM discovery_pool WHERE status='active'").fetchall():
+            track_codes.add(r[0])
+
+        # 2) T+N 跟踪（tracking/active）
+        for r in conn.execute("SELECT DISTINCT stock_code FROM event_tracking WHERE tracking_status IN ('tracking','active')").fetchall():
+            track_codes.add(r[0])
+
+        # 3) 持仓（stocks.json）
+        config_path = PROJECT_ROOT / "config" / "stocks.json"
+        if config_path.exists():
+            with open(config_path) as f:
+                config = json.load(f)
+            for s in config.get('stocks', []):
+                if s.get('holding') or s.get('tracking'):
+                    track_codes.add(s['code'])
+
+        track_codes = sorted(track_codes)
+        conn.close()
+
+        if track_codes:
+            from datetime import timedelta
+            today_str = datetime.now().strftime('%Y%m%d')
+
+            conn = sqlite3.connect(str(DB_PATH))
+
+            # 分类：已有历史数据（只需今日更新） vs 完全无数据（需完整历史）
+            has_history = []
+            no_history = []
+            for code in track_codes:
+                row = conn.execute(
+                    "SELECT MAX(trade_date) FROM prices WHERE stock_code=?", (code,)
+                ).fetchone()
+                if not row[0]:
+                    no_history.append(code)   # 完全无数据
+                elif row[0] < today_str:
+                    has_history.append(code)  # 有历史但今日未更新
+                # row[0] >= today_str → 已是最新，跳过
+            conn.close()
+
+            updated = 0
+
+            # ── 批量更新：腾讯行情 API（一次请求覆盖全部）──
+            if has_history:
+                import urllib.request
+                import re as _re
+                print(f'   腾讯批量更新: {len(has_history)} 只')
+
+                # 转换代码格式: 600660.SH → sh600660
+                def _to_tx_code(c):
+                    c = c.replace('.SH', '').replace('.SZ', '').replace('.BJ', '')
+                    if c.startswith(('6', '9')):
+                        return f'sh{c}'
+                    return f'sz{c}'
+
+                tx_codes = [_to_tx_code(c) for c in has_history]
+                batch_size = 800
+                tx_data = {}  # {stock_code: {...}}
+
+                for start in range(0, len(tx_codes), batch_size):
+                    batch = tx_codes[start:start + batch_size]
+                    url = f"https://qt.gtimg.cn/q={','.join(batch)}"
+                    try:
+                        req = urllib.request.Request(url)
+                        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                        with opener.open(req, timeout=15) as resp:
+                            raw = resp.read().decode('gbk', errors='ignore')
+                        for line in raw.split(';'):
+                            if '~' not in line:
+                                continue
+                            parts = line.split('~')
+                            if len(parts) < 40:
+                                continue
+                            code_raw = parts[2]  # e.g. 600660
+                            # 归一化到 SH/SZ
+                            if code_raw.startswith(('6', '9')):
+                                sc = f'{code_raw}.SH'
+                            else:
+                                sc = f'{code_raw}.SZ'
+                            try:
+                                close = float(parts[3]) if parts[3] else 0
+                                open_p = float(parts[5]) if parts[5] else close
+                                high = float(parts[33]) if parts[33] else close
+                                low = float(parts[34]) if parts[34] else close
+                                change_pct = float(parts[32]) if parts[32] else 0
+                                volume = float(parts[37]) if parts[37] else 0  # 手
+                                turnover = float(parts[38]) if parts[38] else 0  # 亿
+                                if close > 0:
+                                    tx_data[sc] = {
+                                        'close': close, 'open': open_p,
+                                        'high': high, 'low': low,
+                                        'change_pct': change_pct,
+                                        'volume': volume,
+                                        'turnover': round(turnover * 1e8, 2),  # 亿→元
+                                    }
+                            except (ValueError, IndexError):
+                                continue
+                    except Exception as e:
+                        print(f'   ⚠️ 腾讯行情批次失败: {e}')
+
+                # 写入 prices（仅今日记录）
+                conn = sqlite3.connect(str(DB_PATH))
+                for code in has_history:
+                    if code not in tx_data:
+                        continue
+                    d = tx_data[code]
+                    conn.execute("""
+                        INSERT OR REPLACE INTO prices
+                        (stock_code, trade_date, open_price, high_price, low_price, close_price,
+                         volume, turnover, change_pct)
+                        VALUES (?,?,?,?,?,?,?,?,?)
+                    """, (code, today_str, d['open'], d['high'], d['low'], d['close'],
+                          d['volume'], d['turnover'], d['change_pct']))
+                    updated += 1
+                conn.commit()
+                conn.close()
+                print(f'   ✅ 腾讯更新: {updated} 只')
+
+            # ── 无历史数据的股票：KlineProvider 补完整历史 ──
+            if no_history:
+                print(f'   KlineProvider 补历史: {len(no_history)} 只')
+                from core.data_provider import KlineProvider
+                kline_provider = KlineProvider()
+                ok = 0
+                for code in no_history:
+                    try:
+                        klines = kline_provider.fetch(code, limit=120)
+                        if klines:
+                            conn = sqlite3.connect(str(DB_PATH))
+                            for k in klines:
+                                conn.execute("""INSERT OR REPLACE INTO prices
+                                    (stock_code, trade_date, open_price, high_price, low_price, close_price,
+                                     volume, turnover, change_pct)
+                                    VALUES (?,?,?,?,?,?,?,?,?)""",
+                                    (code, k.trade_date, k.open_price, k.high_price, k.low_price, k.close_price,
+                                     k.volume, k.amount, k.change_pct))
+                            conn.commit()
+                            conn.close()
+                            ok += 1
+                    except Exception as e:
+                        print(f'   ⚠️ {code}: {e}')
+                print(f'   ✅ 历史补全: {ok}/{len(no_history)} 只')
+                updated += ok
+
+            step0_ms = int((time.time() - t0) * 1000)
+            results['step0'] = {'track': len(track_codes), 'updated': updated, 'ms': step0_ms}
+            print(f'   📊 Step 0 完成: {updated}/{len(track_codes)} 更新 ({step0_ms}ms)')
+
         # Step 1: DisclosureScanner
         print(f'📡 Step 1: DisclosureScanner (窗口 {hours}h)')
         t0 = time.time()
@@ -40,163 +199,204 @@ def run(args):
         print(f'   ✅ {len(new_codes)} 家新披露 ({scan_ms}ms)')
 
         if not new_codes:
-            print('   无新披露，结束')
-            log.result("无新披露，跳过")
-            return results
+            print('   无新披露，跳过采集步骤')
+            test_codes = []
+        else:
+            test_codes = new_codes[:max_stocks]
+            print(f'   测试范围: {len(test_codes)} 只')
 
-        test_codes = new_codes[:max_stocks]
-        print(f'   测试范围: {len(test_codes)} 只')
+        # 分析结果默认值（无新披露时也保证变量存在）
+        beats, highs, auto_pool, tn, events, fetched = [], [], [], [], [], 0
 
-        # Step 2: Pipeline 采集
-        print(f'\n📊 Step 2: Pipeline 采集')
-        t0 = time.time()
-        from core.pipeline import Pipeline
-        from core.data_provider import FinancialProvider
-        pipeline = Pipeline(db_path=str(DB_PATH), providers=[FinancialProvider()])
-        run_result = pipeline.run(test_codes)
-        pipe_ms = int((time.time() - t0) * 1000)
-        fetched = run_result.get('stocks_fetched', 0) if isinstance(run_result, dict) else 0
-        results['pipeline'] = {'collected': fetched, 'ms': pipe_ms}
-        print(f'   ✅ {fetched}/{len(test_codes)} 采集成功 ({pipe_ms}ms)')
+        if test_codes:
+            # Step 2: Pipeline 采集
+            print(f'\n📊 Step 2: Pipeline 采集')
+            t0 = time.time()
+            from core.pipeline import Pipeline
+            from core.data_provider import FinancialProvider
+            pipeline = Pipeline(db_path=str(DB_PATH), providers=[FinancialProvider()])
+            run_result = pipeline.run(test_codes)
+            pipe_ms = int((time.time() - t0) * 1000)
+            fetched = run_result.get('stocks_fetched', 0) if isinstance(run_result, dict) else 0
+            results['pipeline'] = {'collected': fetched, 'ms': pipe_ms}
+            print(f'   ✅ {fetched}/{len(test_codes)} 采集成功 ({pipe_ms}ms)')
 
-        # Step 2b: 一致预期
-        print(f'\n📊 Step 2b: 一致预期采集')
-        t0 = time.time()
-        from core.pipeline import fetch_and_apply_consensus
-        consensus_result = fetch_and_apply_consensus(str(DB_PATH), test_codes)
-        consensus_ms = int((time.time() - t0) * 1000)
-        c_fetched = consensus_result.get("fetched", 0)
-        c_updated = consensus_result.get("updated", 0)
-        print(f'   ✅ fetched={c_fetched} updated={c_updated} ({consensus_ms}ms)')
+            # Step 3: Analyzer
+            print(f'\n🔍 Step 3: Analyzer')
+            t0 = time.time()
+            from core.analyzer import EarningsAnalyzer
+            ea = EarningsAnalyzer(db_path=str(DB_PATH))
 
-        # Step 3: Analyzer
-        print(f'\n🔍 Step 3: Analyzer')
-        t0 = time.time()
-        from core.analyzer import EarningsAnalyzer
-        ea = EarningsAnalyzer(db_path=str(DB_PATH))
+            beats = ea.scan_beat_expectation(test_codes)
+            print(f'   ├─ 超预期: {len(beats)} 条')
+            for b in beats[:3]:
+                print(f'      {b.get("stock_code","?")}: {b.get("signal","?")} ({b.get("beat_strength","?")})')
 
-        beats = ea.scan_beat_expectation(test_codes)
-        print(f'   ├─ 超预期: {len(beats)} 条')
-        for b in beats[:3]:
-            print(f'      {b.get("stock_code","?")}: {b.get("signal","?")} ({b.get("beat_strength","?")})')
+            highs = ea.scan_new_high(test_codes)
+            print(f'   ├─ 扣非新高: {len(highs)} 条')
 
-        highs = ea.scan_new_high(test_codes)
-        print(f'   ├─ 扣非新高: {len(highs)} 条')
+            auto_pool = ea.auto_discover_pool(beats, highs)
+            print(f'   ├─ 发现池: {len(auto_pool)} 入池')
 
-        auto_pool = ea.auto_discover_pool(beats, highs)
-        print(f'   ├─ 发现池: {len(auto_pool)} 入池')
+            if auto_pool:
+                try:
+                    for entry in auto_pool:
+                        code = entry.get("stock_code")
+                        source = entry.get("source")
+                        if code and source:
+                            ea.create_tn_tracking([code], source)
+                    print(f'   ├─ T+N 创建: {len(auto_pool)} 条')
+                except Exception as e:
+                    print(f'   ├─ T+N 创建: 跳过 ({e})')
 
-        if auto_pool:
             try:
-                for entry in auto_pool:
-                    code = entry.get("stock_code")
-                    source = entry.get("source")
-                    if code and source:
-                        ea.create_tn_tracking([code], source)
-                print(f'   ├─ T+N 创建: {len(auto_pool)} 条')
+                from core.analyzer import PullbackAnalyzer
+                pa = PullbackAnalyzer(db_path=str(DB_PATH))
+                pullback_results = pa.scan(test_codes)
+                print(f'   ├─ 回调买入: {len(pullback_results)} 条')
             except Exception as e:
-                print(f'   ├─ T+N 创建: 跳过 ({e})')
+                print(f'   ├─ 回调买入: 跳过 ({e})')
+                pullback_results = []
 
+            try:
+                from core.analyzer import EventAnalyzer
+                eva = EventAnalyzer(db_path=str(DB_PATH))
+                events = eva.detect_from_pipeline(beats=beats, new_highs=highs)
+                print(f'   └─ 事件(pipeline): {len(events)} 条')
+            except Exception as e:
+                print(f'   └─ 事件(pipeline): 跳过 ({e})')
+                events = []
+
+
+            # Step 3b: 新闻事件采集
+            print(f'\n📰 Step 3b: 新闻事件采集')
+            t0_news = time.time()
+            try:
+                conn = sqlite3.connect(str(DB_PATH))
+                news_codes = set(test_codes)
+
+                config_path = PROJECT_ROOT / "config" / "stocks.json"
+                if config_path.exists():
+                    with open(config_path) as f:
+                        config = json.load(f)
+                    for s in config.get('stocks', []):
+                        if s.get('holding'):
+                            news_codes.add(s['code'])
+
+                pool_rows = conn.execute(
+                    "SELECT DISTINCT stock_code FROM discovery_pool WHERE status = 'active'"
+                ).fetchall()
+                for r in pool_rows:
+                    news_codes.add(r[0])
+                conn.close()
+
+                news_codes = list(news_codes)[:30]
+                news_events = eva.detect_from_codes(news_codes, limit=5)
+                news_ms = int((time.time() - t0_news) * 1000)
+                results['news_events'] = {'codes': len(news_codes), 'events': len(news_events), 'ms': news_ms}
+                print(f'   ✅ {len(news_codes)} 只股票扫描，{len(news_events)} 条新闻事件 ({news_ms}ms)')
+            except Exception as e:
+                print(f'   ⚠️ 新闻事件采集失败: {e}')
+                results['news_events'] = {'error': str(e)}
+
+            ana_ms = int((time.time() - t0) * 1000)
+            results['analyzer'] = {
+                'beats': len(beats), 'highs': len(highs),
+                'pool': len(auto_pool), 'tn': len(tn), 'events': len(events),
+                'pullback': len(pullback_results), 'ms': ana_ms,
+            }
+
+            # Step 3c: 新发现股K线（Step 0 未覆盖的新增股票）
+            print(f'\n📈 Step 3c: 新发现股K线采集')
+            new_from_pipeline = set()
+            for b in beats:
+                c = b.get('code')
+                if c: new_from_pipeline.add(c)
+            for h in highs:
+                c = h.get('stock_code')
+                if c: new_from_pipeline.add(c)
+            # 排除已更新的
+            if new_from_pipeline and results.get('step0', {}).get('track', 0) > 0:
+                conn = sqlite3.connect(str(DB_PATH))
+                existing = set(r[0] for r in conn.execute("SELECT DISTINCT stock_code FROM prices").fetchall())
+                conn.close()
+                new_codes_to_fetch = [c for c in new_from_pipeline if c not in existing]
+            else:
+                new_codes_to_fetch = []
+
+            if new_codes_to_fetch:
+                print(f'   需采集: {len(new_codes_to_fetch)} 只')
+                from core.data_provider import KlineProvider
+                kline_provider = KlineProvider()
+                kline_ok = 0
+                for code in new_codes_to_fetch:
+                    try:
+                        klines = kline_provider.fetch(code, limit=120)
+                        if klines:
+                            conn = sqlite3.connect(str(DB_PATH))
+                            for k in klines:
+                                conn.execute("""INSERT OR REPLACE INTO prices
+                                    (stock_code, trade_date, open_price, high_price, low_price, close_price,
+                                     volume, turnover, change_pct)
+                                    VALUES (?,?,?,?,?,?,?,?,?)""",
+                                    (code, k.trade_date, k.open_price, k.high_price, k.low_price, k.close_price,
+                                     k.volume, k.amount, k.change_pct))
+                            conn.commit()
+                            conn.close()
+                            kline_ok += 1
+                    except Exception as e:
+                        print(f'   ⚠️ {code}: {e}')
+                print(f'   ✅ K线采集完成: {kline_ok}/{len(new_codes_to_fetch)}')
+            else:
+                print(f'   无新增股票需要采集')
+
+            beats, highs, auto_pool, fetched = [], [], [], 0
+
+        # T+N 跟踪更新（无条件执行）
         try:
-            tn = ea.update_tn_tracking()
-            print(f'   ├─ T+N 更新: {len(tn)} 条')
+            from core.analyzer import EarningsAnalyzer
+            ea_tn = EarningsAnalyzer(db_path=str(DB_PATH))
+            tn = ea_tn.update_tn_tracking()
+            print(f'\n📈 T+N 跟踪更新: {len(tn)} 条')
         except Exception as e:
-            print(f'   ├─ T+N 更新: 跳过 ({e})')
+            print(f'\n⚠️ T+N 更新失败: {e}')
             tn = []
 
+        # 一致预期补充（跟踪池中无预期数据的股票）
+        print(f'\n📊 一致预期补充')
+        t0 = time.time()
         try:
-            from core.analyzer import PullbackAnalyzer
-            pa = PullbackAnalyzer(db_path=str(DB_PATH))
-            pullback_results = pa.scan(test_codes)
-            print(f'   ├─ 回调买入: {len(pullback_results)} 条')
+            conn_tmp = sqlite3.connect(str(DB_PATH))
+            need_consensus = [r[0] for r in conn_tmp.execute("""
+                SELECT DISTINCT stock_code FROM event_tracking
+                WHERE tracking_status IN ('tracking','active')
+                AND (expected_yoy IS NULL OR expected_yoy = 0)
+            """).fetchall()]
+            conn_tmp.close()
+            if need_consensus:
+                from core.pipeline import fetch_and_apply_consensus
+                cr = fetch_and_apply_consensus(str(DB_PATH), need_consensus)
+                consensus_ms = int((time.time() - t0) * 1000)
+                print(f'   ✅ {len(need_consensus)} 只待补, fetched={cr.get("fetched",0)} updated={cr.get("updated",0)} ({consensus_ms}ms)')
+                # 同步更新 event_tracking 的 expected_yoy
+                conn_tmp = sqlite3.connect(str(DB_PATH))
+                conn_tmp.execute("""
+                    UPDATE event_tracking SET expected_yoy = (
+                        SELECT c.net_profit_yoy FROM consensus c
+                        WHERE c.stock_code = event_tracking.stock_code
+                        AND c.year = SUBSTR(event_tracking.report_period, 3, 2) || 'E'
+                        AND c.net_profit_yoy IS NOT NULL
+                        ORDER BY c.fetched_at DESC LIMIT 1
+                    )
+                    WHERE tracking_status IN ('tracking','active')
+                    AND (expected_yoy IS NULL OR expected_yoy = 0)
+                """)
+                conn_tmp.commit()
+                conn_tmp.close()
+            else:
+                print(f'   ✅ 无需补充')
         except Exception as e:
-            print(f'   ├─ 回调买入: 跳过 ({e})')
-            pullback_results = []
-
-        try:
-            from core.analyzer import EventAnalyzer
-            eva = EventAnalyzer(db_path=str(DB_PATH))
-            events = eva.detect_from_pipeline(beats=beats, new_highs=highs)
-            print(f'   └─ 事件(pipeline): {len(events)} 条')
-        except Exception as e:
-            print(f'   └─ 事件(pipeline): 跳过 ({e})')
-            events = []
-
-
-        # Step 3b: 新闻事件采集
-        print(f'\n📰 Step 3b: 新闻事件采集')
-        t0_news = time.time()
-        try:
-            conn = sqlite3.connect(str(DB_PATH))
-            news_codes = set(test_codes)
-
-            config_path = PROJECT_ROOT / "config" / "stocks.json"
-            if config_path.exists():
-                with open(config_path) as f:
-                    config = json.load(f)
-                for s in config.get('stocks', []):
-                    if s.get('holding'):
-                        news_codes.add(s['code'])
-
-            pool_rows = conn.execute(
-                "SELECT DISTINCT stock_code FROM discovery_pool WHERE status = 'active'"
-            ).fetchall()
-            for r in pool_rows:
-                news_codes.add(r[0])
-            conn.close()
-
-            news_codes = list(news_codes)[:30]
-            news_events = eva.detect_from_codes(news_codes, limit=5)
-            news_ms = int((time.time() - t0_news) * 1000)
-            results['news_events'] = {'codes': len(news_codes), 'events': len(news_events), 'ms': news_ms}
-            print(f'   ✅ {len(news_codes)} 只股票扫描，{len(news_events)} 条新闻事件 ({news_ms}ms)')
-        except Exception as e:
-            print(f'   ⚠️ 新闻事件采集失败: {e}')
-            results['news_events'] = {'error': str(e)}
-
-        ana_ms = int((time.time() - t0) * 1000)
-        results['analyzer'] = {
-            'beats': len(beats), 'highs': len(highs),
-            'pool': len(auto_pool), 'tn': len(tn), 'events': len(events),
-            'pullback': len(pullback_results), 'ms': ana_ms,
-        }
-
-        # Step 3c: 跟踪股K线
-        print(f'\n📈 Step 3c: 跟踪股K线数据采集')
-        conn = sqlite3.connect(str(DB_PATH))
-        tracking_codes = [r[0] for r in conn.execute(
-            "SELECT DISTINCT stock_code FROM event_tracking WHERE tracking_status IN ('tracking','active')"
-        ).fetchall()]
-        existing_codes = set(r[0] for r in conn.execute("SELECT DISTINCT stock_code FROM prices").fetchall())
-        missing_codes = [c for c in tracking_codes if c not in existing_codes]
-        conn.close()
-
-        if missing_codes:
-            already = len(set(tracking_codes) & existing_codes)
-            print(f'   需采集: {len(missing_codes)} 只 (已有{already}只)')
-            from core.data_provider import KlineProvider
-            kline_provider = KlineProvider()
-            kline_ok = 0
-            for code in missing_codes:
-                try:
-                    klines = kline_provider.fetch(code, limit=120)
-                    if klines:
-                        conn = sqlite3.connect(str(DB_PATH))
-                        for k in klines:
-                            conn.execute("""INSERT OR REPLACE INTO prices
-                                (stock_code, trade_date, open_price, high_price, low_price, close_price,
-                                 volume, turnover, change_pct)
-                                VALUES (?,?,?,?,?,?,?,?,?)""",
-                                (code, k.trade_date, k.open_price, k.high_price, k.low_price, k.close_price,
-                                 k.volume, k.amount, k.change_pct))
-                        conn.commit()
-                        conn.close()
-                        kline_ok += 1
-                except Exception as e:
-                    print(f'   ⚠️ {code}: {e}')
-            print(f'   ✅ K线采集完成: {kline_ok}/{len(missing_codes)}')
-        else:
-            print(f'   跟踪股K线已全部就绪')
+            print(f'   ⚠️ 一致预期补充失败: {e}')
 
         # Step 3d: 回调买入评分
         print('\n📊 Step 3d: 回调买入评分')

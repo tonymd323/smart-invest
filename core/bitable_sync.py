@@ -435,11 +435,12 @@ class BitableSync:
                 expires_ts = int(datetime.strptime(expires_str[:19], '%Y-%m-%d %H:%M:%S').timestamp() * 1000) if expires_str else now_ts + 7 * 86400000
             except (ValueError, IndexError):
                 expires_ts = now_ts + 7 * 86400000
+            signal_zh = {'buy': '买入', 'watch': '关注', 'hold': '持有', 'avoid': '回避'}.get(signal, signal)
             records.append({"fields": {
                 "股票代码": code,
                 "公司名称": name,
                 "发现来源": source,
-                "信号": signal,
+                "信号": signal_zh,
                 "评分": score,
                 "入池日期": now_ts,
                 "过期日期": expires_ts,

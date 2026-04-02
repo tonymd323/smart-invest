@@ -19,6 +19,8 @@ ANALYSIS_TYPE_MAP = {
     'earnings_beat_daily': '超预期',
     'profit_new_high': '扣非新高',
     'pullback_score': '回调评分',
+    'pullback_buy_daily': '回调买入',
+    'quarterly_profit_new_high_daily': '单季利润新高',
     'oversold_btiq': '超跌监控',
 }
 
@@ -29,9 +31,13 @@ SIGNAL_MAP = {
     'avoid': '回避',
     'sell': '卖出',
     'N/A': '无信号',
-    'S': 'S级',
-    'A': 'A级',
-    'B': 'B级',
+    'S': 'S级(买入)',
+    'A': 'A级(买入)',
+    'B': 'B级(关注)',
+    'C': 'C级(不通过)',
+    '超预期': '超预期',
+    '首次覆盖': '首次覆盖',
+    '历史新高': '历史新高',
 }
 
 SOURCE_MAP = {
@@ -57,6 +63,8 @@ SOURCE_MAP = {
 EVENT_TYPE_MAP = {
     'earnings_beat': '超预期',
     'profit_new_high': '扣非新高',
+    'pullback_score': '回调评分',
+    'pullback_buy': '回调买入',
     'new_contract': '新合同',
     'production_increase': '增产',
     'buyback': '回购',

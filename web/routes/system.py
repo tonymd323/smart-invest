@@ -65,7 +65,7 @@ TASK_PANEL = {
         "desc": "扫描跟踪池回调买入信号",
         "icon": "📉",
         "group": "分析扫描",
-        "cmd": ["python3", "-c", "from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()"],
+        "cmd": ["python3", "scripts/run_with_log.py", "pullback", "回调买入扫描", "--", "python3", "-c", "from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); results = pa.scan(); print(f'扫描完成: {len(results)} 只')"],
         "params": [],
     },
     "btiq_backfill": {
@@ -73,7 +73,7 @@ TASK_PANEL = {
         "desc": "回填涨跌比历史数据，使 MA5 可用",
         "icon": "📊",
         "group": "数据采集",
-        "cmd": ["python3", "scripts/btiq_backfill.py", "--days", "{days}"],
+        "cmd": ["python3", "scripts/run_with_log.py", "btiq_backfill", "BTIQ历史回填", "--", "python3", "scripts/btiq_backfill.py", "--days", "{days}"],
         "params": [
             {"key": "days", "label": "回填天数", "type": "number", "default": "5"},
         ],
@@ -83,41 +83,13 @@ TASK_PANEL = {
         "desc": "BTIQ 涨跌比全市场扫描",
         "icon": "🔴",
         "group": "分析扫描",
-        "cmd": ["python3", "scripts/btiq_monitor.py"],
-        "params": [],
-    },
-    "event_monitor": {
-        "name": "事件监控",
-        "desc": "股价异动 + 新闻事件检测",
-        "icon": "📰",
-        "group": "分析扫描",
-        "cmd": ["python3", "scripts/event_monitor.py"],
-        "params": [],
-    },
-    "sector_rotation": {
-        "name": "板块轮动",
-        "desc": "行业资金流向 TOP10",
-        "icon": "🔄",
-        "group": "分析扫描",
-        "cmd": ["python3", "scripts/sector_rotation.py"],
-        "params": [],
-    },
-    "bitable_sync": {
-        "name": "Bitable 同步",
-        "desc": "同步发现池+跟踪池到飞书多维表格",
-        "icon": "📋",
-        "group": "推送同步",
-        "cmd": ["python3", "-c",
-            "import sys; sys.path.insert(0, '.'); "
-            "from core.bitable_sync import BitableSync; "
-            "s = BitableSync.from_preset('scan'); print('scan ok'); "
-            "s2 = BitableSync.from_preset('discovery_pool'); print('pool ok')"],
+        "cmd": ["python3", "scripts/run_with_log.py", "btiq_monitor", "超跌监控", "--", "python3", "scripts/btiq_monitor.py"],
         "params": [],
     },
 }
 
 # 按 group 分组，保持顺序
-TASK_GROUPS = ["数据采集", "分析扫描", "推送同步"]
+TASK_GROUPS = ["数据采集", "分析扫描"]
 
 # ============================================================
 # Cron 解析/管理

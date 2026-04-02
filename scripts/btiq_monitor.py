@@ -227,9 +227,46 @@ def run_once():
     # 计算MA5
     ma5 = calc_ma5(history)
 
+    # 写入数据库（供 Web 页面读取）
+    _save_to_db(result, ma5)
+
     # 生成报告
     report = generate_report(result, ma5)
     return report
+
+
+def _save_to_db(result: dict, ma5):
+    """将监控快照写入 market_snapshots 表"""
+    import sqlite3 as _sqlite3
+    from pathlib import Path as _Path
+
+    db_path = _Path(__file__).parent.parent / "data" / "smart_invest.db"
+    if not db_path.exists():
+        return
+
+    btiq = result['btiq']
+    signal = None
+    if ma5 and ma5 < 30:
+        signal = 'buy'
+    elif btiq < 25:
+        signal = 'warn'
+    elif btiq > 80:
+        signal = 'hot'
+
+    try:
+        conn = _sqlite3.connect(str(db_path))
+        conn.execute("""
+            INSERT INTO market_snapshots
+            (snapshot_time, btiq, up_count, down_count, flat_count, total_count, ma5, signal, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'monitor')
+        """, (
+            result['time'], btiq, result['up'], result['down'],
+            result['flat'], result['total'], ma5, signal,
+        ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"  ⚠️ DB写入失败: {e}", file=sys.stderr)
 
 
 if __name__ == '__main__':

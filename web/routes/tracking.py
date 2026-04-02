@@ -55,7 +55,7 @@ async def tracking_page(
                et.event_type, et.event_date, et.entry_price,
                et.return_1d, et.return_5d, et.return_10d, et.return_20d,
                et.report_period, et.actual_yoy, et.expected_yoy, et.profit_diff,
-               e.koufei_yoy, e.profit_quality_risk,
+               COALESCE(e.koufei_yoy, e.net_profit_yoy) as koufei_yoy, e.profit_quality_risk,
                et.tracking_status, et.last_updated,
                et.event_date as pool_date,
                CAST(julianday('now') - julianday(et.event_date) AS INTEGER) as hold_days
@@ -63,7 +63,6 @@ async def tracking_page(
         LEFT JOIN stocks s ON et.stock_code = s.code
         LEFT JOIN earnings e ON et.stock_code = e.stock_code 
             AND REPLACE(et.report_period, '-', '') = REPLACE(e.report_date, '-', '')
-            AND e.is_forecast = 1
         WHERE 1=1
     """
     params = []

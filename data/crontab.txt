@@ -1,34 +1,44 @@
+# ═══════════════════════════════════════════════════════════════
+# 投资系统 Crontab（APEX 定时任务共用）
+# CRON_TZ=Asia/Shanghai 保证所有任务按北京时间执行
+# 环境变量直接内嵌（cron 子进程不继承 docker env）
+# ═══════════════════════════════════════════════════════════════
 CRON_TZ=Asia/Shanghai
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-CRON_TZ=Asia/Shanghai
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-CRON_TZ=Asia/Shanghai
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-# 投资系统 Pipeline（晚间扫描）
-30 20 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1
-# 投资系统回调扫描（盘后回调买入信号）
-15 15 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_with_log.py pullback 回调买入扫描 -- python3 -c "from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); pa.scan()" >> data/logs/pullback_cron.log 2>&1
-# 投资系统回测回填（每周日）
-0 10 * * 0 cd /app && /usr/local/bin/python3 scripts/btiq_backfill.py >> data/logs/backtest_cron.log 2>&1
-# 盘后全量扫描
+
+# ── 环境变量（cron 不继承 docker env，必须内嵌）──────────────
+FEISHU_APP_ID=cli_a92e5d71f2799bdb
+FEISHU_APP_SECRET=i4OkFLYNfu8sTqDtvQo1Bd8sJ7FeUQUp
+SI_FEISHU_DAILY_TARGET=oc_0b6ecc5a6fdd9246b88415267dbc3224
+SI_FEISHU_ALERT_TARGET=ou_5e001757460aaacd5e22857be92d4743
+XIAOMI_API_KEY=sk-c9lltttwyjgamxteheavdwupnuaw7q97zd9dek2afixkxcq3
+TUSHARE_TOKEN=54c6afc7620641d1611663eb05a9538c6a5b1b4cbd9e0151afdacbd2
+
+# ── A股早报（指数+板块+全球资产+LLM分析）───────────────────
+3 7 * * 1-5 cd /app && /usr/local/bin/python3 -m scripts.push_morning_report >> data/logs/morning_report.log 2>&1
+
+# ── 超跌监控（盘中每10分钟）───────────────────────────────
+*/10 9-14 * * 1-5 cd /app && /usr/local/bin/python3 scripts/btiq_monitor.py >> data/logs/btiq_monitor.log 2>&1
+
+# ── 五维度批量评分（盘后 15:40）───────────────────────────
+40 15 * * 1-5 cd /app && /usr/local/bin/python3 -c "from core.scorer import CompositeScorer; s = CompositeScorer('data/smart_invest.db'); r = s.evaluate_batch(); print(f'评分完成: {len(r)}只')" >> data/logs/composite.log 2>&1
+
+# ── 增强版超预期扫描（盘后 15:45）─────────────────────────
+45 15 * * 1-5 cd /app && /usr/local/bin/python3 -c "from core.scorer import enhanced_beat_scan; results = enhanced_beat_scan('data/smart_invest.db', min_score=55.0); print(f'合格: {len(results)}条')" >> data/logs/enhanced_scan.log 2>&1
+
+15 15 * * 1-5 cd /app && /usr/local/bin/python3 -c "from core.analyzer import PullbackAnalyzer; pa = PullbackAnalyzer(db_path='data/smart_invest.db'); r=pa.scan(); print(f'回调扫描: buy={sum(1 for x in r if x.get(\"signal\")==\"buy\")} watch={sum(1 for x in r if x.get(\"signal\")==\"watch\")} total={len(r)}')" >> data/logs/pullback_cron.log 2>&1
+5 18 * * 1-5 cd /app && /usr/local/bin/python3 -m scripts.push_evening_report >> data/logs/evening_report.log 2>&1
+
+# ── 盘后全量扫描（15:35）───────────────────────────────
 35 15 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> data/logs/pipeline_eod.log 2>&1
-# 晚间补充扫描
-10 22 * * 0 cd /app && /usr/local/bin/python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1
-# A股晚报（板块轮动+指数概览）
-5 18 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_with_log.py evening_report A股晚报 -- python3 -m scripts.push_evening_report >> data/logs/evening_report.log 2>&1
-# 超跌监控（盘中每10分钟）
-*/10 9-14 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_with_log.py btiq_monitor 超跌监控 -- python3 scripts/btiq_monitor.py >> data/logs/btiq_monitor.log 2>&1
 
-# A股早报（指数+板块+全球资产+LLM分析）
-3 7 * * 1-5 cd /app && TZ=Asia/Shanghai /usr/local/bin/python3 -m scripts.push_morning_report >> data/logs/morning_report.log 2>&1
+# ── 回调买入扫描（15:15）───────────────────────────────
 
-# 五维度批量评分（盘后 15:40）— 评分所有有数据的股票 + 同步发现池
-40 15 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_with_log.py composite 五维度评分 -- python3 -c "from core.scorer import CompositeScorer; s = CompositeScorer(\"data/smart_invest.db\"); r = s.evaluate_batch(); print(f\"评分完成: {len(r)}只\")" >> data/logs/composite.log 2>&1
+# ── 晚间补充扫描（20:30）───────────────────────────────
+30 20 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1
 
-# 增强版超预期扫描（盘后 15:45）— 超预期触发 + 五维度过滤入池
-45 15 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_with_log.py enhanced_scan 增强扫描 -- python3 -c "from core.scorer import enhanced_beat_scan; results = enhanced_beat_scan(\"data/smart_invest.db\", min_score=55.0); print(f\"合格: {len(results)}条\")" >> data/logs/enhanced_scan.log 2>&1
+# ── 回测回填（每周日 10:00）───────────────────────────
+0 10 * * 0 cd /app && /usr/local/bin/python3 scripts/btiq_backfill.py >> data/logs/backtest_cron.log 2>&1
+
+# ── 回调买入扫描（修复版 15:15，信号门槛40，B级可写）────────

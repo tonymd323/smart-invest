@@ -38,9 +38,9 @@ SCORE_KLINE_PATTERN = 5      # K线形态确认
 SCORE_EARNINGS_BEAT = 15     # 超预期加持
 PENALTY_BAD_ENV = -15        # 大盘环境差
 
-GRADE_S = 80   # S级：重仓
-GRADE_A = 60   # A级：标准买入
-GRADE_B = 40   # B级：轻仓试探
+GRADE_S = 70   # S级：重仓（≥70）
+GRADE_A = 40   # A级：标准买入（≥40）
+GRADE_B = 20   # B级：轻仓试探（≥20）
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -309,6 +309,25 @@ def calc_risk_filter(df: pd.DataFrame, stock_name: str = '') -> dict:
         five_day_ret = (closes[-1] / closes[-6] - 1) * 100
         if five_day_ret < -15:
             reasons.append(f'5日跌幅{five_day_ret:.1f}%')
+
+    # 涨幅过大过滤 — 回调买入不应在大涨后推荐
+    if n >= 6:
+        five_day_ret = (closes[-1] / closes[-6] - 1) * 100
+        if five_day_ret > 15:
+            reasons.append(f'5日涨幅{five_day_ret:.1f}%过大')
+
+    if n >= 2:
+        last_ret = (closes[-1] / closes[-2] - 1) * 100
+        if last_ret > 9:
+            reasons.append(f'最新日涨幅{last_ret:.1f}%接近涨停')
+
+    # 最近3天内有涨停/大涨（防盘前数据滞后）
+    if n >= 4:
+        for i in range(-3, 0):
+            ret = (closes[i] / closes[i-1] - 1) * 100
+            if ret > 9:
+                reasons.append(f'近3日有涨停({ret:.1f}%)')
+                break
 
     return {'blocked': len(reasons) > 0, 'reasons': reasons}
 

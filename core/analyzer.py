@@ -386,11 +386,18 @@ class EarningsAnalyzer:
                     logger.info(f"[DiscoverPool] {code} 已在池中（active），跳过")
                     continue
 
+                # 准入校验：市场覆盖 + 名称
+                from core.stock_resolver import validate_pool_entry
+                v = validate_pool_entry(code, beat.get("stock_name"), self.db_path)
+                if not v["valid"]:
+                    logger.debug(f"[DiscoverPool] {code} {v['reason']}，跳过")
+                    continue
+
                 entry = self._insert_discovery(
-                    conn, code, beat,
+                    conn, v["code"], beat,
                     source="earnings_beat",
                     signal="buy",
-                    stock_name=beat.get("stock_name"),
+                    stock_name=v["name"],
                 )
                 if entry:
                     new_entries.append(entry)
@@ -406,10 +413,18 @@ class EarningsAnalyzer:
                     logger.info(f"[DiscoverPool] {code} 已在池中（active），跳过")
                     continue
 
+                # 准入校验：市场覆盖 + 名称
+                from core.stock_resolver import validate_pool_entry
+                v = validate_pool_entry(code, db_path=self.db_path)
+                if not v["valid"]:
+                    logger.debug(f"[DiscoverPool] {code} {v['reason']}，跳过")
+                    continue
+
                 entry = self._insert_discovery(
-                    conn, code, high,
+                    conn, v["code"], high,
                     source="profit_new_high",
                     signal="watch",
+                    stock_name=v["name"],
                 )
                 if entry:
                     new_entries.append(entry)
@@ -439,33 +454,18 @@ class EarningsAnalyzer:
         self, conn, stock_code: str, data: Dict,
         source: str, signal: str, stock_name: str = None,
     ) -> Optional[Dict]:
-        """将单只股票写入 discovery_pool 表"""
+        """将单只股票写入 discovery_pool 表（入池前已通过 validate_pool_entry 校验）"""
         import json as _json
 
-        # 过滤 B 股和新股
-        code = stock_code.split('.')[0]
-        if code.startswith(('900', '200')):
-            logger.debug(f"[DiscoverPool] 跳过 B 股: {stock_code}")
-            return None
-        if code.startswith('A25') or (len(code) > 6 and not code.isdigit()):
-            logger.debug(f"[DiscoverPool] 跳过新股/异常: {stock_code}")
-            return None
-
-        # P1#6: 从 stocks 表查询公司名称 + 行业
+        # 查询行业（名称由上游 validate_pool_entry 保证）
         industry = None
-        if not stock_name:
-            row = conn.execute(
-                "SELECT name, industry FROM stocks WHERE code = ?", (stock_code,)
-            ).fetchone()
-            if row:
+        row = conn.execute(
+            "SELECT name, industry FROM stocks WHERE code = ?", (stock_code,)
+        ).fetchone()
+        if row:
+            if not stock_name:
                 stock_name = row["name"]
-                industry = row["industry"]
-        else:
-            row = conn.execute(
-                "SELECT industry FROM stocks WHERE code = ?", (stock_code,)
-            ).fetchone()
-            if row:
-                industry = row["industry"]
+            industry = row["industry"]
 
         # P1#9: 从 detail data 获取市值，补充到入池数据
         total_mv = data.get("total_mv") or data.get("prev_quarterly_high", 0)
@@ -639,13 +639,14 @@ class EarningsAnalyzer:
         updated = []
 
         try:
-            # 获取所有未完成的跟踪记录
+            # 获取所有未完成的跟踪记录（含 pending 无入场价的）
             rows = conn.execute("""
                 SELECT id, stock_code, event_date, entry_price, event_type,
-                       return_1d, return_5d, return_10d, return_20d
+                       return_1d, return_5d, return_10d, return_20d, tracking_status
                 FROM event_tracking
-                WHERE entry_price IS NOT NULL
-                  AND (return_5d IS NULL OR return_10d IS NULL OR return_20d IS NULL)
+                WHERE (tracking_status IN ('pending', 'tracking', 'active'))
+                  AND (entry_price IS NULL
+                       OR return_5d IS NULL OR return_10d IS NULL OR return_20d IS NULL)
                 ORDER BY event_date ASC
             """).fetchall()
 
@@ -654,6 +655,21 @@ class EarningsAnalyzer:
                 stock_code = row["stock_code"]
                 event_date = row["event_date"]
                 entry_price = row["entry_price"]
+
+                # pending 记录：从 prices 表取入场价
+                if entry_price is None:
+                    event_date_compact = event_date.replace('-', '') if event_date else ''
+                    price_row = conn.execute("""
+                        SELECT close_price FROM prices
+                        WHERE stock_code = ? AND trade_date <= ?
+                        ORDER BY trade_date DESC LIMIT 1
+                    """, (stock_code, event_date_compact)).fetchone()
+                    if price_row and price_row[0]:
+                        entry_price = price_row[0]
+                        conn.execute(
+                            "UPDATE event_tracking SET entry_price = ?, tracking_status = 'tracking' WHERE id = ?",
+                            (entry_price, track_id)
+                        )
 
                 if entry_price is None or entry_price == 0:
                     continue
@@ -788,6 +804,8 @@ class PullbackAnalyzer:
         from scanners.pullback_scanner import calc_pullback_score
         from datetime import datetime as dt
 
+        today = dt.now().strftime("%Y-%m-%d")
+
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")
@@ -827,6 +845,21 @@ class PullbackAnalyzer:
                 if len(kline_rows) < 61:
                     logger.debug(f"[PullbackAnalyzer] {code} K 线数据不足 61 条，跳过")
                     continue
+
+                # 数据新鲜度检查 — 超过3个自然日不参与评分
+                latest_date = str(kline_rows[-1]["trade_date"])[:10]
+                try:
+                    # 兼容 20260327 和 2026-03-27 两种格式
+                    if '-' in latest_date:
+                        latest_dt = dt.strptime(latest_date, "%Y-%m-%d")
+                    else:
+                        latest_dt = dt.strptime(latest_date, "%Y%m%d")
+                    days_old = (dt.now() - latest_dt).days
+                    if days_old > 3:
+                        logger.debug(f"[PullbackAnalyzer] {code} 数据过旧 ({latest_date}, {days_old}天)，跳过")
+                        continue
+                except (ValueError, TypeError):
+                    pass
 
                 # 转换为 DataFrame（pullback_scanner 期望的格式）
                 df = pd.DataFrame([{
@@ -877,8 +910,8 @@ class PullbackAnalyzer:
 
                 results.append(result)
 
-                # 只写入 buy 信号（S/A 级回调买入）
-                if result["signal"] != "buy":
+                # 只写入 buy + watch 信号（S/A/B 级回调买入）
+                if result["signal"] not in ("buy", "watch"):
                     continue
 
                 # 写入 analysis_results

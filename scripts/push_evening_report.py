@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """
-A股晚报推送 — 板块轮动 + 指数概览
-从 Docker crontab 调用，采集数据并推送飞书卡片。
+A股晚报推送（飞书卡片 JSON 2.0 · 真表格版）
+=============================================
+数据源：腾讯财经 API + SectorProvider
+输出：飞书交互式卡片消息（schema 2.0 + table 组件）
+
+从 Docker crontab 调用，工作日 18:05 执行。
 """
 
 import json
 import os
+import re
 import sys
 import urllib.request
 from datetime import datetime
@@ -14,232 +19,229 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+INDEX_CODES = {
+    "sh000001": "上证", "sz399001": "深证", "sz399006": "创业板",
+    "sh000300": "沪深300", "sh000905": "中证500", "sh000688": "科创50",
+}
+INDEX_FULL = {
+    "sh000001": "上证指数", "sz399001": "深证成指", "sz399006": "创业板指",
+    "sh000300": "沪深300", "sh000905": "中证500", "sh000688": "科创50",
+}
 
-def get_tenant_token():
-    """获取飞书 tenant_access_token"""
+
+def _safe_float(val, default=0.0):
+    try: return float(val)
+    except: return default
+
+def _fmt_pct(val):
+    try:
+        v = float(val)
+        return f'{"+" if v > 0 else ""}{v:.2f}%'
+    except: return 'N/A'
+
+def _get_tenant_token():
     app_id = os.getenv("FEISHU_APP_ID", "")
     app_secret = os.getenv("FEISHU_APP_SECRET", "")
-    if not app_id or not app_secret:
-        print("❌ 飞书凭证未配置")
-        return None
-
+    if not app_id or not app_secret: return None
     req = urllib.request.Request(
         "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
         data=json.dumps({"app_id": app_id, "app_secret": app_secret}).encode(),
         headers={"Content-Type": "application/json"},
     )
-    resp = json.loads(urllib.request.urlopen(req, timeout=10).read())
-    return resp.get("tenant_access_token")
+    return json.loads(urllib.request.urlopen(req, timeout=10).read()).get("tenant_access_token")
+
+def _send_card_v2(token, target, card):
+    rt = "chat_id" if target.startswith("oc_") else "open_id"
+    payload = {"receive_id": target, "msg_type": "interactive",
+               "content": json.dumps(card, ensure_ascii=False)}
+    req = urllib.request.Request(
+        f"https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type={rt}",
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+    )
+    return json.loads(urllib.request.urlopen(req, timeout=15).read()).get("code", -1) == 0
 
 
-def fetch_index_overview():
-    """获取主要指数行情（腾讯 API）"""
-    indices_map = {
-        "sh000001": "上证指数",
-        "sz399001": "深证成指",
-        "sz399006": "创业板指",
-        "sh000300": "沪深300",
-        "sh000905": "中证500",
-        "sh000688": "科创50",
-    }
+def fetch_indices():
+    codes = ",".join(INDEX_CODES.keys())
+    url = f"https://qt.gtimg.cn/q={codes}"
     try:
-        codes = ",".join(indices_map.keys())
-        url = f"https://qt.gtimg.cn/q={codes}"
         req = urllib.request.Request(url)
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         with opener.open(req, timeout=10) as resp:
             data = resp.read().decode('gbk', errors='ignore')
         results = []
         for line in data.split(';'):
-            if '~' not in line:
-                continue
+            if '~' not in line: continue
             parts = line.split('~')
-            if len(parts) < 40:
-                continue
+            if len(parts) < 40: continue
             code = parts[2]
-            name = indices_map.get(code, parts[1])
-            close = float(parts[3]) if parts[3] else 0
-            change_pct = float(parts[32]) if parts[32] else 0
-            if close > 0:
-                results.append({"name": name, "close": close, "change_pct": change_pct})
+            name = INDEX_CODES.get(code, parts[1])
+            name_full = INDEX_FULL.get(code, parts[1])
+            close = _safe_float(parts[3])
+            pct = _safe_float(parts[32])
+            if close > 0: results.append({"name": name, "name_full": name_full, "close": close, "change_pct": pct})
         return results
     except Exception as e:
-        print(f"指数获取失败: {e}")
+        print(f"  ⚠️ 指数: {e}", file=sys.stderr)
         return []
 
 
-def build_card(indices, sector_data):
-    """构建飞书卡片 JSON"""
-    today = datetime.now().strftime("%Y-%m-%d")
-    weekday = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"][datetime.now().weekday()]
+def llm_analysis(indices, sectors_top, sectors_bottom):
+    api_key = os.getenv('XIAOMI_API_KEY', '')
+    if not api_key: return {'summary': '', 'events': ''}
+
+    idx_s = ', '.join(f"{i['name_full']} {_fmt_pct(i['change_pct'])}" for i in indices[:7]) or '无数据'
+    top_s = ', '.join(f"{s['name']} {_fmt_pct(s['change_pct'])}" for s in sectors_top[:5]) or '无数据'
+    bot_s = ', '.join(f"{s['name']} {_fmt_pct(s['change_pct'])}" for s in sectors_bottom[:5]) or '无数据'
+
+    prompt = f"""你是A股收盘复盘分析师。根据数据输出两部分。
+
+## 数据
+指数：{idx_s}
+涨幅前5：{top_s}
+跌幅前5：{bot_s}
+
+## 输出格式（严格遵循）
+
+[摘要]
+一句话（25字以内）
+
+[事件]
+📌 xxx → xxx
+📌 xxx → xxx
+（2-3条，每条不超35字，📌开头，无明显事件则写"今日正常轮动"）"""
+
+    try:
+        payload = json.dumps({'model': 'mimo-v2-flash', 'messages': [{'role': 'user', 'content': prompt}], 'max_tokens': 300}).encode()
+        req = urllib.request.Request('https://api.xiaomimimo.com/v1/chat/completions', data=payload,
+            headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'})
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(req, timeout=20) as resp:
+            data = json.loads(resp.read())
+        content = data['choices'][0]['message']['content']
+        usage = data.get('usage', {})
+        print(f'  LLM: {usage.get("prompt_tokens",0)}+{usage.get("completion_tokens",0)}')
+
+        summary, events = '', ''
+        if '[事件]' in content:
+            parts = content.split('[事件]')
+            summary = parts[0].replace('[摘要]', '').strip()
+            events = parts[1].strip()
+        else: events = content.strip()
+        return {'summary': summary, 'events': events}
+    except Exception as e:
+        print(f'  ⚠️ LLM: {e}', file=sys.stderr)
+        return {'summary': '', 'events': ''}
+
+
+def build_card(indices, sectors_top, sectors_bottom, analysis):
+    today = datetime.now().strftime('%m-%d')
+    weekday = ['周一','周二','周三','周四','周五','周六','周日'][datetime.now().weekday()]
+
+    sh = next((i for i in indices if i['name'] == '上证'), None)
+    if sh:
+        if sh['change_pct'] > 0.3: template = 'green'
+        elif sh['change_pct'] < -0.3: template = 'red'
+        else: template = 'blue'
+    else: template = 'indigo'
+
+    def md(text):
+        return {"tag": "markdown", "content": text}
 
     elements = []
 
-    # 指数概览
+    if analysis.get('summary'):
+        elements.append(md(analysis['summary']))
+
+    # 指数表格
     if indices:
-        idx_lines = []
-        for idx in sorted(indices, key=lambda x: x["name"]):
-            emoji = "🔴" if idx["change_pct"] > 0 else ("🟢" if idx["change_pct"] < 0 else "⚪")
-            sign = "+" if idx["change_pct"] > 0 else ""
-            idx_lines.append(f"{emoji} {idx['name']}: {idx['close']:.2f} ({sign}{idx['change_pct']:.2f}%)")
         elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": "\n".join(idx_lines)},
+            "tag": "table",
+            "columns": [
+                {"name": "idx", "display_name": "指数", "horizontal_align": "left"},
+                {"name": "pct", "display_name": "涨跌", "horizontal_align": "right"},
+            ],
+            "rows": [
+                {"idx": f"{i['name']} {i['close']:,.2f}", "pct": _fmt_pct(i['change_pct'])}
+                for i in sorted(indices, key=lambda x: x['name'])
+            ]
         })
+
+    # 板块双栏
+    if sectors_top:
+        medals = ['🥇','🥈','🥉','4️⃣','5️⃣']
+        top5 = sectors_top[:5]
+        bot5 = sectors_bottom[:5]
+        left = "**涨 TOP5**\n" + "\n".join(f"{medals[j]}{s['name']} {_fmt_pct(s['change_pct'])}" for j, s in enumerate(top5))
+        right = "**跌 TOP5**\n" + "\n".join(f"🔻{s['name']} {_fmt_pct(s['change_pct'])}" for s in bot5)
+        elements.append({
+            "tag": "column_set", "flex_mode": "flow",
+            "columns": [
+                {"tag": "column", "width": "weighted", "weight": 1, "elements": [md(left)]},
+                {"tag": "column", "width": "weighted", "weight": 1, "elements": [md(right)]},
+            ]
+        })
+
+    # 事件驱动
+    if analysis.get('events'):
         elements.append({"tag": "hr"})
+        elements.append(md(f"🧠 {analysis['events']}"))
 
-    # 板块涨幅 TOP10
-    today_top = sector_data.get("today", [])
-    if today_top:
-        lines = ["**📈 板块涨幅 TOP10**"]
-        for i, s in enumerate(today_top[:10], 1):
-            lead = f" | 龙头: {s.get('lead_stock','')}" if s.get("lead_stock") else ""
-            sign = "+" if s.get("change_pct", 0) > 0 else ""
-            lines.append(f"{i}. {s['name']} {sign}{s['change_pct']:.2f}%{lead}")
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": "\n".join(lines)},
-        })
-
-    # 板块跌幅 TOP5
-    today_bottom = sector_data.get("today_bottom", [])
-    if today_bottom:
-        lines = ["**📉 板块跌幅 TOP5**"]
-        for i, s in enumerate(today_bottom[:5], 1):
-            lines.append(f"{i}. {s['name']} {s['change_pct']:.2f}%")
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": "\n".join(lines)},
-        })
-
-    # 5日资金流向
-    day5 = sector_data.get("5day", [])
-    if day5:
-        lines = ["**💰 5日主力资金流入 TOP5**"]
-        for i, s in enumerate(day5[:5], 1):
-            fund = f"{s['fund_flow_yi']:.1f}亿" if s.get("fund_flow_yi") else ""
-            lines.append(f"{i}. {s['name']} {fund}")
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": "\n".join(lines)},
-        })
-
-    # 检查是否所有数据都是错误
-    has_real_data = (
-        indices or
-        bool(today_top) or
-        bool(today_bottom) or
-        bool(day5)
-    )
-    if not has_real_data:
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": "⚠️ 今日数据采集异常（数据源连接失败），请稍后重试"},
-        })
-
-    card = {
-        "config": {"wide_screen_mode": True},
+    return {
+        "schema": "2.0",
+        "config": {"width_mode": "compact"},
         "header": {
-            "title": {"tag": "plain_text", "content": f"🌆 A股晚报 — {today} {weekday}"},
-            "template": "indigo",
+            "title": {"tag": "plain_text", "content": f"🌆 A股晚报 {today} {weekday}"},
+            "template": template,
         },
-        "elements": elements,
+        "body": {"elements": elements},
     }
-    return card
-
-
-def send_card(token, target, card):
-    """发送飞书卡片"""
-    payload = {
-        "receive_id": target,
-        "msg_type": "interactive",
-        "content": json.dumps(card, ensure_ascii=False),
-    }
-    req = urllib.request.Request(
-        "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id",
-        data=json.dumps(payload).encode(),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        },
-    )
-    resp = json.loads(urllib.request.urlopen(req, timeout=15).read())
-    return resp.get("code", -1) == 0
 
 
 def main():
     print("📊 A股晚报采集...")
 
-    # 1. 获取指数（腾讯 API）
-    indices = fetch_index_overview()
-    print(f"  指数: {len(indices)} 个")
+    print("  [1/3] 指数行情...")
+    indices = fetch_indices()
+    print(f"    ✅ {len(indices)} 个指数")
 
-    # 2. 获取板块数据（SectorProvider，自动降级到腾讯+Tushare）
+    print("  [2/3] 行业板块...")
     from core.data_provider import SectorProvider
     sp = SectorProvider()
-    top_sectors = sp.fetch()  # 全部，已按涨跌幅排序
-    bottom_sectors = top_sectors[::-1]  # 反转 = 跌幅排行
-    print(f"  板块: {len(top_sectors)} 个 (来源: {sp.last_source})")
+    top_sectors = sp.fetch()
+    bottom_sectors = top_sectors[::-1]
+    sectors_top = [{"name": s.sector_name, "change_pct": s.change_pct} for s in top_sectors]
+    sectors_bottom = [{"name": s.sector_name, "change_pct": s.change_pct} for s in bottom_sectors]
+    print(f"    ✅ {len(sectors_top)} 个板块 (来源: {sp.last_source})")
 
-    sector_data = {
-        "today": [{"name": s.sector_name, "change_pct": s.change_pct,
-                    "lead_stock": ""} for s in top_sectors],
-        "today_bottom": [{"name": s.sector_name, "change_pct": s.change_pct}
-                         for s in bottom_sectors],
-        "5day": [],
-    }
-
-    # 3. 检查是否有真实数据（指数+板块至少有一项）
-    has_real_indices = len(indices) > 0
-    has_real_sectors = len(sector_data.get("today", [])) > 0
-    has_real_bottom = len(sector_data.get("today_bottom", [])) > 0
-    has_real_5day = len(sector_data.get("5day", [])) > 0
-
-    if not has_real_indices and not has_real_sectors and not has_real_bottom:
-        print("❌ 指数和板块数据全部失败，发送失败通知")
-        target = os.getenv("SI_FEISHU_DAILY_TARGET", "")
-        token = get_tenant_token()
-        if target and token:
-            fail_card = {
-                "config": {"wide_screen_mode": True},
-                "header": {
-                    "title": {"tag": "plain_text", "content": f"⚠️ A股晚报推送失败 — {datetime.now().strftime('%Y-%m-%d')}"},
-                    "template": "red",
-                },
-                "elements": [{
-                    "tag": "div",
-                    "text": {"tag": "lark_md", "content": "今日数据采集异常（API 连接失败），请稍后重试"},
-                }],
-            }
-            send_card(token, target, fail_card)
+    if not indices and not sectors_top:
+        print("❌ 数据全部失败")
         sys.exit(1)
 
-    # 清理错误数据，只保留有效板块
-    if not has_real_sectors:
-        sector_data["today"] = []
-    if not has_real_bottom:
-        sector_data["today_bottom"] = []
-    if not has_real_5day:
-        sector_data["5day"] = []
+    print("  [3/3] LLM 分析...")
+    analysis = llm_analysis(indices, sectors_top, sectors_bottom)
 
-    # 4. 构建卡片
-    card = build_card(indices, sector_data)
+    card = build_card(indices, sectors_top, sectors_bottom, analysis)
 
-    # 5. 推送
+    # 保存
+    os.makedirs('/tmp/morning_report', exist_ok=True)
+    outpath = f'/tmp/morning_report/A股晚报-{datetime.now().strftime("%Y%m%d")}.json'
+    with open(outpath, 'w', encoding='utf-8') as f:
+        json.dump(card, f, ensure_ascii=False, indent=2)
+    print(f"  卡片已保存: {outpath}")
+
+    # 推送
     target = os.getenv("SI_FEISHU_DAILY_TARGET", "")
     if not target:
         print("❌ 未配置推送目标")
         sys.exit(1)
-
-    token = get_tenant_token()
-    if not token:
-        sys.exit(1)
-
-    success = send_card(token, target, card)
-    if success:
-        print(f"✅ A股晚报推送成功 (指数{len(indices)} 板块{len(sector_data.get('today',[]))}条)")
+    token = _get_tenant_token()
+    if not token: sys.exit(1)
+    if _send_card_v2(token, target, card):
+        print(f"✅ 推送成功 → 指数{len(indices)} 板块{len(sectors_top)}")
     else:
-        print("❌ A股晚报推送失败")
+        print("❌ 推送失败")
         sys.exit(1)
 
 

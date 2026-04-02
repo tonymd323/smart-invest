@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
-from web.routes import dashboard, action, signals, discovery, events, tracking, backtest, system, portfolio, oversold
+from web.routes import dashboard, action, signals, discovery, events, tracking, backtest, system, portfolio, oversold, charts
 
 app = FastAPI(title="投资系统 2.2", version="2.3.0")
 
@@ -37,6 +37,7 @@ app.include_router(backtest.router)
 app.include_router(system.router)
 app.include_router(portfolio.router)
 app.include_router(oversold.router)
+app.include_router(charts.router)
 
 
 @app.get("/", response_class=HTMLResponse)
