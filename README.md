@@ -1,33 +1,47 @@
-# Smart Invest - 备选股池每日扫描系统
+# Smart Invest（归档）
 
-## 功能
+> ⚠️ **状态**：已废弃。2026-04-03 起，功能已整合迁移至 [APEX 天衍](https://github.com/tonymd323/apex-tianyan)。
 
-每日自动扫描全 A 股，筛选两类股票加入备选池：
+## 废弃说明
 
-1. **业绩超预期**：实际净利润/营收 YoY vs 券商一致预期
-2. **扣非净利润历史新高**：单季度扣非净利润创历史新高
+2026-04-03 完成 APEX + SI 整合后，`smart-invest` 容器已停止删除。
 
-扫描完成后自动推送飞书消息。
+**SI 现在是 APEX 的依赖模块**：
+- `smart-invest/` 作为 Python 模块（PYTHONPATH）被 APEX 挂载使用
+- 核心分析逻辑（analyzer、scorer、pipeline、data_provider）直接在 APEX 容器内 import
+- 所有定时任务由 APEX cron_service 统一调度
+- 数据库 `/data/smart_invest.db` 由 APEX 容器共享访问
 
-## 定时任务
+## 原 SI 功能对照
+
+| SI 功能 | APEX 接管方式 |
+|---------|--------------|
+| `run_pipeline.py` | `apex-engine/scripts/run_pipeline.py` |
+| 早报/晚报 | `apex-engine/scripts/push_morning/evening_report.py` |
+| 超预期扫描 | APEX `/api/v1/scanners/earnings` |
+| 回调买入 | APEX `/api/v1/scanners/pullback` |
+| 五维度评分 | APEX cron preset `composite_score` |
+| BTIQ 监控 | APEX cron preset `btiq_monitor` |
+| SI Web UI（端口8080）| **已废弃**（APEX 端口 3000 为唯一入口）|
+
+## 项目结构（归档参考）
 
 ```
-0 21 * * 1-5  python3 daily_scan.py   # 每周一至周五 21:00
+smart-invest/          # ⚠️ 不再独立运行，作为 APEX 依赖模块
+├── core/              # 分析逻辑模块（analyzer / scorer / pipeline / data_provider）
+├── scanners/          # Scanner 实现（earnings / pullback / new_high / predictor）
+├── scripts/           # 任务脚本（已迁入 APEX，不再独立执行）
+├── notifiers/         # 飞书推送（由 APEX import 使用）
+├── data/              # SQLite 数据库（由 APEX 容器共享）
+└── config/            # 配置文件
 ```
 
-## 项目结构
+## 保留原因
 
-```
-smart-invest/
-├── daily_scan.py      # 主扫描脚本
-├── core/
-│   ├── config.py      # 配置
-│   └── database.py    # SQLite 数据库
-├── notifiers/
-│   ├── feishu_pusher.py   # 飞书推送
-│   ├── card_generator.py  # 消息卡片
-│   └── __init__.py
-├── data/
+保留 SI 源码目录原因：
+1. `core/` 和 `scanners/` 作为 APEX 的 PYTHONPATH 模块
+2. `data/smart_invest.db` 是生产数据库，不能丢失
+3. `config/` 中有 API keys 等配置
 │   ├── smart_invest.db    # 数据库
 │   └── logs/              # 运行日志
 └── requirements.txt
