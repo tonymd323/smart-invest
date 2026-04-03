@@ -10294,5 +10294,2909 @@
         "change_pct": -9.8
       }
     ]
+  },
+  {
+    "time": "2026-04-02 03:30:11",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 03:40:09",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 03:50:13",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 04:00:09",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 04:10:10",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 04:20:10",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 04:30:11",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 04:40:09",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 04:50:09",
+    "up": 941,
+    "down": 4172,
+    "flat": 81,
+    "total": 5194,
+    "btiq": 18.4,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 10.07,
+        "change_pct": 18.05
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.72,
+        "change_pct": 15.99
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.47,
+        "change_pct": 14.68
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.2,
+        "change_pct": 12.5
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.59,
+        "change_pct": 10.91
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.62,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.51,
+        "change_pct": -10.56
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 05:00:11",
+    "up": 918,
+    "down": 4178,
+    "flat": 98,
+    "total": 5194,
+    "btiq": 18.01,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.99,
+        "change_pct": 17.12
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.71,
+        "change_pct": 15.94
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.4,
+        "change_pct": 14.16
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 63.5,
+        "change_pct": 13.03
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.99,
+        "change_pct": 12.72
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.54,
+        "change_pct": 10.59
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.64,
+        "change_pct": 10.43
+      },
+      {
+        "code": "600594",
+        "name": "益佰制药",
+        "price": 4.8,
+        "change_pct": 10.09
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.5,
+        "change_pct": -10.92
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 130.4,
+        "change_pct": -10.64
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.02,
+        "change_pct": -9.96
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      },
+      {
+        "code": "605555",
+        "name": "德昌股份",
+        "price": 15.17,
+        "change_pct": -9.76
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 13:10:09",
+    "up": 820,
+    "down": 4294,
+    "flat": 80,
+    "total": 5194,
+    "btiq": 16.03,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.81,
+        "change_pct": 16.43
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.88,
+        "change_pct": 15.83
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 36.21,
+        "change_pct": 13.8
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 63.4,
+        "change_pct": 13.46
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.28,
+        "change_pct": 13.27
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.69,
+        "change_pct": 11.54
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 62.36,
+        "change_pct": 11.0
+      },
+      {
+        "code": "300255",
+        "name": "常山药业",
+        "price": 43.71,
+        "change_pct": 10.6
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 158.94,
+        "change_pct": -11.78
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.92,
+        "change_pct": -10.96
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.3,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "605555",
+        "name": "德昌股份",
+        "price": 15.15,
+        "change_pct": -9.88
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 13:20:09",
+    "up": 781,
+    "down": 4342,
+    "flat": 71,
+    "total": 5194,
+    "btiq": 15.24,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 24.25,
+        "change_pct": 18.58
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.83,
+        "change_pct": 15.24
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 36.4,
+        "change_pct": 14.39
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.1,
+        "change_pct": 11.93
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.52,
+        "change_pct": 11.88
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.74,
+        "change_pct": 11.85
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 62.25,
+        "change_pct": 10.8
+      },
+      {
+        "code": "600339",
+        "name": "中油工程",
+        "price": 4.46,
+        "change_pct": 10.12
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 158.97,
+        "change_pct": -11.77
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.61,
+        "change_pct": -11.18
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 119.36,
+        "change_pct": -10.62
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.3,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "605555",
+        "name": "德昌股份",
+        "price": 15.14,
+        "change_pct": -9.93
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 13:30:11",
+    "up": 924,
+    "down": 4200,
+    "flat": 70,
+    "total": 5194,
+    "btiq": 18.03,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 24.13,
+        "change_pct": 18.0
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.85,
+        "change_pct": 15.47
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 36.14,
+        "change_pct": 13.58
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.16,
+        "change_pct": 12.38
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.79,
+        "change_pct": 12.37
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.7,
+        "change_pct": 11.6
+      },
+      {
+        "code": "688553",
+        "name": "汇宇制药-W",
+        "price": 21.97,
+        "change_pct": 11.58
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 88.6,
+        "change_pct": 11.18
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.54,
+        "change_pct": -11.23
+      },
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.25,
+        "change_pct": -11.06
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 119.31,
+        "change_pct": -10.66
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.31,
+        "change_pct": -9.86
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 13:40:12",
+    "up": 826,
+    "down": 4301,
+    "flat": 67,
+    "total": 5194,
+    "btiq": 16.11,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 24.05,
+        "change_pct": 17.6
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.87,
+        "change_pct": 15.71
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 36.0,
+        "change_pct": 13.14
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.06,
+        "change_pct": 11.64
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.65,
+        "change_pct": 11.29
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.04,
+        "change_pct": 11.02
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 88.26,
+        "change_pct": 10.75
+      },
+      {
+        "code": "600339",
+        "name": "中油工程",
+        "price": 4.46,
+        "change_pct": 10.12
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 159.43,
+        "change_pct": -11.51
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.5,
+        "change_pct": -11.25
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.9,
+        "change_pct": -10.96
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.3,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "600885",
+        "name": "宏发股份",
+        "price": 25.35,
+        "change_pct": -9.95
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 13:50:09",
+    "up": 853,
+    "down": 4278,
+    "flat": 63,
+    "total": 5194,
+    "btiq": 16.62,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.88,
+        "change_pct": 16.77
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.9,
+        "change_pct": 16.06
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 36.07,
+        "change_pct": 13.36
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 90.1,
+        "change_pct": 13.06
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.8,
+        "change_pct": 12.23
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.05,
+        "change_pct": 11.56
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 61.97,
+        "change_pct": 10.9
+      },
+      {
+        "code": "688090",
+        "name": "瑞松科技",
+        "price": 61.88,
+        "change_pct": 10.15
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.37,
+        "change_pct": -11.36
+      },
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 160.0,
+        "change_pct": -11.19
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.87,
+        "change_pct": -11.0
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      },
+      {
+        "code": "600885",
+        "name": "宏发股份",
+        "price": 25.36,
+        "change_pct": -9.91
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.83,
+        "change_pct": -9.89
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 14:00:10",
+    "up": 694,
+    "down": 4438,
+    "flat": 62,
+    "total": 5194,
+    "btiq": 13.52,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.74,
+        "change_pct": 16.09
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.83,
+        "change_pct": 15.24
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 89.85,
+        "change_pct": 12.75
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.74,
+        "change_pct": 11.85
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.4,
+        "change_pct": 11.67
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 35.41,
+        "change_pct": 11.28
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.01,
+        "change_pct": 11.27
+      },
+      {
+        "code": "688618",
+        "name": "三旺通信",
+        "price": 35.81,
+        "change_pct": 11.18
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 158.62,
+        "change_pct": -11.96
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 128.77,
+        "change_pct": -11.75
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.02,
+        "change_pct": -11.62
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.3,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002671",
+        "name": "龙泉股份",
+        "price": 4.87,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "300469",
+        "name": "信息发展",
+        "price": 55.06,
+        "change_pct": -9.96
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 14:10:10",
+    "up": 713,
+    "down": 4427,
+    "flat": 54,
+    "total": 5194,
+    "btiq": 13.87,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.65,
+        "change_pct": 15.65
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.81,
+        "change_pct": 15.01
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 90.0,
+        "change_pct": 12.94
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.77,
+        "change_pct": 12.04
+      },
+      {
+        "code": "688618",
+        "name": "三旺通信",
+        "price": 36.01,
+        "change_pct": 11.8
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.0,
+        "change_pct": 11.19
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 35.35,
+        "change_pct": 11.09
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 61.91,
+        "change_pct": 10.79
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 157.61,
+        "change_pct": -12.52
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 128.87,
+        "change_pct": -11.68
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.5,
+        "change_pct": -11.26
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600075",
+        "name": "新疆天业",
+        "price": 6.3,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002671",
+        "name": "龙泉股份",
+        "price": 4.87,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "600885",
+        "name": "宏发股份",
+        "price": 25.35,
+        "change_pct": -9.95
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 14:20:13",
+    "up": 866,
+    "down": 4260,
+    "flat": 68,
+    "total": 5194,
+    "btiq": 16.89,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.89,
+        "change_pct": 15.94
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.53,
+        "change_pct": 15.06
+      },
+      {
+        "code": "688618",
+        "name": "三旺通信",
+        "price": 36.58,
+        "change_pct": 13.57
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 90.34,
+        "change_pct": 13.36
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.89,
+        "change_pct": 12.8
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 35.65,
+        "change_pct": 12.04
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.1,
+        "change_pct": 11.93
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 61.93,
+        "change_pct": 10.83
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 158.01,
+        "change_pct": -12.3
+      },
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.46,
+        "change_pct": -11.28
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.6,
+        "change_pct": -11.19
+      },
+      {
+        "code": "688190",
+        "name": "云路股份",
+        "price": 85.1,
+        "change_pct": -10.18
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600885",
+        "name": "宏发股份",
+        "price": 25.34,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "002102",
+        "name": "能特科技",
+        "price": 3.0,
+        "change_pct": -9.91
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 14:30:11",
+    "up": 843,
+    "down": 4290,
+    "flat": 61,
+    "total": 5194,
+    "btiq": 16.42,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.87,
+        "change_pct": 15.71
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.58,
+        "change_pct": 15.31
+      },
+      {
+        "code": "688618",
+        "name": "三旺通信",
+        "price": 36.67,
+        "change_pct": 13.85
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.85,
+        "change_pct": 12.55
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 89.57,
+        "change_pct": 12.4
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 35.47,
+        "change_pct": 11.47
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 15.02,
+        "change_pct": 11.34
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 61.7,
+        "change_pct": 10.42
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 128.61,
+        "change_pct": -11.86
+      },
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 159.18,
+        "change_pct": -11.65
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.5,
+        "change_pct": -11.26
+      },
+      {
+        "code": "688190",
+        "name": "云路股份",
+        "price": 84.69,
+        "change_pct": -10.62
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      },
+      {
+        "code": "600885",
+        "name": "宏发股份",
+        "price": 25.35,
+        "change_pct": -9.95
+      },
+      {
+        "code": "605555",
+        "name": "德昌股份",
+        "price": 15.14,
+        "change_pct": -9.93
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 14:40:09",
+    "up": 843,
+    "down": 4292,
+    "flat": 59,
+    "total": 5194,
+    "btiq": 16.42,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.83,
+        "change_pct": 15.24
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.41,
+        "change_pct": 14.47
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 90.48,
+        "change_pct": 13.54
+      },
+      {
+        "code": "688618",
+        "name": "三旺通信",
+        "price": 36.56,
+        "change_pct": 13.51
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.84,
+        "change_pct": 12.48
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 35.33,
+        "change_pct": 11.03
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 14.97,
+        "change_pct": 10.97
+      },
+      {
+        "code": "688143",
+        "name": "长盈通",
+        "price": 62.0,
+        "change_pct": 10.95
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 128.53,
+        "change_pct": -11.92
+      },
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 159.04,
+        "change_pct": -11.73
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.72,
+        "change_pct": -11.1
+      },
+      {
+        "code": "688190",
+        "name": "云路股份",
+        "price": 85.03,
+        "change_pct": -10.26
+      },
+      {
+        "code": "603023",
+        "name": "威帝股份",
+        "price": 4.82,
+        "change_pct": -10.07
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "605555",
+        "name": "德昌股份",
+        "price": 15.13,
+        "change_pct": -9.99
+      },
+      {
+        "code": "002671",
+        "name": "龙泉股份",
+        "price": 4.87,
+        "change_pct": -9.98
+      }
+    ]
+  },
+  {
+    "time": "2026-04-02 14:50:11",
+    "up": 815,
+    "down": 4324,
+    "flat": 55,
+    "total": 5194,
+    "btiq": 15.86,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.81,
+        "change_pct": 15.01
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.39,
+        "change_pct": 14.38
+      },
+      {
+        "code": "688618",
+        "name": "三旺通信",
+        "price": 36.45,
+        "change_pct": 13.16
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 89.98,
+        "change_pct": 12.91
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.78,
+        "change_pct": 12.11
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 14.93,
+        "change_pct": 10.67
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 35.12,
+        "change_pct": 10.37
+      },
+      {
+        "code": "600339",
+        "name": "中油工程",
+        "price": 4.46,
+        "change_pct": 10.12
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.11,
+        "change_pct": -11.52
+      },
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 159.47,
+        "change_pct": -11.49
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 118.58,
+        "change_pct": -11.2
+      },
+      {
+        "code": "300205",
+        "name": "*ST天喻",
+        "price": 5.38,
+        "change_pct": -10.63
+      },
+      {
+        "code": "688190",
+        "name": "云路股份",
+        "price": 84.68,
+        "change_pct": -10.63
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "002671",
+        "name": "龙泉股份",
+        "price": 4.87,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      }
+    ]
+  },
+  {
+    "time": "2026-04-03 09:00:12",
+    "up": 894,
+    "down": 4237,
+    "flat": 63,
+    "total": 5194,
+    "btiq": 17.42,
+    "top_gainers": [
+      {
+        "code": "300834",
+        "name": "星辉环材",
+        "price": 43.49,
+        "change_pct": 20.01
+      },
+      {
+        "code": "300839",
+        "name": "博汇股份",
+        "price": 16.69,
+        "change_pct": 19.99
+      },
+      {
+        "code": "300086",
+        "name": "康芝药业",
+        "price": 9.9,
+        "change_pct": 16.06
+      },
+      {
+        "code": "301188",
+        "name": "力诺药包",
+        "price": 23.59,
+        "change_pct": 15.35
+      },
+      {
+        "code": "688336",
+        "name": "三生国健",
+        "price": 90.38,
+        "change_pct": 13.41
+      },
+      {
+        "code": "688618",
+        "name": "三旺通信",
+        "price": 36.44,
+        "change_pct": 13.13
+      },
+      {
+        "code": "300667",
+        "name": "必创科技",
+        "price": 17.78,
+        "change_pct": 12.11
+      },
+      {
+        "code": "300547",
+        "name": "川环科技",
+        "price": 35.29,
+        "change_pct": 10.91
+      },
+      {
+        "code": "688553",
+        "name": "汇宇制药-W",
+        "price": 21.81,
+        "change_pct": 10.77
+      },
+      {
+        "code": "300632",
+        "name": "光莆股份",
+        "price": 14.93,
+        "change_pct": 10.67
+      }
+    ],
+    "top_losers": [
+      {
+        "code": "688031",
+        "name": "星环科技-U",
+        "price": 129.3,
+        "change_pct": -11.39
+      },
+      {
+        "code": "301338",
+        "name": "凯格精机",
+        "price": 159.68,
+        "change_pct": -11.37
+      },
+      {
+        "code": "688519",
+        "name": "南亚新材",
+        "price": 119.17,
+        "change_pct": -10.76
+      },
+      {
+        "code": "688190",
+        "name": "云路股份",
+        "price": 84.8,
+        "change_pct": -10.5
+      },
+      {
+        "code": "002357",
+        "name": "富临运业",
+        "price": 13.01,
+        "change_pct": -10.03
+      },
+      {
+        "code": "000048",
+        "name": "京基智农",
+        "price": 19.16,
+        "change_pct": -10.0
+      },
+      {
+        "code": "603008",
+        "name": "喜临门",
+        "price": 13.68,
+        "change_pct": -10.0
+      },
+      {
+        "code": "600310",
+        "name": "广西能源",
+        "price": 5.14,
+        "change_pct": -9.98
+      },
+      {
+        "code": "600726",
+        "name": "华电能源",
+        "price": 5.32,
+        "change_pct": -9.98
+      },
+      {
+        "code": "002905",
+        "name": "金逸影视",
+        "price": 10.2,
+        "change_pct": -9.97
+      }
+    ]
   }
 ]

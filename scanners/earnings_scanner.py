@@ -60,7 +60,14 @@ def scan_earnings_beat(target_date: str = None) -> list:
 
     # Step 2: 获取实际增速（fina_indicator）
     logger.info("  Step 2: 获取实际财务数据...")
-    actuals = _batch_fetch_actuals(pro, disclosed)
+    # 预先批量拉全量行情（PE/PB/收盘价），各线程只查 dict，不走网络
+    from core.data_provider import QuoteProvider
+    quote_provider = QuoteProvider()
+    all_codes = list(disclosed.keys())
+    quotes = quote_provider.fetch_batch(all_codes)  # {code: QuoteData}
+    logger.info(f"  行情预拉：{len(quotes)}/{len(all_codes)} 只成功")
+
+    actuals = _batch_fetch_actuals(pro, disclosed, quotes)
     logger.info(f"  Step 2 完成：{len(actuals)} 家有数据")
 
     # Step 3: 获取一致预期（AkShare）
@@ -312,7 +319,7 @@ def _fetch_disclosed_list(pro, target_date: str) -> dict:
     return result
 
 
-def _batch_fetch_actuals(pro, disclosed: dict) -> dict:
+def _batch_fetch_actuals(pro, disclosed: dict, quotes: dict) -> dict:
     """批量获取实际财务数据（并行版）"""
     import tushare as ts
     result = {}
@@ -344,7 +351,10 @@ def _batch_fetch_actuals(pro, disclosed: dict) -> dict:
                     except Exception:
                         pass
 
-                close, pe, total_mv = _fetch_price(pro_local, code)
+                q = quotes.get(code)
+                close = q.price if q else None
+                pe = q.pe if q else None
+                total_mv = q.total_mv if q else None
                 return (code, {
                     'name': name,
                     'disclosure_type': '业绩预告',
@@ -384,7 +394,10 @@ def _batch_fetch_actuals(pro, disclosed: dict) -> dict:
                     except Exception:
                         pass
 
-                close, pe, total_mv = _fetch_price(pro_local, code)
+                q = quotes.get(code)
+                close = q.price if q else None
+                pe = q.pe if q else None
+                total_mv = q.total_mv if q else None
                 return (code, {
                     'name': name,
                     'disclosure_type': dtype,
@@ -424,19 +437,6 @@ def _batch_fetch_actuals(pro, disclosed: dict) -> dict:
 
     logger.info(f"    实际数据完成: {len(result)}/{total}")
     return result
-
-
-def _fetch_price(pro, code: str) -> tuple:
-    """获取收盘价、PE 和总市值"""
-    try:
-        daily = pro.daily_basic(ts_code=code, fields='ts_code,close,pe,total_mv', limit=1)
-        if daily is not None and not daily.empty:
-            return (_safe_float(daily.iloc[0].get('close')),
-                    _safe_float(daily.iloc[0].get('pe')),
-                    _safe_float(daily.iloc[0].get('total_mv')))
-    except Exception:
-        pass
-    return None, None, None
 
 
 def _pick_consensus_year(end_date: str) -> str:

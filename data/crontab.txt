@@ -19,7 +19,7 @@ TUSHARE_TOKEN=54c6afc7620641d1611663eb05a9538c6a5b1b4cbd9e0151afdacbd2
 3 7 * * 1-5 cd /app && /usr/local/bin/python3 -m scripts.push_morning_report >> data/logs/morning_report.log 2>&1
 
 # ── 超跌监控（盘中每10分钟）───────────────────────────────
-*/10 9-14 * * 1-5 cd /app && /usr/local/bin/python3 scripts/btiq_monitor.py >> data/logs/btiq_monitor.log 2>&1
+#DISABLED cd /app && /usr/local/bin/python3 scripts/btiq_monitor.py >> data/logs/btiq_monitor.log 2>&1
 
 # ── 五维度批量评分（盘后 15:40）───────────────────────────
 40 15 * * 1-5 cd /app && /usr/local/bin/python3 -c "from core.scorer import CompositeScorer; s = CompositeScorer('data/smart_invest.db'); r = s.evaluate_batch(); print(f'评分完成: {len(r)}只')" >> data/logs/composite.log 2>&1
@@ -34,6 +34,9 @@ TUSHARE_TOKEN=54c6afc7620641d1611663eb05a9538c6a5b1b4cbd9e0151afdacbd2
 35 15 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_pipeline.py --window 6h --max-stocks 300 >> data/logs/pipeline_eod.log 2>&1
 
 # ── 回调买入扫描（15:15）───────────────────────────────
+
+# ── 前夜预获取（21:00）———————— 财报披露日前一晚预捕捉信号 ──
+0 21 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_pre_disclosure_scan.py >> data/logs/pre_disclosure_cron.log 2>&1
 
 # ── 晚间补充扫描（20:30）───────────────────────────────
 30 20 * * 1-5 cd /app && /usr/local/bin/python3 scripts/run_pipeline.py --window 6h >> data/logs/pipeline_cron.log 2>&1

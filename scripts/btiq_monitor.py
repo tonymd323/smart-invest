@@ -12,7 +12,7 @@ import json
 import time
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # 国内 API 直连，不走代理
 os.environ['no_proxy'] = os.environ.get('no_proxy', '') + ',qt.gtimg.cn,*.qq.com'
@@ -107,7 +107,7 @@ def calc_btiq(stocks):
     btiq = up / total * 100
 
     return {
-        'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'time': datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M:%S'),
         'up': up,
         'down': down,
         'flat': flat,

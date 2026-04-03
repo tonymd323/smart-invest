@@ -148,8 +148,9 @@ class QuoteData:
     open: float                              # 开盘价
     prev_close: float                        # 昨收价
     turnover_rate: float                     # 换手率（%）
-    pe: float                                # 市盈率
+    pe: float                                # 市盈率(TTM)
     total_mv: float                          # 总市值（亿元）
+    pb: float = 0.0                          # 市净率(MRQ)
     source: str = "tencent"                  # 数据来源
 
     def to_dict(self) -> dict:
@@ -167,6 +168,7 @@ class QuoteData:
             "turnover_rate": self.turnover_rate,
             "pe": self.pe,
             "total_mv": self.total_mv,
+            "pb": self.pb,
             "source": self.source,
         }
 
@@ -231,8 +233,9 @@ class QuoteData:
     open: float                              # 开盘价
     prev_close: float                        # 昨收价
     turnover_rate: float                     # 换手率（%）
-    pe: float                                # 市盈率
+    pe: float                                # 市盈率(TTM)
     total_mv: float                          # 总市值（亿元）
+    pb: float = 0.0                          # 市净率(MRQ)
     source: str = "tencent"                  # 数据来源
 
     def to_dict(self) -> dict:

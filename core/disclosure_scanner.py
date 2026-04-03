@@ -15,6 +15,7 @@
 
 import logging
 import sqlite3
+import requests
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Set
 
@@ -259,3 +260,134 @@ class DisclosureScanner:
         if code.startswith("6") or code.startswith("9"):
             return f"{code}.SH"
         return f"{code}.SZ"
+
+    def fetch_pre_disclosure(self, target_date: str) -> List[Dict]:
+        """
+        获取指定日期（target_date）将要披露财报的公司列表。
+        通过 EITIME（收录时间）字段筛选——东方财富在披露日前一晚 ~21:00 就会收录数据。
+
+        Args:
+            target_date: 披露日期，格式 "YYYY-MM-DD"，如 "2026-04-03"
+
+        Returns:
+            List[Dict]，每项包含：
+            {
+                "stock_code": "000792.SZ",
+                "stock_name": "盐湖股份",
+                "report_date": "2025-12-31",
+                "notice_date": "2026-04-03",
+                "em_code": "000792",  # 东财代码（无后缀）
+            }
+        """
+        table = "RPT_LICO_FN_CPD"
+        columns = "SECURITY_CODE,SECURITY_NAME_ABBR,REPORTDATE,NOTICE_DATE"
+        # EITIME 是东财收录时间，通常在 target_date 当晚 21:00 左右就入库
+        # 注意：EITIME>='2026-04-03' 会被解读为 >= '2026-04-03 00:00:00'，
+        # 而实际 EITIME 值是 "2026-04-02 21:04:39"，所以要用前一天的 18:00 作为起点
+        from datetime import datetime, timedelta
+        td = datetime.strptime(target_date, "%Y-%m-%d")
+        day_before = (td - timedelta(days=1)).strftime("%Y-%m-%d")
+        filter_str = f"(EITIME>='{day_before} 18:00:00')AND(NOTICE_DATE='{target_date}')"
+
+        params = {
+            "reportName": table,
+            "columns": columns,
+            "filter": filter_str,
+            "pageSize": 500,
+            "sortColumns": "EITIME",
+            "sortTypes": -1,
+        }
+
+        all_data = []
+        page = 1
+
+        while True:
+            params["pageNumber"] = page
+            try:
+                resp = requests.get(self.BASE_URL, params=params, timeout=30)
+                resp.raise_for_status()
+                data = resp.json()
+            except Exception as e:
+                logger.error(f"[DisclosureScanner] fetch_pre_disclosure API 失败: {e}")
+                break
+
+            if not data.get("success"):
+                logger.warning(f"[DisclosureScanner] fetch_pre_disclosure API 返回失败: page={page}")
+                break
+
+            result = data.get("result", {})
+            page_data = result.get("data", [])
+            if not page_data:
+                break
+
+            all_data.extend(page_data)
+
+            total_pages = result.get("pages", 1)
+            if page >= total_pages:
+                break
+            page += 1
+
+        # 转换为标准格式
+        results = []
+        for item in all_data:
+            code = item.get("SECURITY_CODE", "")
+            if not code:
+                continue
+            results.append({
+                "stock_code": self._em_code_to_ts(code),
+                "stock_name": item.get("SECURITY_NAME_ABBR", ""),
+                "report_date": (item.get("REPORTDATE") or "")[:10],
+                "notice_date": (item.get("NOTICE_DATE") or "")[:10],
+                "em_code": code,
+            })
+
+        logger.info(f"[DisclosureScanner] fetch_pre_disclosure({target_date}) 年报返回 {len(results)} 条")
+
+        # ── 业绩预告（东财 API 只支持范围查询，Python 再过滤精确日期）──────────
+        try:
+            pred_filter = f"(NOTICE_DATE>='{target_date}')"
+            pred_params = {
+                "reportName": self.PREDICT_TABLE,
+                "columns": "SECURITY_CODE,SECURITY_NAME_ABBR,REPORT_DATE,NOTICE_DATE,PREDICT_FINANCE_CODE,PREDICT_TYPE",
+                "filter": pred_filter,
+                "pageSize": 500,
+                "sortColumns": "NOTICE_DATE",
+                "sortTypes": -1,
+                "source": "WEB",
+                "client": "WEB",
+            }
+            resp2 = requests.get(self.BASE_URL, params=pred_params, timeout=30)
+            d2 = resp2.json()
+            if d2.get("result"):
+                seen_forecast = set()  # 同一股票+报告期只取第一条
+                for item in d2["result"].get("data", []):
+                    notice = (item.get("NOTICE_DATE") or "")[:10]
+                    if notice != target_date:  # Python 端精确过滤
+                        continue
+                    code = item.get("SECURITY_CODE", "")
+                    if not code:
+                        continue
+                    ts_code = self._em_code_to_ts(code)
+                    report_date = (item.get("REPORT_DATE") or "")[:10]
+                    key = f"{ts_code}_{report_date}"
+                    if key in seen_forecast:
+                        continue
+                    # 去重：年报已覆盖则跳过
+                    if any(r.get("stock_code") == ts_code and r.get("report_date") == report_date for r in results):
+                        continue
+                    seen_forecast.add(key)
+                    results.append({
+                        "stock_code": ts_code,
+                        "stock_name": item.get("SECURITY_NAME_ABBR", ""),
+                        "report_date": report_date,
+                        "notice_date": target_date,
+                        "em_code": code,
+                        "disclosure_type": "forecast",
+                        "forecast_type": item.get("PREDICT_TYPE", ""),
+                    })
+                logger.info(f"[DisclosureScanner] 预告表额外返回 {len(seen_forecast)} 条")
+        except Exception as e:
+            logger.error(f"[DisclosureScanner] 预告表查询失败: {e}")
+
+        logger.info(f"[DisclosureScanner] fetch_pre_disclosure({target_date}) 合计返回 {len(results)} 条")
+        return results

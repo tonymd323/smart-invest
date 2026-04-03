@@ -322,16 +322,17 @@ class EarningsAnalyzer:
         if result.get("signal") == "N/A":
             return
 
-        # 先删旧记录，避免重复（替代 INSERT OR REPLACE 的唯一约束失效问题）
-        conn.execute(
-            "DELETE FROM analysis_results WHERE stock_code = ? AND analysis_type = ?",
+        # 先查是否有旧记录，保留其 created_at
+        old_row = conn.execute(
+            "SELECT created_at FROM analysis_results WHERE stock_code = ? AND analysis_type = ?",
             (result["stock_code"], result["analysis_type"])
-        )
+        ).fetchone()
+        preserved_created_at = old_row["created_at"] if old_row else "datetime('now', 'localtime')"
 
         conn.execute("""
-            INSERT INTO analysis_results
+            INSERT OR REPLACE INTO analysis_results
             (stock_code, analysis_type, score, signal, summary, created_at)
-            VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
+            VALUES (?, ?, ?, ?, ?, """ + preserved_created_at + """)
         """, (
             normalizer.normalize_code(result["stock_code"]),
             result["analysis_type"],
@@ -548,15 +549,29 @@ class EarningsAnalyzer:
                     logger.info(f"[T+N] {code} {event_type} 已存在(id={existing['id']})，跳过")
                     continue
 
-                # 从 prices 表取最新收盘价
-                price_row = conn.execute("""
-                    SELECT close_price FROM prices
-                    WHERE stock_code = ?
-                    ORDER BY trade_date DESC
-                    LIMIT 1
-                """, (code,)).fetchone()
-
-                entry_price = price_row["close_price"] if price_row else None
+                # 从 prices 表取 event_date 当天的收盘价（而非昨天）
+                # event_date 来自 discovery_pool.report_period（财报截止日）
+                # 再从 prices 表取 event_date 当天的收盘价（而非昨天）
+                et_date = today
+                if report_period:
+                    et_date = report_period[:4] + "-" + report_period[4:6] + "-" + report_period[6:8] \
+                        if len(report_period) == 8 else report_period
+                et_date_compact = et_date.replace("-", "")
+                # entry_price = 财报披露日后第一个交易日开盘价（而非当天收盘价）
+                # next_trade_date = et_date 的下一个交易日（> et_date_compact）
+                next_day_row = conn.execute("""
+                    SELECT trade_date FROM prices
+                    WHERE stock_code = ? AND trade_date > ? AND open_price > 0
+                    ORDER BY trade_date LIMIT 1
+                """, (code, et_date_compact)).fetchone()
+                if next_day_row:
+                    entry_price = conn.execute("""
+                        SELECT open_price FROM prices
+                        WHERE stock_code = ? AND trade_date = ?
+                        LIMIT 1
+                    """, (code, next_day_row[0])).fetchone()[0]
+                else:
+                    entry_price = None
 
                 # 查询公司名称
                 name_row = conn.execute(
@@ -656,20 +671,25 @@ class EarningsAnalyzer:
                 event_date = row["event_date"]
                 entry_price = row["entry_price"]
 
-                # pending 记录：从 prices 表取入场价
+                # pending 记录：从 prices 表取入场价（财报披露日后第一个交易日开盘价）
                 if entry_price is None:
                     event_date_compact = event_date.replace('-', '') if event_date else ''
-                    price_row = conn.execute("""
-                        SELECT close_price FROM prices
-                        WHERE stock_code = ? AND trade_date <= ?
-                        ORDER BY trade_date DESC LIMIT 1
+                    next_day_row = conn.execute("""
+                        SELECT trade_date FROM prices
+                        WHERE stock_code = ? AND trade_date > ? AND open_price > 0
+                        ORDER BY trade_date LIMIT 1
                     """, (stock_code, event_date_compact)).fetchone()
-                    if price_row and price_row[0]:
-                        entry_price = price_row[0]
-                        conn.execute(
-                            "UPDATE event_tracking SET entry_price = ?, tracking_status = 'tracking' WHERE id = ?",
-                            (entry_price, track_id)
-                        )
+                    if next_day_row:
+                        entry_price = conn.execute("""
+                            SELECT open_price FROM prices
+                            WHERE stock_code = ? AND trade_date = ?
+                            LIMIT 1
+                        """, (stock_code, next_day_row[0])).fetchone()[0]
+                        if entry_price and entry_price > 0:
+                            conn.execute(
+                                "UPDATE event_tracking SET entry_price = ?, tracking_status = 'tracking' WHERE id = ?",
+                                (entry_price, track_id)
+                            )
 
                 if entry_price is None or entry_price == 0:
                     continue
@@ -682,7 +702,7 @@ class EarningsAnalyzer:
                     SELECT trade_date, close_price
                     FROM prices
                     WHERE stock_code = ? AND trade_date > ?
-                    ORDER BY trade_date ASC
+                    ORDER BY trade_date DESC
                     LIMIT 25
                 """, (stock_code, event_date_compact)).fetchall()
 
@@ -838,7 +858,7 @@ class PullbackAnalyzer:
                            close_price, volume
                     FROM prices
                     WHERE stock_code = ?
-                    ORDER BY trade_date ASC
+                    ORDER BY trade_date DESC
                     LIMIT 120
                 """, (code,)).fetchall()
 
@@ -914,16 +934,17 @@ class PullbackAnalyzer:
                 if result["signal"] not in ("buy", "watch"):
                     continue
 
-                # 写入 analysis_results
+                # 写入 analysis_results（保留原 created_at）
                 pb_code = normalizer.normalize_code(code)
-                conn.execute(
-                    "DELETE FROM analysis_results WHERE stock_code = ? AND analysis_type = ?",
+                old_row = conn.execute(
+                    "SELECT created_at FROM analysis_results WHERE stock_code = ? AND analysis_type = ?",
                     (pb_code, "pullback_score")
-                )
+                ).fetchone()
+                preserved_created_at = old_row["created_at"] if old_row else "datetime('now', 'localtime')"
                 conn.execute("""
-                    INSERT INTO analysis_results
+                    INSERT OR REPLACE INTO analysis_results
                     (stock_code, analysis_type, score, signal, summary, detail, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
+                    VALUES (?, ?, ?, ?, ?, ?, """ + preserved_created_at + """)
                 """, (
                     pb_code,
                     "pullback_score",

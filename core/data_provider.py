@@ -428,6 +428,89 @@ class FinancialProvider(BaseProvider):
             source="tushare",
         )
 
+    def fetch_by_em_code(self, em_code: str, report_date: str = None) -> List[FinancialData]:
+        """
+        给定东方财富股票代码（无后缀），直接调 API 取财务数据。
+        用于 DisclosureScanner 预获取后，直接拿财务数据而不走数据库。
+
+        Args:
+            em_code: 东方财富股票代码，如 "000792"（无后缀）
+            report_date: 可选，指定报告期，如 "2025-12-31"
+
+        Returns:
+            List[FinancialData]
+        """
+        import requests
+        try:
+            params = {
+                "reportName": "RPT_LICO_FN_CPD",
+                "columns": "ALL",
+                "filter": f'(SECURITY_CODE="{em_code}")',
+                "pageSize": 10,
+                "source": "SECURITIES",
+                "client": "WEB",
+            }
+            if report_date:
+                params["filter"] += f"AND(REPORTDATE='{report_date}')"
+
+            resp = requests.get(self.BASE_URL, params=params, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
+
+            if data.get("success") and data.get("result", {}).get("data"):
+                items = data["result"]["data"]
+                ts_code = _em_code_to_ts(em_code)
+                return self._parse_lico_cpd_items(items, ts_code)
+            return []
+        except Exception as e:
+            logger.error(f"[FinancialProvider] fetch_by_em_code({em_code}) 失败: {e}")
+            return []
+
+    def _parse_lico_cpd_items(self, items: list, stock_code: str) -> List[FinancialData]:
+        """
+        解析 RPT_LICO_FN_CPD 接口返回的数据。
+        注意：该接口字段名与 F10 主表不同，使用 REPORTDATE 而非 REPORT_DATE，
+        PARENT_NETPROFIT 而非 PARENTNETPROFIT。
+        """
+        results = []
+        for item in items:
+            try:
+                # RPT_LICO_FN_CPD 实际字段名
+                report_date_raw = item.get("REPORTDATE") or ""
+                report_date = report_date_raw[:10] if report_date_raw else ""
+                if not report_date:
+                    continue
+
+                BILLION = 1e9
+                net_profit = float(item.get("PARENT_NETPROFIT") or 0) / BILLION
+                revenue = float(item.get("TOTAL_OPERATE_INCOME") or 0) / BILLION
+                net_profit_yoy = float(item.get("YSTZ") or 0)  # 归母净利润同比
+                revenue_yoy = float(item.get("SJLTZ") or 0)    # 营收同比
+                roe = float(item.get("WEIGHTAVG_ROE") or 0)
+                gross_margin = float(item.get("XSMLL") or 0)
+                eps = float(item.get("BASIC_EPS") or 0)
+                koufei_profit = float(item.get("DEDUCT_BASIC_EPS") or 0) * 1e9 / BILLION
+
+                results.append(FinancialData(
+                    stock_code=stock_code,
+                    report_date=report_date,
+                    net_profit=round(net_profit, 4),
+                    net_profit_yoy=round(net_profit_yoy, 2),
+                    revenue=round(revenue, 4),
+                    revenue_yoy=round(revenue_yoy, 2),
+                    roe=round(roe, 2),
+                    gross_margin=round(gross_margin, 2),
+                    eps=round(eps, 4),
+                    source="eastmoney",
+                    koufei_net_profit=round(koufei_profit, 4),
+                    koufei_yoy=0.0,
+                    gross_margin_yoy=0.0,
+                ))
+            except (KeyError, TypeError, ValueError) as e:
+                logger.error(f"[FinancialProvider] _parse_lico_cpd 解析失败: {e}")
+                continue
+        return results
+
     def fetch_price(self, stock_code: str) -> dict:
         """
         获取收盘价/PE/市值（Tushare daily_basic）
@@ -1127,6 +1210,7 @@ class QuoteProvider(BaseProvider):
         open_price = float(parts[5]) if parts[5] else 0
         turnover_rate = float(parts[38]) if parts[38] else 0  # [38] 换手率%
         pe = float(parts[39]) if parts[39] else 0  # [39] PE
+        pb = float(parts[46]) if len(parts) > 46 and parts[46] else 0  # [46] PB(MRQ)
         # 总市值转亿元（腾讯返回单位：万元）
         total_mv = float(parts[44]) if len(parts) > 44 and parts[44] else 0  # [44] 总市值(亿)
 
@@ -1143,6 +1227,7 @@ class QuoteProvider(BaseProvider):
             prev_close=round(prev_close, 2),
             turnover_rate=round(turnover_rate, 2),
             pe=round(pe, 2),
+            pb=round(pb, 2),
             total_mv=round(total_mv, 2),
             source="tencent",
         )
@@ -1156,7 +1241,7 @@ class QuoteProvider(BaseProvider):
                 self.EM_URL,
                 params={
                     "secid": secid,
-                    "fields": "f43,f44,f45,f46,f47,f48,f57,f58,f169,f170,f171,f116,f117",
+                    "fields": "f43,f44,f45,f46,f47,f48,f57,f58,f162,f167,f169,f170,f171,f116,f117",
                     "ut": "fa5fd1943c7b386f172d6893dbbd4065",
                 },
                 timeout=15,
@@ -1170,6 +1255,7 @@ class QuoteProvider(BaseProvider):
 
             # f43=最新价(×100), f44=最高(×100), f45=最低(×100), f46=今开(×100)
             # f47=成交量(手), f48=成交额(元), f57=代码, f58=名称
+            # f162=PE, f167=PB(MRQ)
             # f169=涨跌(×100), f170=涨幅%(×100), f171=换手率%(×100)
             # f116=总市值, f117=流通市值
             DIV = 100.0
@@ -1195,7 +1281,8 @@ class QuoteProvider(BaseProvider):
                 open=round((item.get("f46") or 0) / DIV, 2),
                 prev_close=round(price - ((item.get("f169") or 0) / DIV), 2),
                 turnover_rate=round((item.get("f171") or 0) / DIV, 2),
-                pe=0.0,
+                pe=float(item.get("f162") or 0),
+                pb=float(item.get("f167") or 0),
                 total_mv=round((item.get("f116") or 0) / 1e8, 2),
                 source="eastmoney",
             )
@@ -2063,3 +2150,164 @@ class MarketSnapshotProvider:
         if ma5 is not None and ma5 > MarketSnapshotProvider.HOT_THRESHOLD:
             return "hot"       # 过热
         return None
+
+
+class ValuationProvider(BaseProvider):
+    """
+    PE/PB 估值 Provider — 多数据源降级
+    数据源优先级：Tushare Pro → 腾讯实时 → 东方财富 Push2
+
+    主方法：
+        fetch_pe_pb(stock_codes: List[str]) -> Dict[str, dict]
+        返回 {stock_code: {"pe_ttm": float, "pb": float, "source": str}}
+
+    多源降级逻辑：
+        1. Tushare Pro daily_basic（积分限制，每次最多5条）
+        2. 腾讯实时行情（单股 API，有 PE 无 PB）
+        3. 东方财富 Push2（单股 API，字段 f162=PE, f167=PB）
+    """
+
+    TUSHARE_TOKEN = os.getenv("TUSHARE_TOKEN", "")
+    TENCENT_URL = "https://qt.gtimg.cn/q="
+    EM_URL = "https://push2.eastmoney.com/api/qt/stock/get"
+
+    def __init__(self):
+        self.last_source = ""
+
+    def fetch(self, stock_code: str, **kwargs) -> dict:
+        """实现抽象方法，单股 PE/PB"""
+        return self.fetch_pe_pb_single(stock_code)
+
+    def fetch_pe_pb(self, stock_codes: List[str]) -> Dict[str, dict]:
+        """
+        批量获取 PE/PB，多源降级。
+
+        Args:
+            stock_codes: 股票代码列表，如 ["000001.SZ", "600519.SH"]
+
+        Returns:
+            Dict[str, dict]，每只股票 {"pe_ttm": float|None, "pb": float|None, "source": str}
+        """
+        result: Dict[str, dict] = {}
+
+        # 源1: Tushare Pro（免费 tier 每次最多5条，用于补充 PB）
+        ts_result = self._fetch_from_tushare(stock_codes)
+        for code, vals in ts_result.items():
+            result[code] = {**vals, "source": "tushare"}
+
+        # 源2: 腾讯实时行情（有 PE，尝试补充缺失的 PE）
+        missing_pe = [c for c in stock_codes if result.get(c, {}).get("pe_ttm") is None]
+        if missing_pe:
+            tencent_result = self._fetch_from_tencent_pe(missing_pe)
+            for code, pe in tencent_result.items():
+                if result.get(code):
+                    result[code]["pe_ttm"] = pe
+                    result[code]["source"] += "+tencent"
+                else:
+                    result[code] = {"pe_ttm": pe, "pb": None, "source": "tencent"}
+
+        return result
+
+    def _fetch_from_tushare(self, stock_codes: List[str]) -> Dict[str, dict]:
+        """从 Tushare Pro 获取 PB（PE+PB 一次性，Tushare 免费 tier 限制 5 条/次）"""
+        if not self.TUSHARE_TOKEN:
+            logger.warning("[ValuationProvider] TUSHARE_TOKEN 未设置，跳过 Tushare")
+            return {}
+
+        try:
+            import tushare as ts
+            pro = ts.pro_api(self.TUSHARE_TOKEN)
+
+            result = {}
+            # 免费 tier 每次最多 5 条，分批拉
+            batch_size = 5
+            for i in range(0, len(stock_codes), batch_size):
+                batch = stock_codes[i:i+batch_size]
+                try:
+                    # 转换代码格式
+                    ts_codes = [c.replace('.SZ', '.SZ').replace('.SH', '.SH') for c in batch]
+                    df = pro.daily_basic(
+                        ts_code=','.join(ts_codes),
+                        fields='ts_code,pe_ttm,pb',
+                    )
+                    if df is not None and not df.empty:
+                        for _, row in df.iterrows():
+                            ts_code = row['ts_code']
+                            pe = float(row['pe_ttm']) if row['pe_ttm'] and row['pe_ttm'] > 0 else None
+                            pb = float(row['pb']) if row['pb'] and row['pb'] > 0 else None
+                            if pe or pb:
+                                result[ts_code] = {'pe_ttm': pe, 'pb': pb}
+                except Exception as e:
+                    logger.warning(f"[ValuationProvider] Tushare 批次 {i} 失败: {e}")
+                    continue
+
+            if result:
+                logger.info(f"[ValuationProvider] Tushare 获取 {len(result)} 只 PE/PB")
+            return result
+        except ImportError:
+            logger.error("[ValuationProvider] tushare 未安装")
+            return {}
+        except Exception as e:
+            logger.error(f"[ValuationProvider] Tushare 获取失败: {e}")
+            return {}
+
+    def _fetch_from_tencent_pe(self, stock_codes: List[str]) -> Dict[str, float]:
+        """
+        从腾讯行情 API 获取实时 PE（腾讯有 PE 无 PB）
+        腾讯字段 [39] = 市盈率(动)
+        """
+        if not stock_codes:
+            return {}
+
+        try:
+            import urllib.request
+            tencent_codes = []
+            for c in stock_codes:
+                # 转换: 000001.SZ → sz000001, 600519.SH → sh600519
+                code, market = c.split('.')
+                tencent_codes.append(market.lower() + code)
+
+            # 分批请求，每批 800 只
+            all_result = {}
+            batch_size = 800
+            for start in range(0, len(tencent_codes), batch_size):
+                batch = tencent_codes[start:start+batch_size]
+                url = self.TENCENT_URL + ",".join(batch)
+
+                req = urllib.request.Request(url)
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                with opener.open(req, timeout=15) as resp:
+                    text = resp.read().decode("gbk", errors="replace")
+
+                for line in text.strip().split("\n"):
+                    if not line or "=" not in line:
+                        continue
+                    parts = line.split("~")
+                    if len(parts) < 40:
+                        continue
+                    try:
+                        code_part = parts[2].strip()
+                        pe_str = parts[39].strip() if parts[39] else ""
+                        pe = float(pe_str) if pe_str and pe_str not in ("-", "0", "") else None
+
+                        if pe and pe > 0:
+                            # 映射回标准代码
+                            market_flag = parts[0].lower()
+                            if "sh" in market_flag:
+                                ts_code = f"{code_part}.SH"
+                            else:
+                                ts_code = f"{code_part}.SZ"
+                            all_result[ts_code] = pe
+                    except (ValueError, IndexError):
+                        continue
+
+            logger.info(f"[ValuationProvider] 腾讯实时 PE 获取 {len(all_result)} 只")
+            return all_result
+        except Exception as e:
+            logger.warning(f"[ValuationProvider] 腾讯 PE 获取失败: {e}")
+            return {}
+
+    def fetch_pe_pb_single(self, stock_code: str) -> dict:
+        """单只股票 PE/PB（供 fill_pe_pb.py 使用）"""
+        result = self.fetch_pe_pb([stock_code])
+        return result.get(stock_code, {"pe_ttm": None, "pb": None, "source": "none"})

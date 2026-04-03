@@ -54,11 +54,18 @@ def scan_quarterly_new_high(target_date: str = None) -> list:
         return []
 
     # Step 2-3: 逐只检查扣非净利润新高
-    logger.info("  Step 2: 检查扣非净利润新高...")
+    # 预先批量拉全量行情（PE/PB/收盘价），各线程只查 dict，不走网络
+    logger.info("  Step 2: 预拉行情数据...")
+    from core.data_provider import QuoteProvider
+    quote_provider = QuoteProvider()
+    quotes = quote_provider.fetch_batch(codes)  # {code: QuoteData}
+    logger.info(f"  行情预拉：{len(quotes)}/{len(codes)} 只成功")
+
+    logger.info("  Step 3: 检查扣非净利润新高...")
     new_highs = []
     for i, code in enumerate(codes):
         try:
-            result = _check_single_new_high(pro, code)
+            result = _check_single_new_high(pro, code, quotes)
             if result:
                 new_highs.append(result)
                 logger.info(f"    ✅ {code} {result['name']} 扣非新高！")
@@ -74,7 +81,7 @@ def scan_quarterly_new_high(target_date: str = None) -> list:
     return new_highs
 
 
-def _check_single_new_high(pro, code: str) -> dict:
+def _check_single_new_high(pro, code: str, quotes: dict) -> dict:
     """检查单只股票的扣非净利润是否新高"""
     # 获取扣非净利润累计值（最近 12 个季度）
     fi = pro.fina_indicator(
@@ -126,18 +133,11 @@ def _check_single_new_high(pro, code: str) -> dict:
         except Exception:
             pass
 
-        # 获取收盘价和 PE
-        close = None
-        pe = None
-        total_mv = None
-        try:
-            daily = pro.daily_basic(ts_code=code, fields='ts_code,close,pe,total_mv', limit=1)
-            if daily is not None and not daily.empty:
-                close = _safe_float(daily.iloc[0].get('close'))
-                pe = _safe_float(daily.iloc[0].get('pe'))
-                total_mv = _safe_float(daily.iloc[0].get('total_mv'))
-        except Exception:
-            pass
+        # 获取收盘价和 PE（从预拉的行情 dict 查，不走网络）
+        q = quotes.get(code)
+        close = q.price if q else None
+        pe = q.pe if q else None
+        total_mv = q.total_mv if q else None
 
         return {
             'code': code,

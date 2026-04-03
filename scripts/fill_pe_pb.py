@@ -118,6 +118,61 @@ def fetch_daily_basic_all() -> dict:
     return all_data
 
 
+def fill_pe_pb_multi_source() -> dict:
+    """
+    多数据源修复 PE/PB：
+    主源：腾讯实时行情（PE[39] + PB[46]），批量 800 只/次
+    降级：东财 Push2（单股兜底）
+    """
+    from core.data_provider import QuoteProvider
+    import sqlite3
+
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        # 读取当前缺 PE/PB 的股票
+        rows = conn.execute("""
+            SELECT stock_code FROM stock_scores
+            WHERE pe_ttm IS NULL OR pe_ttm = 0 OR pb IS NULL OR pb = 0
+        """).fetchall()
+        missing_codes = [r[0] for r in rows]
+        logger.info(f"缺 PE/PB 股票: {len(missing_codes)} 只")
+
+        if not missing_codes:
+            return {"updated": 0, "source": "none"}
+
+        # 腾讯批量获取 PE+PB（PE[39], PB[46]）
+        provider = QuoteProvider()
+        quotes = provider.fetch_batch(missing_codes)  # {code: QuoteData}
+
+        # 写入
+        updated = 0
+        for code, q in quotes.items():
+            pe = q.pe if q and q.pe and q.pe > 0 else None
+            pb = q.pb if q and q.pb and q.pb > 0 else None
+            if pe or pb:
+                conn.execute(
+                    "UPDATE stock_scores SET pe_ttm=COALESCE(?,pe_ttm), pb=COALESCE(?,pb) WHERE stock_code=?",
+                    (pe, pb, code),
+                )
+                updated += 1
+
+        conn.commit()
+
+        # 统计
+        cur = conn.execute("SELECT COUNT(*) total, SUM(CASE WHEN pe_ttm>0 THEN 1 ELSE 0 END) has_pe, SUM(CASE WHEN pb>0 THEN 1 ELSE 0 END) has_pb FROM stock_scores")
+        r = cur.fetchone()
+
+        logger.info(f"多源修复完成: 更新 {updated} 只 | PE覆盖: {r[1]}/{r[0]} | PB覆盖: {r[2]}/{r[0]}")
+        return {
+            "updated": updated,
+            "total": r[0],
+            "pe_count": r[1],
+            "pb_count": r[2],
+        }
+    finally:
+        conn.close()
+
+
 def get_current_pe_pb(conn) -> dict:
     """读取 stock_scores 当前有 PE/PB 的股票"""
     rows = conn.execute("SELECT stock_code, pe_ttm, pb FROM stock_scores").fetchall()

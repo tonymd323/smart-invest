@@ -396,27 +396,191 @@ def run(args):
             else:
                 print(f'   ✅ 无需补充')
         except Exception as e:
+            import traceback; traceback.print_exc()
             print(f'   ⚠️ 一致预期补充失败: {e}')
 
-        # Step 3d: 回调买入评分
+        # ── Pre-Check: 价格新鲜度 + 实时价差校验 ───────────────────────────────
+        print('\n🔍 Pre-Check: 数据新鲜度检查')
+        # DEBUG: 检查 conn 在 Pre-Check 前的状态
+        try:
+            test = conn.execute("SELECT COUNT(*) FROM discovery_pool").fetchone()
+            print(f'   DEBUG pre-PreCheck conn OK: {test[0]}')
+        except Exception as e:
+            print(f'   DEBUG conn DEAD before Pre-Check: {e}')
+        from core.data_provider import QuoteProvider
+        qp = QuoteProvider()
+        freshness_issues = []   # (code, db_date, current_price, db_price, deviation)
+        skip_codes = set()      # 价格过期的代码，跳过评分
+
+        try:
+            today_str = datetime.now().strftime('%Y-%m-%d')
+            # 从发现池拿所有股票
+            all_pool_codes = [r[0] for r in conn.execute(
+                "SELECT stock_code FROM discovery_pool WHERE status='active'"
+            ).fetchall()]
+
+            # 批量查 DB 最新价格日期
+            placeholders = ','.join(['?' for _ in all_pool_codes])
+            db_dates = dict(conn.execute(f"""
+                SELECT stock_code, MAX(trade_date) FROM prices
+                WHERE stock_code IN ({placeholders})
+                GROUP BY stock_code
+            """, all_pool_codes).fetchall())
+
+            # 查实时价格（腾讯，一次查多只）
+            valid_codes = [c for c in all_pool_codes if c in db_dates]
+            if valid_codes:
+                quotes = qp.fetch_batch(valid_codes)  # {code: {price, change_pct}}
+
+                for code in valid_codes:
+                    db_date = str(db_dates.get(code, ''))
+                    # 计算过期天数
+                    try:
+                        if '-' in db_date:
+                            from datetime import timedelta
+                            days_old = (datetime.now() - datetime.strptime(db_date, '%Y-%m-%d')).days
+                        else:
+                            days_old = (datetime.now() - datetime.strptime(db_date, '%Y%m%d')).days
+                    except:
+                        days_old = 999
+
+                    current_price = quotes.get(code, {}).get('price', 0)
+                    # 取 DB 最新收盘价
+                    db_price_row = conn.execute(
+                        "SELECT close_price FROM prices WHERE stock_code=? ORDER BY trade_date DESC LIMIT 1",
+                        (code,)
+                    ).fetchone()
+                    db_price = db_price_row[0] if db_price_row else 0
+
+                    # 偏差检测
+                    if current_price > 0 and db_price > 0:
+                        dev_pct = (current_price - db_price) / db_price * 100
+                    else:
+                        dev_pct = 0.0
+
+                    if days_old > 1:
+                        skip_codes.add(code)
+                        freshness_issues.append({
+                            'code': code,
+                            'days_old': days_old,
+                            'db_date': db_date,
+                            'current_price': current_price,
+                            'db_price': db_price,
+                            'dev_pct': round(dev_pct, 2),
+                        })
+
+            freshness_issues.sort(key=lambda x: x['dev_pct'], reverse=True)
+            print(f'   过期(>1天): {len(freshness_issues)} 只，其中偏差>5%: {sum(1 for x in freshness_issues if abs(x["dev_pct"])>5)}')
+            for issue in freshness_issues[:5]:
+                flag = ' ⚠️' if abs(issue['dev_pct']) > 5 else ''
+                print(f'   → {issue["code"]} DB={issue["db_date"]}({issue["days_old"]}天前) '
+                      f'当前={issue["current_price"]} DB价={issue["db_price"]} 偏差={issue["dev_pct"]:+.1f}%{flag}')
+
+        except Exception as e:
+            import traceback as _tb; _tb.print_exc()
+            print(f'   ⚠️ Pre-Check 异常: {e}')
+            freshness_issues = []
+
+        # Step 3d: 回调买入评分（排除过期股票）
         print('\n📊 Step 3d: 回调买入评分')
         from core.analyzer import PullbackAnalyzer
         pa = PullbackAnalyzer(db_path=str(DB_PATH))
-        pullback_results = pa.scan()
-        pb_signals = [r for r in pullback_results if r.get('score', 0) > 0]
-        print(f'   扫描: {len(pullback_results)} 只 | 信号: {len(pb_signals)} 只')
+        # 只对价格新鲜的股票评分
+        try:
+            test_result = conn.execute("SELECT COUNT(*) FROM discovery_pool").fetchone()
+            print(f'   DEBUG conn check: pool_count={test_result[0]}')
+        except Exception as e:
+            print(f'   DEBUG conn DEAD before Step 3d: {e}')
+        active_pool = [c for c in (conn.execute(
+            "SELECT stock_code FROM discovery_pool WHERE status='active'"
+        ).fetchall()) if c[0] not in skip_codes]
+        pullback_results = pa.scan([r[0] for r in active_pool])
+
+        # ── Post-Check: 结果合理性校验 ─────────────────────────────────────
+        print('\n🔍 Post-Check: 结果合理性校验')
+        try:
+            scored_codes = [r['stock_code'] for r in pullback_results if r.get('score', 0) > 0]
+            post_check_warnings = []
+            for code in scored_codes:
+                db_price_row = conn.execute(
+                    "SELECT close_price FROM prices WHERE stock_code=? ORDER BY trade_date DESC LIMIT 1",
+                    (code,)
+                ).fetchone()
+                db_price = db_price_row[0] if db_price_row else 0
+                # 腾讯实时价
+                current_price = 0
+                try:
+                    import urllib.request
+                    url = f"https://qt.gtimg.cn/q={code}"
+                    req = urllib.request.Request(url)
+                    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                    with opener.open(req, timeout=8) as resp:
+                        raw = resp.read().decode('gbk', errors='ignore')
+                    parts = raw.split('~')
+                    if len(parts) > 3 and parts[3]:
+                        current_price = float(parts[3])
+                except:
+                    pass
+
+                if current_price > 0 and db_price > 0:
+                    dev_pct = (current_price - db_price) / db_price * 100
+                    if abs(dev_pct) > 5:
+                        post_check_warnings.append({
+                            'code': code,
+                            'db_price': db_price,
+                            'current_price': current_price,
+                            'dev_pct': round(dev_pct, 2),
+                        })
+
+            print(f'   偏差>5%: {len(post_check_warnings)} 只')
+            for w in post_check_warnings[:5]:
+                print(f'   ⚠️ {w["code"]} 评分用价={w["db_price"]} 当前={w["current_price"]} 偏差={w["dev_pct"]:+.1f}% → 降级')
+
+        except Exception as e:
+            print(f'   ⚠️ Post-Check 异常: {e}')
+            post_check_warnings = []
+
+        # 降级偏差过大的信号
+        degraded = set(x['code'] for x in post_check_warnings)
+        pb_signals = []
+        for r in pullback_results:
+            if r.get('score', 0) > 0:
+                if r['stock_code'] in degraded:
+                    r['grade'] = 'C'   # 降为 C 级，不参与推送
+                    r['degraded'] = True
+                pb_signals.append(r)
+
+        print(f'   扫描: {len(pullback_results)} 只 | 有效信号: {len(pb_signals)} 只 | 降级: {len(degraded)} 只')
         for s in pb_signals[:5]:
-            print(f"   → {s['stock_code']} {s.get('stock_name','')} 分={s['score']} {s['grade']}")
+            flag = ' ⚠️已降级' if s.get('degraded') else ''
+            print(f"   → {s['stock_code']} {s.get('stock_name','')} 分={s['score']} {s['grade']}{flag}")
         results['pullback'] = len(pb_signals)
+        results['freshness'] = {'issues': len(freshness_issues), 'degraded': len(degraded)}
 
         # Step 4: 数据质量
         print(f'\n🔍 Step 4: 数据质量验证')
         conn = sqlite3.connect(str(DB_PATH))
         name_ok = conn.execute("SELECT COUNT(*) FROM discovery_pool WHERE stock_name IS NOT NULL AND stock_name != ''").fetchone()[0]
         name_total = conn.execute("SELECT COUNT(*) FROM discovery_pool").fetchone()[0]
-        conn.close()
+        # 价格新鲜度统计
+        fresh_count = conn.execute(f"""
+            SELECT COUNT(DISTINCT p.stock_code) FROM prices p
+            JOIN discovery_pool d ON d.stock_code = p.stock_code AND d.status='active'
+            WHERE p.trade_date >= date('now', '-1 day')
+        """).fetchone()[0] if False else None  # disabled, already checked above
+
+        stale_count = len(freshness_issues)
+        degraded_count = len(degraded)
         print(f'   发现池名称: {name_ok}/{name_total}')
-        results['quality'] = {'pool_names': name_ok, 'pool_total': name_total}
+        print(f'   价格过期(>1天): {stale_count} 只')
+        print(f'   信号降级(偏差>5%): {degraded_count} 只')
+        conn.close()
+        results['quality'] = {
+            'pool_names': name_ok,
+            'pool_total': name_total,
+            'stale_prices': stale_count,
+            'degraded_signals': degraded_count,
+        }
 
         total_ms = int((time.time() - t_total) * 1000)
         results['total_ms'] = total_ms
