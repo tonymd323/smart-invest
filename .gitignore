@@ -6,3 +6,21 @@ data/v21_scan_result.json
 .env
 *.bak
 data/logs/
+
+# ═══════════════════════════════════════════════════════════════════
+# 敏感文件 — 禁止 Git 追踪
+# ═══════════════════════════════════════════════════════════════════
+# Crontab
+data/crontab.txt
+data/crontab.txt.link
+
+# 环境变量和凭证
+*.credential
+*.secret
+.env.prod
+.env.production
+
+# SSH Key
+*.pem
+*.key
+id_rsa*
